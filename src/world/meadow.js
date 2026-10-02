@@ -1,16 +1,22 @@
 import * as THREE from 'three';
-import { rng } from '../engine/math.js';
+import { rng } from '../engine/math';
 
 const HILL_R = 40;
 
 /** Pastel sky, rounded grassy hill, flowers and drifting clouds. */
 export function createMeadow(scene, { seed = 7 } = {}) {
-  { // sky gradient
+  {
+    // sky gradient
     const c = document.createElement('canvas');
-    c.width = 2; c.height = 256;
-    const g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
-    gr.addColorStop(0, '#9fd8ff'); gr.addColorStop(0.6, '#d9f0ff'); gr.addColorStop(1, '#fff1e2');
-    g.fillStyle = gr; g.fillRect(0, 0, 2, 256);
+    c.width = 2;
+    c.height = 256;
+    const g = c.getContext('2d'),
+      gr = g.createLinearGradient(0, 0, 0, 256);
+    gr.addColorStop(0, '#9fd8ff');
+    gr.addColorStop(0.6, '#d9f0ff');
+    gr.addColorStop(1, '#fff1e2');
+    g.fillStyle = gr;
+    g.fillRect(0, 0, 2, 256);
     const tex = new THREE.CanvasTexture(c);
     tex.colorSpace = THREE.SRGBColorSpace;
     scene.background = tex;
@@ -41,7 +47,8 @@ export function createMeadow(scene, { seed = 7 } = {}) {
   const petalCols = [0xffb3c1, 0xffe08a, 0xc9b6e4, 0xffffff];
   const centerMat = new THREE.MeshStandardMaterial({ color: 0xffd25e, roughness: 0.8 });
   for (let i = 0; i < 40; i++) {
-    const x = (r() - 0.5) * 22, z = -10 + r() * 13;
+    const x = (r() - 0.5) * 22,
+      z = -10 + r() * 13;
     if (Math.abs(x) < 2.2 && z > -2) continue; // keep the stage clear
     const f = new THREE.Group();
     const pm = new THREE.MeshStandardMaterial({ color: petalCols[i % 4], roughness: 0.9 });
@@ -60,7 +67,12 @@ export function createMeadow(scene, { seed = 7 } = {}) {
   }
 
   const clouds = [];
-  const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, emissive: 0xffffff, emissiveIntensity: 0.35 });
+  const cloudMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    roughness: 1,
+    emissive: 0xffffff,
+    emissiveIntensity: 0.35,
+  });
   for (let i = 0; i < 5; i++) {
     const c = new THREE.Group();
     for (let k = 0; k < 4; k++) {

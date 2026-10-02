@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ball } from '../characters/materials.js';
+import { ball } from '../characters/materials';
 
 /**
  * Chunky toy electric guitar. Origin = center of the body, neck points +y.
@@ -12,11 +12,15 @@ export function createGuitar({ color = 0xe63946, neck: neckLen = 1.5, strings = 
   const metal = new THREE.MeshStandardMaterial({ color: 0xd8d8e0, roughness: 0.25, metalness: 1 });
 
   const g = new THREE.Group();
-  g.add(ball(0.55, gloss, [0, 0, 0], [1, 0.95, 0.28]));        // lower bout
-  g.add(ball(0.42, gloss, [0, 0.52, 0], [1, 0.9, 0.28]));      // upper bout
+  g.add(ball(0.55, gloss, [0, 0, 0], [1, 0.95, 0.28])); // lower bout
+  g.add(ball(0.42, gloss, [0, 0.52, 0], [1, 0.9, 0.28])); // upper bout
   g.add(ball(0.3, white, [0.12, -0.05, 0.1], [1, 0.8, 0.15])); // pickguard
-  for (const y of [-0.15, 0.2]) {                               // pickups
-    const p = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.08, 0.05), new THREE.MeshStandardMaterial({ color: 0x222222 }));
+  for (const y of [-0.15, 0.2]) {
+    // pickups
+    const p = new THREE.Mesh(
+      new THREE.BoxGeometry(0.32, 0.08, 0.05),
+      new THREE.MeshStandardMaterial({ color: 0x222222 }),
+    );
     p.position.set(0, y, 0.16);
     g.add(p);
   }
@@ -30,7 +34,9 @@ export function createGuitar({ color = 0xe63946, neck: neckLen = 1.5, strings = 
   head.position.set(0, nutY + 0.17, 0.04);
   g.add(head);
   const perSide = Math.ceil(strings / 2);
-  for (const s of [-1, 1]) for (let i = 0; i < perSide; i++) g.add(ball(0.035, metal, [s * 0.17, nutY + 0.05 + i * (0.27 / perSide), 0.06], [1, 1, 1], 10)); // tuners
+  for (const s of [-1, 1])
+    for (let i = 0; i < perSide; i++)
+      g.add(ball(0.035, metal, [s * 0.17, nutY + 0.05 + i * (0.27 / perSide), 0.06], [1, 1, 1], 10)); // tuners
 
   // bridge, nut and six strings running from the bridge up the neck to the headstock
   const black = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 });
@@ -44,9 +50,9 @@ export function createGuitar({ color = 0xe63946, neck: neckLen = 1.5, strings = 
   const stringMat = new THREE.MeshStandardMaterial({ color: 0xf2efe6, roughness: 0.3, metalness: 0.8 });
   const up = new THREE.Vector3(0, 1, 0);
   for (let i = 0; i < strings; i++) {
-    const k = i / (strings - 1) - 0.5;                       // -0.5 … 0.5 across the strings
-    const from = new THREE.Vector3(k * 0.22, -0.36, 0.2);    // bridge (wider spacing)
-    const to = new THREE.Vector3(k * 0.12, nutY, 0.105);     // nut (narrower)
+    const k = i / (strings - 1) - 0.5; // -0.5 … 0.5 across the strings
+    const from = new THREE.Vector3(k * 0.22, -0.36, 0.2); // bridge (wider spacing)
+    const to = new THREE.Vector3(k * 0.12, nutY, 0.105); // nut (narrower)
     const dir = to.clone().sub(from);
     const thickness = (strings <= 4 ? 0.011 : 0.0075) - i * 0.0008; // lowest string thickest
     const str = new THREE.Mesh(new THREE.CylinderGeometry(thickness, thickness, dir.length(), 6), stringMat);

@@ -1,26 +1,22 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dino Studio</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&family=Metal+Mania&family=Rye&display=swap">
-  <link rel="stylesheet" href="/src/style.css">
-</head>
-<body>
-  <div id="stage"></div>
-  <div class="controls">
-    <select id="episode"></select>
-    <select id="format"></select>
-    <button id="sound">🔈 Sound off</button>
-    <button id="restart">⟲ Restart</button>
-    <button id="rec" class="primary">● Record video</button>
-    <input id="scrub" type="range" min="0" step="0.1" value="0">
-    <span id="time">0.0s</span>
-    <span id="status"></span>
-  </div>
-  <script type="module" src="/src/main.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Rocksaurus Dino Studio — 3D dinosaur band shorts made with Three.js and Web Audio."
+    />
+    <title>Rocksaurus · Dino Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@700&family=Inter:wght@400;500;600;700&family=Metal+Mania&family=Rye&display=swap"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

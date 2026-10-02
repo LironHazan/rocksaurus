@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials.js';
+import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
 
 export const RORY_COLORS = {
-  body: 0xa8e6cf,  // mint green
+  body: 0xa8e6cf, // mint green
   belly: 0xfff3dc, // cream
   bumps: 0x7fd1ae,
   cheeks: 0xffb3c1,
@@ -15,22 +15,32 @@ export const RORY_COLORS = {
  */
 export function createRory(colors = RORY_COLORS) {
   const M = {
-    body: plush(colors.body), belly: plush(colors.belly), bump: plush(colors.bumps),
-    eye: glossyEye(), shine: shine(), cheek: blush(colors.cheeks), dark: matte(0x3a4a44),
+    body: plush(colors.body),
+    belly: plush(colors.belly),
+    bump: plush(colors.bumps),
+    eye: glossyEye(),
+    shine: shine(),
+    cheek: blush(colors.cheeks),
+    dark: matte(0x3a4a44),
   };
 
-  const root = new THREE.Group();   // world placement (x, hop height, facing)
+  const root = new THREE.Group(); // world placement (x, hop height, facing)
   const squash = new THREE.Group(); // squash & stretch around the feet
   root.add(squash);
 
   const torso = new THREE.Group();
   torso.add(ball(1, M.body, [0, 1.2, 0], [1, 1.1, 0.95]));
   torso.add(ball(0.75, M.belly, [0, 1.1, 0.5], [1, 1.15, 0.55]));
-  for (const [y, z] of [[2.0, -0.72], [1.55, -0.92], [1.05, -0.93]])
+  for (const [y, z] of [
+    [2.0, -0.72],
+    [1.55, -0.92],
+    [1.05, -0.93],
+  ])
     torso.add(ball(0.17, M.bump, [0, y, z], [0.8, 1, 1.1]));
   squash.add(torso);
 
-  const feet = [], thighs = []; // lift feet with foot.position.y for walking; userData.side = -1 / 1
+  const feet = [],
+    thighs = []; // lift feet with foot.position.y for walking; userData.side = -1 / 1
   for (const s of [-1, 1]) {
     const thigh = ball(0.5, M.body, [s * 0.58, 0.62, 0.02]);
     thigh.userData.side = s;
@@ -68,7 +78,7 @@ export function createRory(colors = RORY_COLORS) {
   const head = new THREE.Group();
   head.position.set(0, 2.5, 0.1);
   head.add(ball(1.05, M.body, [0, 0, 0], [1.1, 0.95, 1]));
-  head.add(ball(0.6, M.body, [0, -0.3, 0.75], [1.1, 0.75, 0.9]));    // snout
+  head.add(ball(0.6, M.body, [0, -0.3, 0.75], [1.1, 0.75, 0.9])); // snout
   const headBump = ball(0.17, M.bump, [0, 0.9, -0.35], [0.8, 1, 1.1]);
   head.add(headBump);
   for (const s of [-1, 1]) head.add(ball(0.04, M.dark, [s * 0.14, -0.14, 1.27], [1.2, 0.8, 0.6], 12)); // nostrils
@@ -86,7 +96,8 @@ export function createRory(colors = RORY_COLORS) {
   mouth.visible = false;
   head.add(mouth);
 
-  const eyes = [], cheeks = [];
+  const eyes = [],
+    cheeks = [];
   for (const s of [-1, 1]) {
     const eye = new THREE.Group();
     eye.position.set(s * 0.42, 0.15, 0.9);

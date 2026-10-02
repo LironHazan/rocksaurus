@@ -1,9 +1,9 @@
-import { seg, ease, lerp } from '../../engine/math.js';
-import { createMeadow } from '../../world/meadow.js';
-import { createRory, idle } from '../../characters/rory.js';
-import { playScore } from '../../audio/score.js';
-import { hop, thump } from '../../audio/sfx.js';
-import { score } from './score.js';
+import { seg, ease, lerp } from '../../engine/math';
+import { createMeadow } from '../../world/meadow';
+import { createRory, idle } from '../../characters/rory';
+import { playScore } from '../../audio/score';
+import { hop, thump } from '../../audio/sfx';
+import { score } from './score';
 
 // Beat sheet (seconds) — music bars are 2 s each, so every action lands on a bar.
 //   0.0–2.4  hops in from the left
@@ -58,7 +58,8 @@ export default {
       const wave = seg(t, 2.5, 2.8) * (1 - seg(t, 4.6, 4.9));
       for (const a of rory.arms) {
         const s = a.userData.side;
-        let rz = s * 0.35, rx = -0.5;
+        let rz = s * 0.35,
+          rx = -0.5;
         if (s === 1) {
           rz = lerp(rz, 2.3 + Math.sin(t * 12) * 0.45, ease(wave));
           rx = lerp(rx, 0, ease(wave));
@@ -80,6 +81,6 @@ export default {
   audio(bus, t0) {
     playScore(bus, t0, score);
     for (let k = 1; k <= 5; k++) hop(bus, t0 + 0.48 * k); // hop landings
-    thump(bus, t0 + 6.2);                                  // big-jump landing
+    thump(bus, t0 + 6.2); // big-jump landing
   },
 };

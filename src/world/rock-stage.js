@@ -6,10 +6,15 @@ import * as THREE from 'three';
  */
 export function createRockStage(scene) {
   const c = document.createElement('canvas');
-  c.width = 2; c.height = 256;
-  const g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
-  gr.addColorStop(0, '#0d0518'); gr.addColorStop(0.55, '#2a0e4a'); gr.addColorStop(1, '#4a1660');
-  g.fillStyle = gr; g.fillRect(0, 0, 2, 256);
+  c.width = 2;
+  c.height = 256;
+  const g = c.getContext('2d'),
+    gr = g.createLinearGradient(0, 0, 0, 256);
+  gr.addColorStop(0, '#0d0518');
+  gr.addColorStop(0.55, '#2a0e4a');
+  gr.addColorStop(1, '#4a1660');
+  g.fillStyle = gr;
+  g.fillRect(0, 0, 2, 256);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   scene.background = tex;
@@ -23,11 +28,21 @@ export function createRockStage(scene) {
   Object.assign(key.shadow.camera, { left: -6, right: 6, top: 7, bottom: -3 });
   scene.add(key);
 
-  const beamMat = color => new THREE.MeshBasicMaterial({
-    color, transparent: true, opacity: 0.09, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
-  });
+  const beamMat = color =>
+    new THREE.MeshBasicMaterial({
+      color,
+      transparent: true,
+      opacity: 0.09,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
   const lights = [];
-  for (const [x, color] of [[-5, 0xff3fa4], [5, 0x3fd4ff], [0, 0xffd36b]]) {
+  for (const [x, color] of [
+    [-5, 0xff3fa4],
+    [5, 0x3fd4ff],
+    [0, 0xffd36b],
+  ]) {
     const spot = new THREE.SpotLight(color, x === 0 ? 10 : 35, 30, 0.42, 0.6, 1.4);
     spot.position.set(x, 9, -1);
     spot.target.position.set(x * 0.3, 0, -3); // light the stage behind Rory, not Rory (keeps his mint color)
@@ -52,9 +67,13 @@ export function createRockStage(scene) {
   stage.receiveShadow = true;
   scene.add(stage);
 
-  for (let i = 0; i < 24; i++) { // floor bulbs along the stage edge
+  for (let i = 0; i < 24; i++) {
+    // floor bulbs along the stage edge
     const a = (i / 24) * Math.PI * 2;
-    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 8), new THREE.MeshBasicMaterial({ color: i % 2 ? 0xff3fa4 : 0xffd36b }));
+    const bulb = new THREE.Mesh(
+      new THREE.SphereGeometry(0.08, 12, 8),
+      new THREE.MeshBasicMaterial({ color: i % 2 ? 0xff3fa4 : 0xffd36b }),
+    );
     bulb.position.set(Math.cos(a) * 7.1, 0.02, Math.sin(a) * 7.1);
     scene.add(bulb);
   }
