@@ -7,7 +7,13 @@ const shellMat = () =>
 // No environment map on stage, so metals use partial metalness + a little glow to stay bright
 const chrome = new THREE.MeshStandardMaterial({ color: 0xdfe3ea, metalness: 0.5, roughness: 0.3, emissive: 0x333344 });
 const headMat = new THREE.MeshStandardMaterial({ color: 0xf6f2ea, roughness: 0.7 });
-const brass = new THREE.MeshStandardMaterial({ color: 0xf0c050, metalness: 0.45, roughness: 0.35, emissive: 0x4a3200 });
+const brass = new THREE.MeshStandardMaterial({
+  color: 0xf0c050,
+  metalness: 0.45,
+  roughness: 0.35,
+  emissive: 0x4a3200,
+  side: THREE.DoubleSide, // cymbals are thin open surfaces — visible from above and below
+});
 
 function drum(radius, depth) {
   const g = new THREE.Group();
@@ -33,9 +39,17 @@ function stand(from, to) {
   return m;
 }
 
+/** A cymbal: thin, slightly domed disc with a bell in the middle (surface of revolution, two-sided). */
 function cymbal(radius) {
-  const c = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.08, radius, 0.05, 40), brass);
-  return c;
+  const profile = [
+    new THREE.Vector2(0, 0.07),
+    new THREE.Vector2(radius * 0.12, 0.068),
+    new THREE.Vector2(radius * 0.2, 0.04), // bell
+    new THREE.Vector2(radius * 0.24, 0.03),
+    new THREE.Vector2(radius * 0.7, 0.012),
+    new THREE.Vector2(radius, 0), // thin edge
+  ];
+  return new THREE.Mesh(new THREE.LatheGeometry(profile, 48), brass);
 }
 
 /**
@@ -132,11 +146,11 @@ export function createDrumKit({ logo = 'ROCKSAURUS' } = {}) {
   const hat = new THREE.Group();
   const hatBottom = cymbal(0.33),
     hatTop = cymbal(0.33);
-  hatTop.position.y = 0.07;
+  hatTop.position.y = 0.11; // flipped: the two cymbals face each other, bells pointing apart
   hatTop.rotation.x = Math.PI;
   hat.add(hatBottom, hatTop);
-  hat.position.set(1.0, 1.5, 0.95);
-  g.add(hat, stand(new THREE.Vector3(1.0, 0, 0.95), new THREE.Vector3(1.0, 1.5, 0.95)));
+  hat.position.set(0.92, 1.66, 1.12); // close to the snare side, in clear view
+  g.add(hat, stand(new THREE.Vector3(0.92, 0, 1.12), new THREE.Vector3(0.92, 1.66, 1.12)));
 
   const crash = cymbal(0.5);
   crash.position.set(1.15, 2.45, 1.25);
@@ -151,7 +165,7 @@ export function createDrumKit({ logo = 'ROCKSAURUS' } = {}) {
       crash.rotation.x = rest.crash.x + Math.sin(k * 30) * 0.15 * k;
       crash.rotation.z = rest.crash.z + Math.cos(k * 26) * 0.1 * k;
     }
-    if (name === 'hat') hatTop.position.y = 0.07 - 0.04 * k;
+    if (name === 'hat') hatTop.position.y = 0.11 - 0.035 * k;
     if (name === 'kick') kick.scale.setScalar(1 + 0.03 * k);
     if (name === 'snare') snare.scale.setScalar(1 + 0.04 * k);
     if (name === 'tom') tom.scale.setScalar(1 + 0.05 * k);

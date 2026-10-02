@@ -1,7 +1,7 @@
 # Rocksaurus 🦖🎸 — Dino Studio
 
 The studio behind [@Rocksaurus on YouTube](https://www.youtube.com/@Rocksaurus): a band of tiny dinosaurs
-(Rory on guitar, Lulu on drums, Tiki Taka on bass) — tiny arms, BIG riffs.
+(Paris on vocals, Rory on guitar, Tiki Taka on bass, Steggy on keys, Lulu on drums) — tiny arms, BIG riffs.
 
 Cute 3D dinosaur shorts made entirely with web tech: **Three.js** for the picture, **Web Audio** for a
 synthesized piano. Every episode is a pure function of time, so it renders the same way every time and
