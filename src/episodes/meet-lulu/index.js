@@ -95,8 +95,8 @@ export default {
         look = [L, 2.4, -0.5];
       } // the fill
       else if (t >= 8 && t < 10) {
-        cam = [L - 3.8, 4.3, 6.6];
-        look = [L, 3.7, -1];
+        cam = [L - 3.4, 4.0, 7.2];
+        look = [L + 0.5, 3.0, -0.3]; // from her left, aimed across the kit so the hi-hat and crash stay in frame
       } // from her left
       else if (t >= 10 && t < 12) {
         cam = [L + 3.8, 4.4, 6.6];

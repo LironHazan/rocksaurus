@@ -1,40 +1,9 @@
 import * as THREE from 'three';
 import { rng } from '../engine/math';
+import { taperedTube, curve3 } from './tube';
 
 // Lulu's head ellipsoid around the `face` group (see createLulu: head ball 0.6 scaled 1 × 0.9 × 1.1)
 const HEAD = { x: 0.6, y: 0.54, z: 0.66 };
-
-/** A tube along `curve` whose radius follows radiusAt(s) for s = 0..1 (Three's TubeGeometry can't taper). */
-function taperedTube(curve, radiusAt, { segments = 64, radial = 24 } = {}) {
-  const frames = curve.computeFrenetFrames(segments, false);
-  const pos = [],
-    idx = [];
-  for (let i = 0; i <= segments; i++) {
-    const s = i / segments,
-      c = curve.getPointAt(s),
-      r = radiusAt(s);
-    const N = frames.normals[i],
-      B = frames.binormals[i];
-    for (let j = 0; j <= radial; j++) {
-      const a = (j / radial) * Math.PI * 2;
-      const n = N.clone().multiplyScalar(Math.cos(a)).addScaledVector(B, Math.sin(a));
-      pos.push(c.x + n.x * r, c.y + n.y * r, c.z + n.z * r);
-    }
-  }
-  for (let i = 0; i < segments; i++)
-    for (let j = 0; j < radial; j++) {
-      const a = i * (radial + 1) + j,
-        b = a + radial + 1;
-      idx.push(a, a + 1, b, b, a + 1, b + 1); // counter-clockwise from outside → normals face out
-    }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  g.setIndex(idx);
-  g.computeVertexNormals();
-  return g;
-}
-
-const curve3 = pts => new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p)));
 
 /**
  * Loose ponytail: thick smooth locks combed back from the hairline and lifted off the head (not slicked
