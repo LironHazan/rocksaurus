@@ -40,13 +40,15 @@ export function drawCaptions(
     const fade = clamp01((c.to - t) / 0.15);
     const size = unit * (c.size ?? 0.085);
     ctx.font = `700 ${size}px ${CAPTION_FONT}, "Arial Rounded MT Bold", system-ui, sans-serif`;
-    const lines = wrapText(s => ctx.measureText(s).width, c.text, width * 0.86);
+    const left = c.align === 'left';
+    // left-aligned text stays clear of the Shorts buttons on the right edge
+    const lines = wrapText(s => ctx.measureText(s).width, c.text, width * (left ? 0.78 : 0.86));
 
     ctx.save();
     ctx.globalAlpha = fade;
-    ctx.translate(width / 2, (c.y ?? safe[c.at ?? 'top']) * height);
+    ctx.translate(left ? width * 0.07 : width / 2, (c.y ?? safe[c.at ?? 'top']) * height);
     ctx.scale(pop, pop);
-    ctx.textAlign = 'center';
+    ctx.textAlign = left ? 'left' : 'center';
     ctx.textBaseline = 'middle';
     ctx.lineJoin = 'round';
     lines.forEach((line, i) => {

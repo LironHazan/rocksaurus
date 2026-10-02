@@ -17,6 +17,8 @@ export interface Caption {
   to: number;
   text: string;
   at?: 'top' | 'bottom';
+  /** Horizontal alignment (default 'center'); 'left' reads like subtitles and keeps the middle clear. */
+  align?: 'center' | 'left';
   /** Explicit vertical position 0..1 (overrides `at`). */
   y?: number;
   /** Font size as a fraction of the frame's short side. */
