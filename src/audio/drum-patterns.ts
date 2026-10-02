@@ -1,8 +1,8 @@
-export type DrumName = 'kick' | 'snare' | 'hat' | 'crash' | 'tom' | 'floorTom' | 'click';
+export type DrumName = 'kick' | 'snare' | 'hat' | 'crash' | 'china' | 'splash' | 'ride' | 'tom' | 'floorTom' | 'click';
 
 /**
  * A drum part written as one string per instrument, 16 steps per bar (16th notes):
- *   'x' hit · 'X' accent · 'o' open hi-hat · '.' rest   (spaces are ignored, use them to separate bars)
+ *   'x' hit · 'X' accent · 'g' ghost note (soft) · 'o' open hi-hat · '.' rest   (spaces are ignored, use them to separate bars)
  */
 export interface DrumPart {
   bpm: number;
@@ -16,6 +16,9 @@ export interface DrumHit {
   accent: boolean;
   ch: string;
 }
+
+/** How hard a hit is played, from its pattern character. */
+export const hitVelocity = (ch: string): number => (ch === 'X' ? 1 : ch === 'g' ? 0.32 : 0.75);
 
 /** Every hit in a drum part, sorted by time — used both to schedule sound and to sync animation. */
 export function drumHits({ bpm, tracks }: DrumPart): DrumHit[] {

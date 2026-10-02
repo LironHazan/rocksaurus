@@ -4,7 +4,7 @@ import type { Episode } from '../../engine/types';
 import { createRockStage } from '../../world/rock-stage';
 import { createParasaurolophus } from '../../characters/parasaurolophus';
 import { idle, resetPose } from '../../characters/rory';
-import { reachArm } from '../../characters/reach';
+import { reachArm, armOf } from '../../characters/reach';
 import { createMicStand } from '../../props/mic-stand';
 import { addGothOutfit } from '../../props/goth-outfit';
 import { sungNotes, mouthOpenAt } from '../../audio/vowels';
@@ -35,7 +35,8 @@ const episode: Episode = {
     stand.group.position.set(0, 0, 1.85); // a little space between the mic and her bill
     scene.add(stand.group);
 
-    const [leftArm, rightArm] = [-1, 1].map(s => paris.arms.find(a => a.userData.side === s)!);
+    const leftArm = armOf(paris, -1);
+    const rightArm = armOf(paris, 1);
     const world = new THREE.Vector3();
     const standToTorso = (p: THREE.Vector3) => paris.torso.worldToLocal(stand.group.localToWorld(world.copy(p)));
 

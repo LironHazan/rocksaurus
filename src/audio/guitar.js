@@ -1,6 +1,7 @@
 import { audio } from './context';
 import { midi } from './piano';
 import { rng } from '../engine/math';
+import { atTime } from './schedule';
 
 const { ctx } = audio;
 const cache = new Map();
@@ -63,13 +64,13 @@ const filter = (type, frequency, Q = 0.7, gain = 0) => new BiquadFilterNode(ctx,
 function createAmp(bus, pan) {
   const chain = [
     filter('highpass', 90), // tighten low end
-    filter('lowpass', 3200), // smooth pick fizz before it hits the clipper
-    new GainNode(ctx, { gain: 5 }), // drive
+    filter('lowpass', 2400), // smooth pick fizz before it hits the clipper
+    new GainNode(ctx, { gain: 3.6 }), // drive (moderate: crunch, not fizz)
     new WaveShaperNode(ctx, { curve: CURVE, oversample: '4x' }),
-    filter('peaking', 180, 0.8, 3), // body / warmth
-    filter('peaking', 2600, 1.2, -3), // tame harsh upper mids
-    filter('lowpass', 3600, 0.6), // speaker rolloff…
-    filter('lowpass', 5000, 0.5), // …steeper, like a real 12" cab
+    filter('peaking', 200, 0.8, 4), // body / warmth
+    filter('peaking', 2400, 1.0, -6), // tame harsh upper mids (where the 'metal' ring lives)
+    filter('lowpass', 2800, 0.6), // speaker rolloff…
+    filter('lowpass', 3800, 0.5), // …steeper, like a real 12" cab
     new GainNode(ctx, { gain: 0.2 }), // level
     new StereoPannerNode(ctx, { pan }),
   ];
@@ -92,28 +93,30 @@ export function playRiff(bus, t0, { bpm, notes }) {
   ];
 
   for (const [at, root, len, style, vel = 1] of notes) {
-    const muted = style === 'mute';
-    const start = t0 + at * eighth;
-    const stop = start + len * eighth;
-    for (const take of takes) {
-      [0, 7, 12].forEach((interval, i) => {
-        const f = 440 * 2 ** ((midi(root) + interval - 69 + take.cents / 100) / 12);
-        const src = ctx.createBufferSource();
-        src.buffer = pluck(
-          f,
-          muted
-            ? { dur: 0.45, rho: 0.88, bright: 0.3, seed: take.seed * 31 + i }
-            : { dur: 3.0, rho: 0.999, bright: 0.5, seed: take.seed * 31 + i },
-        );
-        const g = ctx.createGain();
-        const when = start + take.late + i * 0.006; // downstroke strum
-        g.gain.setValueAtTime((muted ? 0.8 : 1) * vel, when);
-        g.gain.setTargetAtTime(0, stop + take.late, 0.03); // fret hand lets go
-        src.connect(g);
-        g.connect(take.amp);
-        src.start(when);
-        src.stop(stop + 0.4);
-      });
-    }
+    atTime(t0 + at * eighth, () => {
+      const muted = style === 'mute';
+      const start = t0 + at * eighth;
+      const stop = start + len * eighth;
+      for (const take of takes) {
+        [0, 7, 12].forEach((interval, i) => {
+          const f = 440 * 2 ** ((midi(root) + interval - 69 + take.cents / 100) / 12);
+          const src = ctx.createBufferSource();
+          src.buffer = pluck(
+            f,
+            muted
+              ? { dur: 0.45, rho: 0.88, bright: 0.22, seed: take.seed * 31 + i }
+              : { dur: 3.0, rho: 0.998, bright: 0.32, seed: take.seed * 31 + i },
+          );
+          const g = ctx.createGain();
+          const when = start + take.late + i * 0.006; // downstroke strum
+          g.gain.setValueAtTime((muted ? 0.8 : 1) * vel, when);
+          g.gain.setTargetAtTime(0, stop + take.late, 0.03); // fret hand lets go
+          src.connect(g);
+          g.connect(take.amp);
+          src.start(when);
+          src.stop(stop + 0.4);
+        });
+      }
+    });
   }
 }

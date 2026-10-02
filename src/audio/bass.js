@@ -1,6 +1,7 @@
 import { audio } from './context';
 import { midi } from './piano';
 import { pluck } from './guitar';
+import { atTime } from './schedule';
 
 const { ctx } = audio;
 
@@ -35,29 +36,31 @@ export function playBass(bus, t0, { bpm, notes }) {
   const eighth = 60 / bpm / 2;
   const amp = createBassAmp(bus);
   notes.forEach(([at, note, len, vel = 1], i) => {
-    const f = 440 * 2 ** ((midi(note) - 69) / 12);
-    const src = ctx.createBufferSource();
-    src.buffer = pluck(f, { dur: 2.5, rho: 0.996, bright: 0.18, seed: 50 + (i % 7) }); // soft finger attack
-    const g = ctx.createGain();
-    const start = t0 + at * eighth,
-      stop = start + len * eighth;
-    g.gain.setValueAtTime(vel, start);
-    g.gain.setTargetAtTime(0, stop - 0.01, 0.025);
-    src.connect(g);
-    g.connect(amp);
-    src.start(start);
-    src.stop(stop + 0.3);
-    // round low body: a pure tone at the fundamental, under the string
-    const sub = new OscillatorNode(ctx, { type: 'sine', frequency: f }),
-      sg = ctx.createGain();
-    sg.gain.setValueAtTime(0, start);
-    sg.gain.linearRampToValueAtTime(0.35 * vel, start + 0.01);
-    sg.gain.setTargetAtTime(0.2 * vel, start + 0.01, 0.15);
-    sg.gain.setTargetAtTime(0, stop - 0.01, 0.03);
-    sub.connect(sg);
-    sg.connect(amp);
-    sub.start(start);
-    sub.stop(stop + 0.3);
+    atTime(t0 + at * eighth, () => {
+      const f = 440 * 2 ** ((midi(note) - 69) / 12);
+      const src = ctx.createBufferSource();
+      src.buffer = pluck(f, { dur: 2.5, rho: 0.996, bright: 0.18, seed: 50 + (i % 7) }); // soft finger attack
+      const g = ctx.createGain();
+      const start = t0 + at * eighth,
+        stop = start + len * eighth;
+      g.gain.setValueAtTime(vel, start);
+      g.gain.setTargetAtTime(0, stop - 0.01, 0.025);
+      src.connect(g);
+      g.connect(amp);
+      src.start(start);
+      src.stop(stop + 0.3);
+      // round low body: a pure tone at the fundamental, under the string
+      const sub = new OscillatorNode(ctx, { type: 'sine', frequency: f }),
+        sg = ctx.createGain();
+      sg.gain.setValueAtTime(0, start);
+      sg.gain.linearRampToValueAtTime(0.35 * vel, start + 0.01);
+      sg.gain.setTargetAtTime(0.2 * vel, start + 0.01, 0.15);
+      sg.gain.setTargetAtTime(0, stop - 0.01, 0.03);
+      sub.connect(sg);
+      sg.connect(amp);
+      sub.start(start);
+      sub.stop(stop + 0.3);
+    });
   });
 }
 

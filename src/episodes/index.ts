@@ -1,6 +1,7 @@
 import type { Episode } from '../engine/types';
 
 // Register episodes here. The first one is the default.
+import bandLive from './band-live';
 import meetParis from './meet-paris';
 import meetSteggy from './meet-steggy';
 import meetTiki from './meet-tiki';
@@ -11,6 +12,7 @@ import roryFriday from './rory-friday';
 import roryHello from './rory-hello';
 
 export const episodes: readonly Episode[] = [
+  bandLive,
   meetParis,
   meetSteggy,
   meetTiki,

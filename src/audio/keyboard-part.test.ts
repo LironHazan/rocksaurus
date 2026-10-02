@@ -1,5 +1,6 @@
 vi.mock('./piano', () => ({ piano: vi.fn() })); // no Web Audio in tests
-vi.mock('./synth', () => ({ lead: vi.fn(), pad: vi.fn() }));
+vi.mock('./synth', () => ({ lead: vi.fn(), pad: vi.fn(), organ: vi.fn() }));
+vi.mock('./schedule', () => ({ atTime: vi.fn() }));
 import { timedNotes } from './keyboard-part';
 
 describe('timedNotes', () => {
