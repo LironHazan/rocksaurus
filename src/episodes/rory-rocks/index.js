@@ -11,7 +11,7 @@ import { riff as synthRiff } from './riff';
 // then set BPM to the tempo you played at. Rory headbangs and the lights flash on every beat.
 // No file yet? You'll hear FALLBACK instead: 'synth' (synthesized guitar riff, riff.js) or
 // 'click' (a metronome at BPM, to record along to with headphones).
-const RIFF = { url: '/audio/riff.wav', offset: 0, gain: 1 };
+const RIFF = { url: `${import.meta.env.BASE_URL}audio/riff.wav`, offset: 0, gain: 1 };
 const FALLBACK = 'synth';
 const BPM = 120;
 const BEATS_PER_BAR = 4;
