@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Channel Art · Dino Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka:wght@700&family=Metal+Mania&family=Rye&display=swap">
+  <link rel="stylesheet" href="/src/style.css">
+  <style>
+    body { align-items: stretch; max-width: 1280px; margin: 0 auto; }
+    h2 { margin: 18px 0 6px; font-size: 16px; opacity: .8; font-weight: 600; }
+    .art { width: 100%; height: auto; border-radius: 10px; display: block; }
+    #profile { width: 280px; border-radius: 50%; }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    input { background: var(--panel); color: var(--text); border: 1px solid #444a5a; border-radius: 8px; padding: 8px 12px; font: inherit; }
+    label { display: flex; gap: 6px; align-items: center; }
+  </style>
+</head>
+<body>
+  <div class="row">
+    <label>Name <input id="name" value="ROCKSAURUS"></label>
+    <label>Tagline <input id="tagline" value="tiny arms · BIG riffs 🤘" size="26"></label>
+    <label><input type="checkbox" id="safe"> Show banner safe area</label>
+  </div>
+
+  <h2>Profile picture: 800×800 (YouTube shows it as a circle)</h2>
+  <div class="row"><canvas id="profile" class="art"></canvas><button id="dl-profile" class="primary">Download PNG</button></div>
+
+  <h2>Channel banner: 2560×1440 (the middle 1546×423 is visible on every device)</h2>
+  <canvas id="banner" class="art"></canvas>
+  <div class="row"><button id="dl-banner" class="primary">Download PNG</button></div>
+
+  <script type="module" src="/src/brand/main.js"></script>
+</body>
+</html>
