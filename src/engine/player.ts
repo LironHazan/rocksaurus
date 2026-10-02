@@ -1,4 +1,5 @@
 import { audio } from '../audio/context';
+import { cancelScheduled } from '../audio/schedule';
 import { drawCaptions } from './captions';
 import type { Episode, Stage } from './types';
 
@@ -50,6 +51,7 @@ export function createPlayer(stage: Stage, episode: Episode): Player {
   };
 
   function stopBus() {
+    cancelScheduled();
     if (!bus) return;
     const old = bus;
     old.gain.setTargetAtTime(0, audio.ctx.currentTime, 0.05);

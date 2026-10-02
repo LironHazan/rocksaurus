@@ -1,6 +1,7 @@
 import { audio } from './context';
 import { frequency } from './notes';
 import { FORMANTS, type VocalPart, type Vowel } from './vowels';
+import { atTime } from './schedule';
 
 const { ctx } = audio;
 
@@ -76,6 +77,8 @@ export function sing(bus: AudioNode, when: number, note: string, vowel: Vowel = 
 /** Schedules a whole vocal part. */
 export function playVocal(bus: AudioNode, t0: number, { bpm, notes }: VocalPart): void {
   const eighth = 60 / bpm / 2;
-  for (const [at, note, len, vowel = 'a', vel = 0.7] of notes)
-    sing(bus, t0 + at * eighth, note, vowel, vel, len * eighth);
+  for (const [at, note, len, vowel = 'a', vel = 0.7] of notes) {
+    const when = t0 + at * eighth;
+    atTime(when, () => sing(bus, when, note, vowel, vel, len * eighth));
+  }
 }

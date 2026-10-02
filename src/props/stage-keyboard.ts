@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { midi as toMidi, type Note } from '../audio/notes';
 import { ball, enableShadows } from '../characters/materials';
-import { textTexture, outlinedText } from '../world/text-texture';
 
 /** Lowest and highest keys (3 octaves). */
 export const KEY_RANGE = { low: toMidi('C3'), high: toMidi('B5') } as const;
@@ -21,10 +20,10 @@ export interface StageKeyboard {
 
 /**
  * Rock stage keyboard on an X-stand: slim black synth body with a glowing screen, knobs and pitch/mod wheels,
- * a 3-octave keyboard whose keys press down, and the band logo on the back panel (facing the audience).
+ * a 3-octave keyboard whose keys press down, and a plain back panel facing the audience.
  * The player stands at −z facing +z; the keys' front edge is at z ≈ −0.2.
  */
-export function createStageKeyboard({ logo = 'ROCKSAURUS' } = {}): StageKeyboard {
+export function createStageKeyboard(): StageKeyboard {
   const body = new THREE.MeshPhysicalMaterial({ color: 0x15151c, roughness: 0.3, clearcoat: 0.6 });
   const metal = new THREE.MeshStandardMaterial({ color: 0x9aa0aa, metalness: 0.6, roughness: 0.35 });
   const ivory = new THREE.MeshStandardMaterial({ color: 0xfaf6ee, roughness: 0.35 });
@@ -53,42 +52,8 @@ export function createStageKeyboard({ logo = 'ROCKSAURUS' } = {}): StageKeyboard
     group.add(wheel);
   }
 
-  // band logo on the back panel, facing the audience
-  const logoTex = textTexture(
-    1024,
-    128,
-    (ctx: CanvasRenderingContext2D, w: number, h: number) => {
-      ctx.fillStyle = '#15151c';
-      ctx.fillRect(0, 0, w, h);
-      const fire = (c: CanvasRenderingContext2D, y: number, size: number) => {
-        const gr = c.createLinearGradient(0, y - size / 2, 0, y + size / 2);
-        gr.addColorStop(0, '#fff3a8');
-        gr.addColorStop(0.5, '#ffb347');
-        gr.addColorStop(1, '#ff3d2e');
-        return gr;
-      };
-      outlinedText(ctx, logo, w / 2, h / 2, {
-        font: "'Metal Mania'",
-        size: 96,
-        maxWidth: w * 0.6,
-        fill: fire,
-        stroke: '#000',
-        line: 0.08,
-        glow: '#ff3d2e',
-      });
-    },
-    ["96px 'Metal Mania'"],
-  );
-  const back = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.3, 0.28),
-    new THREE.MeshStandardMaterial({
-      map: logoTex,
-      emissive: 0xffffff,
-      emissiveMap: logoTex,
-      emissiveIntensity: 0.35,
-      roughness: 0.4,
-    }),
-  );
+  // plain back panel facing the audience (the band logo lives on the kick drum)
+  const back = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 0.28), body);
   back.position.set(0, KEYS_TOP - 0.05, 0.37);
   group.add(back);
 

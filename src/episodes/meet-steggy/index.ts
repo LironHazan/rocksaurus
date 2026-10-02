@@ -4,7 +4,7 @@ import type { Episode } from '../../engine/types';
 import { createRockStage } from '../../world/rock-stage';
 import { createStegosaurus } from '../../characters/stegosaurus';
 import { idle, resetPose } from '../../characters/rory';
-import { reachArm } from '../../characters/reach';
+import { reachArm, armOf } from '../../characters/reach';
 import { createStageKeyboard } from '../../props/stage-keyboard';
 import { addBandTee } from '../../props/band-tee';
 import { addShortHair } from '../../props/short-hair';
@@ -53,7 +53,8 @@ const episode: Episode = {
     addBandTee(steggy, { text: 'DREAM THEATER', body: { center: [0, 1.15, -0.1], radii: [1.0, 0.95, 1.15] } });
     addShortHair(steggy.head, { head: [0.525, 0.45, 0.55] }); // short dark crop
 
-    const [leftArm, rightArm] = [-1, 1].map(s => steggy.arms.find(a => a.userData.side === s)!);
+    const leftArm = armOf(steggy, -1);
+    const rightArm = armOf(steggy, 1);
     const pressed = new Map<number, number>();
     const world = new THREE.Vector3();
     /** A point on the keyboard (keyboard space) → Steggy's torso space, for reachArm. */

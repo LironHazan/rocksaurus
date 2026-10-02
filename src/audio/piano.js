@@ -15,14 +15,28 @@ const noiseBuf = (() => {
 export { midi } from './notes';
 
 /**
- * Additive piano voice: slightly inharmonic partials, detuned unison strings, per-partial decay,
- * a closing lowpass (tone darkens as it rings), a hammer knock and a damper release.
+ * Piano voice: a rich harmonic waveform on two detuned unison strings, a closing lowpass (tone darkens as
+ * it rings), a hammer knock and a damper release. Light enough to play dense parts in real time.
  * @param {AudioNode} bus  where to send the sound
  * @param {number} when    AudioContext time to strike
  * @param {string|number} note  'C5' or a MIDI number
  * @param {number} vel     0..1 loudness
  * @param {number} dur     seconds until the key is released
  */
+// All of a piano note's overtones baked into one waveform (2nd partial a little strong, the rest falling off),
+// so each note needs only two oscillators instead of a stack of them. Higher partials still fade first,
+// because the lowpass filter below closes as the note rings.
+let pianoWave = null;
+function getPianoWave() {
+  if (pianoWave) return pianoWave;
+  const N = 9;
+  const real = new Float32Array(N),
+    imag = new Float32Array(N);
+  for (let n = 1; n < N; n++) imag[n] = (1 / Math.pow(n, 1.15)) * (n === 2 ? 1.25 : 1);
+  pianoWave = ctx.createPeriodicWave(real, imag);
+  return pianoWave;
+}
+
 export function piano(bus, when, note, vel = 0.5, dur = 1) {
   const f = 440 * 2 ** ((midi(note) - 69) / 12);
   const out = ctx.createGain();
@@ -35,25 +49,21 @@ export function piano(bus, when, note, vel = 0.5, dur = 1) {
   lp.connect(bus);
 
   const ring = 2.4 * Math.pow(261.6 / f, 0.45); // low notes sustain longer
-  for (let n = 1; n <= 8; n++) {
-    const pf = f * n * Math.sqrt(1 + 0.00035 * n * n);
-    if (pf > 15000) break;
-    const amp = ((vel * 0.2) / Math.pow(n, 1.15)) * (n === 2 ? 1.25 : 1);
-    const tau = ring / Math.pow(n, 0.75);
-    for (const detune of n <= 2 ? [-1.8, 1.8] : [0]) {
-      const o = ctx.createOscillator(),
-        g = ctx.createGain();
-      o.frequency.value = pf;
-      o.detune.value = detune;
-      g.gain.setValueAtTime(0, when);
-      g.gain.linearRampToValueAtTime(n <= 2 ? amp * 0.6 : amp, when + 0.005);
-      g.gain.setTargetAtTime(0, when + 0.005, tau);
-      g.gain.setTargetAtTime(0, when + dur, 0.25); // damper
-      o.connect(g);
-      g.connect(out);
-      o.start(when);
-      o.stop(when + dur + 2);
-    }
+  const amp = vel * 0.2;
+  out.gain.setValueAtTime(0, when);
+  out.gain.linearRampToValueAtTime(amp, when + 0.005);
+  out.gain.setTargetAtTime(0, when + 0.005, ring * 0.6);
+  out.gain.setTargetAtTime(0, when + dur, 0.25); // damper
+  const stop = when + dur + 1.2;
+  for (const detune of [-1.8, 1.8]) {
+    // two slightly detuned "strings", like a real piano's unison
+    const o = ctx.createOscillator();
+    o.setPeriodicWave(getPianoWave());
+    o.frequency.value = f;
+    o.detune.value = detune;
+    o.connect(out);
+    o.start(when);
+    o.stop(stop);
   }
 
   const hn = ctx.createBufferSource(),

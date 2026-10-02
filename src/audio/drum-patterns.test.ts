@@ -1,4 +1,4 @@
-import { drumHits } from './drum-patterns';
+import { drumHits, hitVelocity } from './drum-patterns';
 
 describe('drumHits', () => {
   it('turns step strings into timed hits (16th notes at the given BPM)', () => {
@@ -21,5 +21,13 @@ describe('drumHits', () => {
   it('sorts hits from all tracks by time', () => {
     const hits = drumHits({ bpm: 120, tracks: { snare: '.x', kick: 'x.' } });
     expect(hits.map(h => h.name)).toEqual(['kick', 'snare']);
+  });
+});
+
+describe('hitVelocity', () => {
+  it('plays accents hardest, ghost notes softest', () => {
+    expect(hitVelocity('X')).toBe(1);
+    expect(hitVelocity('x')).toBe(0.75);
+    expect(hitVelocity('g')).toBeLessThan(0.4);
   });
 });
