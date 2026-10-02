@@ -108,7 +108,7 @@ function lettering(ctx, w, h, text) {
  * A tattoo inked onto Rory's hip (the side facing the camera).
  *   style: 'lettering' — just `text` in a metal font (default)
  *          'classic'   — old-school heart + bat + banner with `text`
- *   image: path to your own PNG (transparent background), e.g. '/tattoos/my-tattoo.png'
+ *   image: path to your own PNG (transparent background), e.g. `${import.meta.env.BASE_URL}tattoos/my-tattoo.png`
  *          in public/. Overrides `style`. Only use artwork you have the rights to.
  */
 export function addTattoo(rig, { text = 'OZZY', style = 'lettering', image, size = 0.85 } = {}) {
