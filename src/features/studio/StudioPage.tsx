@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { episodes, findEpisode } from '../../episodes';
+import { folders, findEpisode } from '../../episodes';
 import { DEFAULT_FORMAT, FORMATS, isFormatId } from '../../engine/formats';
 import { CAPTION_FONT } from '../../engine/captions';
 import { recordEpisode } from '../../engine/recorder';
@@ -52,7 +52,7 @@ export function StudioPage() {
   return (
     <div className={styles.layout}>
       <EpisodeList
-        episodes={episodes}
+        folders={folders}
         activeId={episode.id}
         disabled={recording}
         onSelect={id => updateParam('episode', id)}

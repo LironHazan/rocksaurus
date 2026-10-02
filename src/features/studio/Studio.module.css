@@ -36,6 +36,7 @@
   background: var(--surface-3);
   color: var(--text-muted);
 }
+.folderList,
 .episodeList {
   list-style: none;
   margin: 0;
@@ -43,6 +44,35 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+.episodeList {
+  margin: 2px 0 6px 15px;
+  padding-left: 8px;
+  border-left: 1px solid var(--border);
+}
+.folder {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font: 600 13px var(--font);
+  text-align: left;
+  cursor: pointer;
+}
+.folder:hover {
+  background: var(--surface-2);
+}
+.chevron {
+  color: var(--text-faint);
+  transition: transform 0.15s ease;
+}
+.folder[aria-expanded='true'] .chevron {
+  transform: rotate(90deg);
 }
 .episode {
   width: 100%;
