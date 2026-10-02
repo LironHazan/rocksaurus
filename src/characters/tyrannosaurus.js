@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials.js';
+import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
 
 export const TIKI_COLORS = {
-  body: 0x6fbbea,     // sky blue
-  stripes: 0x3a78b8,  // darker blue tiger stripes
+  body: 0x6fbbea, // sky blue
+  stripes: 0x3a78b8, // darker blue tiger stripes
   belly: 0xfff0dc,
   brow: 0x4f97d6,
   cheeks: 0xffb3c1,
@@ -20,9 +20,16 @@ export const TIKI_COLORS = {
  */
 export function createTyrannosaurus(colors = TIKI_COLORS) {
   const M = {
-    body: plush(colors.body), stripe: plush(colors.stripes), belly: plush(colors.belly), brow: plush(colors.brow),
-    eye: glossyEye(), shine: shine(), cheek: blush(colors.cheeks), dark: matte(0x1f2a3a),
-    tooth: new THREE.MeshStandardMaterial({ color: colors.teeth, roughness: 0.4 }), claw: plush(colors.claws),
+    body: plush(colors.body),
+    stripe: plush(colors.stripes),
+    belly: plush(colors.belly),
+    brow: plush(colors.brow),
+    eye: glossyEye(),
+    shine: shine(),
+    cheek: blush(colors.cheeks),
+    dark: matte(0x1f2a3a),
+    tooth: new THREE.MeshStandardMaterial({ color: colors.teeth, roughness: 0.4 }),
+    claw: plush(colors.claws),
   };
 
   const root = new THREE.Group();
@@ -30,7 +37,7 @@ export function createTyrannosaurus(colors = TIKI_COLORS) {
   root.add(squash);
   const torso = new THREE.Group();
   squash.add(torso);
-  const posture = new THREE.Group();          // fixed forward lean, under the animated torso
+  const posture = new THREE.Group(); // fixed forward lean, under the animated torso
   posture.rotation.x = 0.1;
   torso.add(posture);
 
@@ -41,23 +48,25 @@ export function createTyrannosaurus(colors = TIKI_COLORS) {
   const BODY = { c: new THREE.Vector3(0, 1.45, 0), r: new THREE.Vector3(1.0, 1.25, 1.05) };
   for (let i = 0; i < 5; i++) {
     const y = 0.85 + i * 0.3;
-    for (const phi of [-1.15, -0.6, 0, 0.6, 1.15]) {           // around the back, from side to side
+    for (const phi of [-1.15, -0.6, 0, 0.6, 1.15]) {
+      // around the back, from side to side
       // point on the body ellipsoid at height y, angle phi around the back; normal for orientation
-      const h = (y - BODY.c.y) / BODY.r.y, ring = Math.sqrt(Math.max(0, 1 - h * h));
+      const h = (y - BODY.c.y) / BODY.r.y,
+        ring = Math.sqrt(Math.max(0, 1 - h * h));
       const pos = new THREE.Vector3(Math.sin(phi) * ring * BODY.r.x, y - BODY.c.y, -Math.cos(phi) * ring * BODY.r.z);
       const n = new THREE.Vector3(pos.x / BODY.r.x ** 2, pos.y / BODY.r.y ** 2, pos.z / BODY.r.z ** 2).normalize();
       pos.add(BODY.c);
       const patch = ball(1, M.stripe, [0, 0, 0], [0.3 - Math.abs(phi) * 0.06, 0.07, 0.05], 20);
       patch.position.copy(pos);
       patch.lookAt(pos.clone().add(n));
-      patch.rotateZ(0.25 * Math.sign(phi || 1) * (i % 2 ? 1 : -1) * 0.5);   // slight zig-zag, like real stripes
+      patch.rotateZ(0.25 * Math.sign(phi || 1) * (i % 2 ? 1 : -1) * 0.5); // slight zig-zag, like real stripes
       posture.add(patch);
     }
   }
 
   const feet = [];
   for (const s of [-1, 1]) {
-    posture.add(ball(0.62, M.body, [s * 0.62, 0.78, 0.0], [1, 1.1, 1.1]));   // chunky thighs
+    posture.add(ball(0.62, M.body, [s * 0.62, 0.78, 0.0], [1, 1.1, 1.1])); // chunky thighs
     const foot = new THREE.Group();
     foot.position.set(s * 0.6, 0, 0.35);
     foot.add(ball(0.45, M.body, [0, 0.2, 0], [1, 0.55, 1.35]));
@@ -98,8 +107,8 @@ export function createTyrannosaurus(colors = TIKI_COLORS) {
   posture.add(ball(0.62, M.body, [0, 2.55, 0.2]));
   const head = new THREE.Group();
   head.position.set(0, 2.85, 0.3);
-  head.add(ball(0.75, M.body, [0, 0, 0.3], [1, 0.85, 1.45]));            // skull
-  head.add(ball(0.55, M.body, [0, -0.15, 1.15], [1, 0.78, 1.2]));       // long snout
+  head.add(ball(0.75, M.body, [0, 0, 0.3], [1, 0.85, 1.45])); // skull
+  head.add(ball(0.55, M.body, [0, -0.15, 1.15], [1, 0.78, 1.2])); // long snout
   for (const s of [-1, 1]) {
     head.add(ball(0.2, M.brow, [s * 0.4, 0.4, 0.85], [1.2, 0.55, 1.1])); // brow ridges
     head.add(ball(0.04, M.dark, [s * 0.14, 0.02, 1.78], [1.2, 0.8, 0.6], 12)); // nostrils
@@ -123,10 +132,11 @@ export function createTyrannosaurus(colors = TIKI_COLORS) {
   jaw.position.set(0, -0.38, 0.35);
   jaw.add(ball(0.5, M.body, [0, -0.08, 0.6], [0.95, 0.32, 1.45]));
   jaw.add(ball(0.42, matte(0x3a1a2a), [0, 0.04, 0.62], [0.85, 0.12, 1.3])); // mouth inside (shows when open)
-  jaw.add(ball(0.2, matte(0xff7a93), [0, 0.07, 0.75], [1, 0.35, 1.6]));     // tongue
+  jaw.add(ball(0.2, matte(0xff7a93), [0, 0.07, 0.75], [1, 0.35, 1.6])); // tongue
   head.add(jaw);
 
-  const eyes = [], cheeks = [];
+  const eyes = [],
+    cheeks = [];
   for (const s of [-1, 1]) {
     const eye = new THREE.Group();
     eye.position.set(s * 0.43, 0.2, 1.02);
@@ -145,9 +155,22 @@ export function createTyrannosaurus(colors = TIKI_COLORS) {
   enableShadows(root);
 
   return {
-    root, squash, torso, posture, head, jaw, snoutTip, eyes, cheeks, arms, feet, tail,
+    root,
+    squash,
+    torso,
+    posture,
+    head,
+    jaw,
+    snoutTip,
+    eyes,
+    cheeks,
+    arms,
+    feet,
+    tail,
     /** 0 = closed, 1 = wide open */
-    setMouth(k) { jaw.rotation.x = k * 0.45; },
+    setMouth(k) {
+      jaw.rotation.x = k * 0.45;
+    },
     setFrown() {},
   };
 }

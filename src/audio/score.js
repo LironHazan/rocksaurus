@@ -1,4 +1,4 @@
-import { piano } from './piano.js';
+import { piano } from './piano';
 
 /**
  * Plays a written score on the piano.

@@ -1,4 +1,4 @@
-import roryHello from '../rory-hello/index.js';
+import roryHello from '../rory-hello/index';
 
 // Same animation and music as "Rory Says Hello". The captions turn it into a joke for adults.
 // Times line up with the beat sheet in rory-hello/index.js.

@@ -1,15 +1,15 @@
 import * as THREE from 'three';
-import { seg, ease, lerp, clamp01 } from '../../engine/math.js';
-import { createMeadow } from '../../world/meadow.js';
-import { createPizzeria, createTable, TABLE_TOP } from '../../world/pizzeria.js';
-import { createRory, idle, resetPose } from '../../characters/rory.js';
-import { addGuitar, strumArm, freeArm } from '../../brand/rocker.js';
-import { addMohawk } from '../../props/mohawk.js';
-import { addTattoo } from '../../props/tattoo.js';
-import { createPizza } from '../../props/pizza.js';
-import { createThoughtBubble, createLightbulb } from '../../props/thought-bubble.js';
-import { playRiff } from '../../audio/guitar.js';
-import { riff, soundEffects, BEAT, CUES } from './music.js';
+import { seg, ease, lerp, clamp01 } from '../../engine/math';
+import { createMeadow } from '../../world/meadow';
+import { createPizzeria, createTable, TABLE_TOP } from '../../world/pizzeria';
+import { createRory, idle, resetPose } from '../../characters/rory';
+import { addGuitar, strumArm, freeArm } from '../../characters/rocker';
+import { addMohawk } from '../../props/mohawk';
+import { addTattoo } from '../../props/tattoo';
+import { createPizza } from '../../props/pizza';
+import { createThoughtBubble, createLightbulb } from '../../props/thought-bubble';
+import { playRiff } from '../../audio/guitar';
+import { riff, soundEffects, BEAT, CUES } from './music';
 
 // Beat sheet (all times are in music.js → CUES)
 //   0–12   hungry (pizza thought bubble), walks on the beat to Slice Sabbath, stops, sniffs
@@ -18,7 +18,10 @@ import { riff, soundEffects, BEAT, CUES } from './music.js';
 //   32–42  idea 💡 → power chords make the slice hop over → into his mouth → chomp ×4
 //   42–52  victory headbang, final chord, tiny burp
 
-const backOut = x => { const k = 1.7; return 1 + (k + 1) * (x - 1) ** 3 + k * (x - 1) ** 2; };
+const backOut = x => {
+  const k = 1.7;
+  return 1 + (k + 1) * (x - 1) ** 3 + k * (x - 1) ** 2;
+};
 /** Pops in at a, out at b (0..~1.1). */
 const pop = (t, a, b) => (t < a || t > b ? 0 : backOut(clamp01((t - a) / 0.25)) * clamp01((b - t) / 0.15));
 /** Parabolic arc 0→h→0 over [a, b]. */
@@ -27,11 +30,11 @@ const arc = (t, a, b, h) => (t > a && t < b ? Math.sin(seg(t, a, b) * Math.PI) *
 const hitAfter = (t, c, rate = 6) => (t >= c ? Math.exp(-(t - c) * rate) : 0);
 const v3 = (x, y, z) => new THREE.Vector3(x, y, z);
 
-const RORY_X = -0.3;   // where Rory stands at the table
+const RORY_X = -0.3; // where Rory stands at the table
 const START_X = -9;
 const TABLE_X = 1.7;
 const WALK_ANGLE = 1.0; // 3/4 view: walking right, face toward us
-const ESTABLISH = 6.5;  // cut to a wide shot of Slice Sabbath as Rory walks up
+const ESTABLISH = 6.5; // cut to a wide shot of Slice Sabbath as Rory walks up
 
 export default {
   id: 'rory-pizza',
@@ -56,7 +59,8 @@ export default {
     addGuitar(rory);
     addMohawk(rory);
     scene.add(rory.root);
-    const strum = strumArm(rory), free = freeArm(rory);
+    const strum = strumArm(rory),
+      free = freeArm(rory);
 
     const top = gy + TABLE_TOP;
     const pizzaHome = v3(TABLE_X, top, 0);
@@ -67,9 +71,9 @@ export default {
     const [walkStart, walkEnd] = CUES.walk;
 
     function eyesAt(t) {
-      if (t >= 10.2 && t < 11.8) return 0.55;                  // dreamy sniffing
-      if (t >= 20 && t < 28.6) return 0.7;                     // effort squint
-      if (t >= 28.6 && t < CUES.idea) return 0.45;             // sad
+      if (t >= 10.2 && t < 11.8) return 0.55; // dreamy sniffing
+      if (t >= 20 && t < 28.6) return 0.7; // effort squint
+      if (t >= 28.6 && t < CUES.idea) return 0.45; // sad
       if (t >= CUES.bites[0] && t < CUES.victory) return 0.15; // bliss
       if (t >= CUES.victory) return t > CUES.finalChord ? 0.15 : 0.3;
       return 1;
@@ -79,24 +83,29 @@ export default {
       world.update(t);
       resetPose(rory);
       idle(rory, t, { eyesOpen: eyesAt(t) });
-      strum.rotation.set(-0.9, 0, -0.2);                        // tiny arm rests on the strings
+      strum.rotation.set(-0.9, 0, -0.2); // tiny arm rests on the strings
       const R = rory;
       const beatHit = Math.pow(1 - ((t / BEAT) % 1), 3);
-      let x = RORY_X, y = 0, ry = 0, wide = 1;
+      let x = RORY_X,
+        y = 0,
+        ry = 0,
+        wide = 1;
 
       // ── Walk to the pizzeria ──────────────────────────────────────
       if (t < walkEnd) {
-        const p = Math.max(0, (t - walkStart) / BEAT);          // one step per beat
+        const p = Math.max(0, (t - walkStart) / BEAT); // one step per beat
         x = lerp(START_X, RORY_X, seg(t, walkStart, walkEnd));
         ry = WALK_ANGLE;
         if (t >= walkStart) {
           y = Math.abs(Math.sin(Math.PI * p)) * 0.12;
-          for (const f of R.feet) f.position.y = Math.max(0, Math.sin(Math.PI * p + (f.userData.side > 0 ? 0 : Math.PI))) * 0.25;
+          for (const f of R.feet)
+            f.position.y = Math.max(0, Math.sin(Math.PI * p + (f.userData.side > 0 ? 0 : Math.PI))) * 0.25;
           R.torso.rotation.z += Math.sin(Math.PI * p) * 0.06;
           free.rotation.x = -0.5 + Math.sin(Math.PI * p) * 0.4;
           R.tail.rotation.y = Math.sin(Math.PI * p) * 0.3;
         }
-      } else if (t < CUES.pizzaDrop) {                          // stop, face us, sniff the air
+      } else if (t < CUES.pizzaDrop) {
+        // stop, face us, sniff the air
         ry = lerp(WALK_ANGLE, 0.25, ease(seg(t, walkEnd, walkEnd + 0.6)));
         R.head.rotation.x += -0.25 - CUES.sniffs.reduce((a, s) => a + hitAfter(t, s, 8) * 0.12, 0);
       }
@@ -108,7 +117,7 @@ export default {
         wide = 1.2;
         R.setMouth(t < 13 ? 0.6 : 0.3);
         R.tail.rotation.y = Math.sin(t * 14) * 0.35;
-        if (t < 13) free.rotation.set(0.3, 0, 2.4);             // yay!
+        if (t < 13) free.rotation.set(0.3, 0, 2.4); // yay!
       }
 
       // ── Can't reach it ────────────────────────────────────────────
@@ -119,17 +128,25 @@ export default {
           const r = ease(seg(t, a, a + 0.4)) * (1 - ease(seg(t, b - 0.4, b)));
           if (r <= 0) return;
           reach = r;
-          if (i === 0) R.torso.rotation.x = 0.3 * r;                         // lean
-          if (i === 1) { y = 0.25 * r; R.squash.scale.y = 1 + 0.08 * r; }    // tiptoe
-          if (i === 2) y = arc(t, 27.2, 27.9, 1.0);                          // jump
+          if (i === 0) R.torso.rotation.x = 0.3 * r; // lean
+          if (i === 1) {
+            y = 0.25 * r;
+            R.squash.scale.y = 1 + 0.08 * r;
+          } // tiptoe
+          if (i === 2) y = arc(t, 27.2, 27.9, 1.0); // jump
         });
         for (const a of R.arms) {
           const s = a.userData.side;
-          a.rotation.set(lerp(a.rotation.x, -1.6, reach), 0, lerp(a.rotation.z, s * 0.15, reach) + Math.sin(t * 30) * 0.12 * reach);
+          a.rotation.set(
+            lerp(a.rotation.x, -1.6, reach),
+            0,
+            lerp(a.rotation.z, s * 0.15, reach) + Math.sin(t * 30) * 0.12 * reach,
+          );
         }
         if (reach > 0) R.setMouth(0.25);
         if ((t >= 22.5 && t < 23.5) || (t >= 25.5 && t < 26.5)) R.setFrown(true); // between tries: hmph
-        if (t >= 28.6) {                                                         // sad
+        if (t >= 28.6) {
+          // sad
           const k = ease(seg(t, 28.6, 29.4));
           R.head.rotation.x += 0.35 * k;
           R.setFrown(true);
@@ -151,7 +168,7 @@ export default {
         } else {
           const bite = Math.max(...CUES.bites.map(b => Math.sin(Math.PI * seg(t, b - 0.15, b + 0.15))));
           R.setMouth(bite);
-          for (const c of R.cheeks) c.scale.set(1.35, 0.95, 0.5);   // stuffed cheeks
+          for (const c of R.cheeks) c.scale.set(1.35, 0.95, 0.5); // stuffed cheeks
           R.squash.scale.y = 1 + Math.sin(t * 9) * 0.02;
         }
       }
@@ -174,10 +191,13 @@ export default {
 
       R.root.position.set(x, world.groundY(x, 0) + y, 0);
       R.root.rotation.y = ry;
-      for (const e of R.eyes) { e.scale.x = wide; e.scale.z = wide; }
+      for (const e of R.eyes) {
+        e.scale.x = wide;
+        e.scale.z = wide;
+      }
 
       // ── Props ─────────────────────────────────────────────────────
-      bubble.scale.setScalar(pop(t, 0.3, 2.8));                 // hungry thought, follows him
+      bubble.scale.setScalar(pop(t, 0.3, 2.8)); // hungry thought, follows him
       bubble.visible = bubble.scale.x > 0.001;
       bubble.position.set(x + 1.2, R.root.position.y + 4.1, 0.6);
 
@@ -221,16 +241,35 @@ export default {
 
       // ── Camera: one framing per story beat (hard cuts between them) ──
       let cam, look;
-      if (t < ESTABLISH) { const cx = x + 0.6; cam = [cx, 2.6, 10]; look = [cx, 1.9, 0]; }
-      else if (t < walkEnd) { cam = [1.2, 3.4, 14.5]; look = [1.2, 3.7, -2]; }   // establishing shot: the whole shop + sign
+      if (t < ESTABLISH) {
+        const cx = x + 0.6;
+        cam = [cx, 2.6, 10];
+        look = [cx, 1.9, 0];
+      } else if (t < walkEnd) {
+        cam = [1.2, 3.4, 14.5];
+        look = [1.2, 3.7, -2];
+      } // establishing shot: the whole shop + sign
       else if (t < 20) {
         const k = ease(seg(t, walkEnd, walkEnd + 1.5));
-        cam = [lerp(RORY_X + 0.6, 0.9, k), 2.6, lerp(10, 8.5, k)]; look = [lerp(RORY_X + 0.6, 0.9, k), 1.85, 0];
-      } else if (t < 29) { cam = [0.7, 2.4, 7.5]; look = [0.7, 1.8, 0]; }
-      else if (t < CUES.idea) { const k = ease(seg(t, 29, 31.5)); cam = [lerp(0.7, 0, k), lerp(2.4, 2.6, k), lerp(7.5, 6, k)]; look = [lerp(0.7, -0.2, k), lerp(1.8, 2.3, k), 0]; }
-      else if (t < CUES.bites[0]) { cam = [0.8, 2.6, 8]; look = [0.8, 2.0, 0]; }
-      else if (t < CUES.victory) { cam = [0.1, 2.6, 5.6]; look = [-0.1, 2.3, 0]; }
-      else { cam = [0.6 + Math.sin(t * 0.4) * 0.3, 3.6, 13.5]; look = [0.9, 3.5, -1]; }  // wide: Rory + the roof sign
+        cam = [lerp(RORY_X + 0.6, 0.9, k), 2.6, lerp(10, 8.5, k)];
+        look = [lerp(RORY_X + 0.6, 0.9, k), 1.85, 0];
+      } else if (t < 29) {
+        cam = [0.7, 2.4, 7.5];
+        look = [0.7, 1.8, 0];
+      } else if (t < CUES.idea) {
+        const k = ease(seg(t, 29, 31.5));
+        cam = [lerp(0.7, 0, k), lerp(2.4, 2.6, k), lerp(7.5, 6, k)];
+        look = [lerp(0.7, -0.2, k), lerp(1.8, 2.3, k), 0];
+      } else if (t < CUES.bites[0]) {
+        cam = [0.8, 2.6, 8];
+        look = [0.8, 2.0, 0];
+      } else if (t < CUES.victory) {
+        cam = [0.1, 2.6, 5.6];
+        look = [-0.1, 2.3, 0];
+      } else {
+        cam = [0.6 + Math.sin(t * 0.4) * 0.3, 3.6, 13.5];
+        look = [0.9, 3.5, -1];
+      } // wide: Rory + the roof sign
       camera.position.set(...cam);
       camera.lookAt(...look);
     }

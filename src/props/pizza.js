@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { enableShadows } from '../characters/materials.js';
+import { enableShadows } from '../characters/materials';
 
-const SLICE = Math.PI / 4;      // one slice = 1/8 pizza
-const DIR = Math.PI * 1.5;      // the loose slice points toward -x
+const SLICE = Math.PI / 4; // one slice = 1/8 pizza
+const DIR = Math.PI * 1.5; // the loose slice points toward -x
 
 /**
  * Pepperoni pizza with one loose slice.
@@ -11,11 +11,18 @@ const DIR = Math.PI * 1.5;      // the loose slice points toward -x
  */
 export function createPizza({ radius = 0.75 } = {}) {
   const mat = (color, roughness) => new THREE.MeshStandardMaterial({ color, roughness });
-  const crust = mat(0xe2a65a, 0.8), sauce = mat(0xd2462a, 0.6), cheese = mat(0xffd36b, 0.5), pep = mat(0xb3302a, 0.5);
+  const crust = mat(0xe2a65a, 0.8),
+    sauce = mat(0xd2462a, 0.6),
+    cheese = mat(0xffd36b, 0.5),
+    pep = mat(0xb3302a, 0.5);
 
   function layers(start, len) {
     const g = new THREE.Group();
-    for (const [r, h, y, m] of [[radius, 0.08, 0.04, crust], [radius * 0.9, 0.02, 0.085, sauce], [radius * 0.86, 0.03, 0.1, cheese]]) {
+    for (const [r, h, y, m] of [
+      [radius, 0.08, 0.04, crust],
+      [radius * 0.9, 0.02, 0.085, sauce],
+      [radius * 0.86, 0.03, 0.1, cheese],
+    ]) {
       const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 48, 1, false, start, len), m);
       mesh.position.y = y;
       g.add(mesh);
@@ -35,7 +42,7 @@ export function createPizza({ radius = 0.75 } = {}) {
   const centroid = (2 * radius * Math.sin(SLICE / 2)) / (3 * (SLICE / 2));
   const inner = layers(DIR - SLICE / 2, SLICE);
   pepperoni(inner, 0.6, DIR);
-  inner.position.x = centroid;      // shift so the slice's own origin is its center
+  inner.position.x = centroid; // shift so the slice's own origin is its center
   const slice = new THREE.Group();
   slice.add(inner);
 

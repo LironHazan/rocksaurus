@@ -1,10 +1,10 @@
-import { ease, seg, lerp } from '../../engine/math.js';
-import { createRockStage } from '../../world/rock-stage.js';
-import { createRockerRory } from '../../brand/rocker.js';
-import { loadTrack, playTrack } from '../../audio/track.js';
-import { boop } from '../../audio/sfx.js';
-import { playRiff } from '../../audio/guitar.js';
-import { riff as synthRiff } from './riff.js';
+import { ease, seg, lerp } from '../../engine/math';
+import { createRockStage } from '../../world/rock-stage';
+import { createRockerRory } from '../../characters/rocker';
+import { loadTrack, playTrack } from '../../audio/track';
+import { boop } from '../../audio/sfx';
+import { playRiff } from '../../audio/guitar';
+import { riff as synthRiff } from './riff';
 
 // ── Your riff ────────────────────────────────────────────────────────────────
 // Drop your recording at public/audio/riff.wav (or .mp3 / .m4a and change the url),
@@ -24,7 +24,9 @@ export default {
   title: 'Rory Rocks 🎸',
   duration: 12,
 
-  async preload() { riff = await loadTrack(RIFF.url); },
+  async preload() {
+    riff = await loadTrack(RIFF.url);
+  },
 
   setup({ scene, camera }) {
     const stage = createRockStage(scene);
@@ -35,19 +37,19 @@ export default {
     const pump = rory.arms.find(a => a.userData.side === 1);
 
     function update(t) {
-      const intro = ease(seg(t, 0, 0.6));                // ease in from a still pose
+      const intro = ease(seg(t, 0, 0.6)); // ease in from a still pose
       const phase = (t / beat) % 1;
-      const hit = Math.pow(1 - phase, 3) * intro;        // sharp on the beat, decays until the next
+      const hit = Math.pow(1 - phase, 3) * intro; // sharp on the beat, decays until the next
       const barHit = Math.floor(t / beat) % BEATS_PER_BAR === 0 ? hit : hit * 0.6;
 
-      rory.head.rotation.x = -0.18 + hit * 0.5;          // headbang
-      rory.head.rotation.z = 0.22 * Math.cos(t * Math.PI / beat / 2);
+      rory.head.rotation.x = -0.18 + hit * 0.5; // headbang
+      rory.head.rotation.z = 0.22 * Math.cos((t * Math.PI) / beat / 2);
       rory.torso.rotation.x = hit * 0.12;
       rory.root.position.y = Math.abs(Math.sin((t / beat) * Math.PI)) * 0.12 * intro;
       rory.squash.scale.set(1 + barHit * 0.05, 1 - barHit * 0.08, 1 + barHit * 0.05);
-      pump.rotation.z = 2.2 + hit * 0.35;                // 🤘 pump
-      strum.rotation.x = -0.9 + Math.sin(t * Math.PI * 2 / beat * 2) * 0.25; // strumming 8ths
-      rory.tail.rotation.y = Math.sin(t * Math.PI / beat) * 0.35;
+      pump.rotation.z = 2.2 + hit * 0.35; // 🤘 pump
+      strum.rotation.x = -0.9 + Math.sin(((t * Math.PI * 2) / beat) * 2) * 0.25; // strumming 8ths
+      rory.tail.rotation.y = Math.sin((t * Math.PI) / beat) * 0.35;
 
       stage.pulse(barHit);
       const zoom = lerp(10.5, 8.6, ease(seg(t, 0, 12)));

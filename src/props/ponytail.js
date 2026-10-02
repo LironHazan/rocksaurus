@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { rng } from '../engine/math.js';
+import { rng } from '../engine/math';
 
 // Lulu's head ellipsoid around the `face` group (see createLulu: head ball 0.6 scaled 1 × 0.9 × 1.1)
 const HEAD = { x: 0.6, y: 0.54, z: 0.66 };
@@ -7,20 +7,26 @@ const HEAD = { x: 0.6, y: 0.54, z: 0.66 };
 /** A tube along `curve` whose radius follows radiusAt(s) for s = 0..1 (Three's TubeGeometry can't taper). */
 function taperedTube(curve, radiusAt, { segments = 64, radial = 24 } = {}) {
   const frames = curve.computeFrenetFrames(segments, false);
-  const pos = [], idx = [];
+  const pos = [],
+    idx = [];
   for (let i = 0; i <= segments; i++) {
-    const s = i / segments, c = curve.getPointAt(s), r = radiusAt(s);
-    const N = frames.normals[i], B = frames.binormals[i];
+    const s = i / segments,
+      c = curve.getPointAt(s),
+      r = radiusAt(s);
+    const N = frames.normals[i],
+      B = frames.binormals[i];
     for (let j = 0; j <= radial; j++) {
       const a = (j / radial) * Math.PI * 2;
       const n = N.clone().multiplyScalar(Math.cos(a)).addScaledVector(B, Math.sin(a));
       pos.push(c.x + n.x * r, c.y + n.y * r, c.z + n.z * r);
     }
   }
-  for (let i = 0; i < segments; i++) for (let j = 0; j < radial; j++) {
-    const a = i * (radial + 1) + j, b = a + radial + 1;
-    idx.push(a, a + 1, b, b, a + 1, b + 1);   // counter-clockwise from outside → normals face out
-  }
+  for (let i = 0; i < segments; i++)
+    for (let j = 0; j < radial; j++) {
+      const a = i * (radial + 1) + j,
+        b = a + radial + 1;
+      idx.push(a, a + 1, b, b, a + 1, b + 1); // counter-clockwise from outside → normals face out
+    }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setIndex(idx);
@@ -39,7 +45,13 @@ const curve3 = pts => new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(
 export function addPonytail(rig, { color = 0xe8562a, scrunchie = 0xff3fa4, seed = 7 } = {}) {
   const r = rng(seed);
   const hairMat = new THREE.MeshPhysicalMaterial({
-    color, roughness: 0.45, sheen: 0.8, sheenRoughness: 0.3, sheenColor: new THREE.Color(0xffc9a8), clearcoat: 0.25, clearcoatRoughness: 0.4,
+    color,
+    roughness: 0.45,
+    sheen: 0.8,
+    sheenRoughness: 0.3,
+    sheenColor: new THREE.Color(0xffc9a8),
+    clearcoat: 0.25,
+    clearcoatRoughness: 0.4,
   });
   const group = new THREE.Group();
 
@@ -51,15 +63,16 @@ export function addPonytail(rig, { color = 0xe8562a, scrunchie = 0xff3fa4, seed 
   group.add(under);
 
   // locks: thick, smooth strands combed from the hairline back to the ponytail, lifted off the head (loose)
-  const BASE = new THREE.Vector3(0, 0.32, -0.64);           // where they gather (scrunchie)
-  const onHead = (d, lift) => {                              // point on the head ellipsoid in direction d, pushed out by `lift`
+  const BASE = new THREE.Vector3(0, 0.32, -0.64); // where they gather (scrunchie)
+  const onHead = (d, lift) => {
+    // point on the head ellipsoid in direction d, pushed out by `lift`
     const k = 1 / Math.sqrt((d.x / HEAD.x) ** 2 + (d.y / HEAD.y) ** 2 + (d.z / HEAD.z) ** 2);
     return d.clone().multiplyScalar(k * lift);
   };
   const baseDir = BASE.clone().normalize();
   const LOCKS = 17;
   for (let i = 0; i < LOCKS; i++) {
-    const a = -1.3 + (i / (LOCKS - 1)) * 2.6;                 // across the hairline, temple to temple
+    const a = -1.3 + (i / (LOCKS - 1)) * 2.6; // across the hairline, temple to temple
     const startDir = new THREE.Vector3(Math.sin(a), 0.3 + 0.32 * Math.cos(a), Math.cos(a) * 0.95).normalize();
     const pts = [];
     for (let j = 0; j <= 10; j++) {
@@ -72,15 +85,28 @@ export function addPonytail(rig, { color = 0xe8562a, scrunchie = 0xff3fa4, seed 
     }
     const lock = new THREE.CatmullRomCurve3(pts);
     const thick = 0.085 + r() * 0.025;
-    group.add(new THREE.Mesh(taperedTube(lock, t => thick * Math.min(1, 0.45 + t * 6) * (1 - 0.35 * t), { segments: 48, radial: 14 }), hairMat));
+    group.add(
+      new THREE.Mesh(
+        taperedTube(lock, t => thick * Math.min(1, 0.45 + t * 6) * (1 - 0.35 * t), { segments: 48, radial: 14 }),
+        hairMat,
+      ),
+    );
   }
 
   // two loose face-framing pieces from the temples down past the jaw
   for (const sx of [-1, 1]) {
     const piece = curve3([
-      [sx * 0.58, 0.3, 0.24], [sx * 0.7, 0.04, 0.27], [sx * 0.7, -0.26, 0.2], [sx * 0.62, -0.5, 0.16],
+      [sx * 0.58, 0.3, 0.24],
+      [sx * 0.7, 0.04, 0.27],
+      [sx * 0.7, -0.26, 0.2],
+      [sx * 0.62, -0.5, 0.16],
     ]);
-    group.add(new THREE.Mesh(taperedTube(piece, s => 0.07 * Math.min(1, 0.5 + s * 5) * (1 - s * 0.75), { segments: 40, radial: 16 }), hairMat));
+    group.add(
+      new THREE.Mesh(
+        taperedTube(piece, s => 0.07 * Math.min(1, 0.5 + s * 5) * (1 - s * 0.75), { segments: 40, radial: 16 }),
+        hairMat,
+      ),
+    );
   }
 
   // relaxed ponytail at the back of the head (pivot at the scrunchie so it can swing)
@@ -89,10 +115,22 @@ export function addPonytail(rig, { color = 0xe8562a, scrunchie = 0xff3fa4, seed 
   group.add(ponytail);
 
   // the tail drapes down the back and a little toward her right shoulder
-  const tailCurve = curve3([[0, 0, 0], [0.02, 0.02, -0.2], [0.08, -0.2, -0.36], [0.2, -0.6, -0.4], [0.32, -1.0, -0.3], [0.38, -1.3, -0.16]]);
+  const tailCurve = curve3([
+    [0, 0, 0],
+    [0.02, 0.02, -0.2],
+    [0.08, -0.2, -0.36],
+    [0.2, -0.6, -0.4],
+    [0.32, -1.0, -0.3],
+    [0.38, -1.3, -0.16],
+  ]);
   const fullness = s => (0.16 + 0.1 * Math.sin(Math.PI * Math.min(1, s / 0.65))) * (1 - 0.6 * Math.pow(s, 1.5));
   // hidden core so no gaps show between the locks
-  ponytail.add(new THREE.Mesh(taperedTube(tailCurve, s => Math.max(0.02, fullness(s) * 0.7 * (1 - Math.pow(s, 4)))), hairMat));
+  ponytail.add(
+    new THREE.Mesh(
+      taperedTube(tailCurve, s => Math.max(0.02, fullness(s) * 0.7 * (1 - Math.pow(s, 4)))),
+      hairMat,
+    ),
+  );
   // locks: gathered at the scrunchie, gently twisting together, splitting a little at the ends
   const X = new THREE.Vector3(1, 0, 0);
   const TAIL_LOCKS = 14;
@@ -102,18 +140,35 @@ export function addPonytail(rig, { color = 0xe8562a, scrunchie = 0xff3fa4, seed 
     const thick = 0.06 + r() * 0.02;
     const pts = [];
     for (let i = 0; i <= 12; i++) {
-      const t = i / 12, s = Math.min(1, t * len);
+      const t = i / 12,
+        s = Math.min(1, t * len);
       const p = tailCurve.getPointAt(s);
       const side = new THREE.Vector3().crossVectors(tailCurve.getTangentAt(s), X).normalize();
-      const a = phi + s * 1.2;                                // gentle twist
-      const off = fullness(s) * 0.72 + Math.pow(s, 3) * 0.12;  // ends split apart a little
+      const a = phi + s * 1.2; // gentle twist
+      const off = fullness(s) * 0.72 + Math.pow(s, 3) * 0.12; // ends split apart a little
       pts.push(p.addScaledVector(X, Math.cos(a) * off).addScaledVector(side, Math.sin(a) * off));
     }
-    ponytail.add(new THREE.Mesh(taperedTube(new THREE.CatmullRomCurve3(pts), t => Math.max(0.006, thick * Math.min(1, 0.5 + t * 5) * (1 - Math.pow(t, 1.6))), { segments: 48, radial: 12 }), hairMat));
+    ponytail.add(
+      new THREE.Mesh(
+        taperedTube(
+          new THREE.CatmullRomCurve3(pts),
+          t => Math.max(0.006, thick * Math.min(1, 0.5 + t * 5) * (1 - Math.pow(t, 1.6))),
+          { segments: 48, radial: 12 },
+        ),
+        hairMat,
+      ),
+    );
   }
 
   // scrunchie around the base, lined up with the tail
-  const bandMat = new THREE.MeshPhysicalMaterial({ color: scrunchie, roughness: 0.6, sheen: 1, sheenColor: new THREE.Color(0xffffff), emissive: scrunchie, emissiveIntensity: 0.35 });
+  const bandMat = new THREE.MeshPhysicalMaterial({
+    color: scrunchie,
+    roughness: 0.6,
+    sheen: 1,
+    sheenColor: new THREE.Color(0xffffff),
+    emissive: scrunchie,
+    emissiveIntensity: 0.35,
+  });
   const band = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.09, 16, 32), bandMat);
   for (let i = 0; i < 10; i++) {
     const a = (i / 10) * Math.PI * 2;
@@ -125,10 +180,16 @@ export function addPonytail(rig, { color = 0xe8562a, scrunchie = 0xff3fa4, seed 
   band.position.copy(tailCurve.getPointAt(0.05));
   ponytail.add(band);
 
-  group.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  group.traverse(o => {
+    if (o.isMesh) {
+      o.castShadow = true;
+      o.receiveShadow = true;
+    }
+  });
   rig.face.add(group);
 
-  if (rig.flower) {                       // flower above her right ear
+  if (rig.flower) {
+    // flower above her right ear
     rig.flower.position.set(HEAD.x * 1.12 + 0.02, 0.3, 0.1);
     rig.flower.scale.setScalar(1.2);
   }

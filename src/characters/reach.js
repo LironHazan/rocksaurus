@@ -20,7 +20,9 @@ function parts(pivot) {
     return m;
   };
   pivot.userData.reach = {
-    arm, radius, full: length + radius * 2,
+    arm,
+    radius,
+    full: length + radius * 2,
     paw: mk(new THREE.SphereGeometry(radius * 1.12, 20, 14)),
     joint: mk(new THREE.SphereGeometry(radius * 1.02, 16, 12)),
     forearm: mk(new THREE.CapsuleGeometry(radius * 0.95, length, 8, 16)),

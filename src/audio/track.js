@@ -1,14 +1,23 @@
-import { audio } from './context.js';
+import { audio } from './context';
 
 const cache = new Map();
 
 /** Loads and decodes an audio file (wav, mp3, m4a…) once. Resolves to an AudioBuffer, or null if missing. */
 export function loadTrack(url) {
   if (!cache.has(url)) {
-    cache.set(url, fetch(url)
-      .then(r => { if (!r.ok) throw new Error(r.statusText); return r.arrayBuffer(); })
-      .then(data => audio.ctx.decodeAudioData(data))
-      .catch(err => { console.warn(`Could not load ${url}: ${err.message}`); return null; }));
+    cache.set(
+      url,
+      fetch(url)
+        .then(r => {
+          if (!r.ok) throw new Error(r.statusText);
+          return r.arrayBuffer();
+        })
+        .then(data => audio.ctx.decodeAudioData(data))
+        .catch(err => {
+          console.warn(`Could not load ${url}: ${err.message}`);
+          return null;
+        }),
+    );
   }
   return cache.get(url);
 }

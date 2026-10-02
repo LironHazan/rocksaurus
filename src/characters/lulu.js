@@ -1,13 +1,13 @@
 import * as THREE from 'three';
-import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials.js';
+import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
 
 export const LULU_COLORS = {
-  body: 0xb48ce8,   // lavender (saturated enough to stay purple under stage lights)
+  body: 0xb48ce8, // lavender (saturated enough to stay purple under stage lights)
   belly: 0xf1e2ff,
-  spots: 0xff8fcf,  // pink
+  spots: 0xff8fcf, // pink
   cheeks: 0xffb3c1,
   flower: 0xff7eb6,
-  eyes: 0x3d8ef0,   // iris color (null = classic all-dark cartoon eyes)
+  eyes: 0x3d8ef0, // iris color (null = classic all-dark cartoon eyes)
 };
 
 const BODY = { y: 1, rx: 1.05, ry: 0.95, rz: 1 }; // body ellipsoid
@@ -41,9 +41,15 @@ function drumstick() {
  */
 export function createLulu(colors = LULU_COLORS) {
   const M = {
-    body: plush(colors.body), belly: plush(colors.belly), spot: plush(colors.spots),
-    eye: glossyEye(), shine: shine(), cheek: blush(colors.cheeks), dark: matte(0x3a2a4a),
-    flower: plush(colors.flower), center: plush(0xffd36b),
+    body: plush(colors.body),
+    belly: plush(colors.belly),
+    spot: plush(colors.spots),
+    eye: glossyEye(),
+    shine: shine(),
+    cheek: blush(colors.cheeks),
+    dark: matte(0x3a2a4a),
+    flower: plush(colors.flower),
+    center: plush(0xffd36b),
   };
 
   const root = new THREE.Group();
@@ -53,8 +59,15 @@ export function createLulu(colors = LULU_COLORS) {
   squash.add(body);
   body.add(ball(1, M.body, [0, BODY.y, 0], [BODY.rx, BODY.ry, BODY.rz]));
   body.add(ball(0.7, M.belly, [0, 0.95, 0.48], [1, 1.1, 0.55]));
-  for (const [x, y, z, r] of [[0.45, 1.5, -0.55, 0.17], [-0.5, 1.3, -0.65, 0.14], [0.1, 1.8, -0.45, 0.12],
-    [-0.2, 0.9, -0.9, 0.16], [0.6, 0.85, -0.7, 0.12], [-0.8, 1.05, -0.3, 0.11], [0.85, 1.25, -0.2, 0.1]]) {
+  for (const [x, y, z, r] of [
+    [0.45, 1.5, -0.55, 0.17],
+    [-0.5, 1.3, -0.65, 0.14],
+    [0.1, 1.8, -0.45, 0.12],
+    [-0.2, 0.9, -0.9, 0.16],
+    [0.6, 0.85, -0.7, 0.12],
+    [-0.8, 1.05, -0.3, 0.11],
+    [0.85, 1.25, -0.2, 0.1],
+  ]) {
     const [pos, n] = onBody(x, y, z);
     body.add(stickOn(ball(r, M.spot, [0, 0, 0], [1, 1, 0.3]), pos, n));
   }
@@ -80,8 +93,10 @@ export function createLulu(colors = LULU_COLORS) {
   body.add(tail);
 
   // tiny arms, each holding a drumstick that points forward and slightly down
-  const arms = [], sticks = [];
-  const up = new THREE.Vector3(0, 1, 0), dir = new THREE.Vector3(0, -0.25, 1).normalize();
+  const arms = [],
+    sticks = [];
+  const up = new THREE.Vector3(0, 1, 0),
+    dir = new THREE.Vector3(0, -0.25, 1).normalize();
   for (const s of [-1, 1]) {
     const pivot = new THREE.Group();
     pivot.position.set(s * 0.68, 1.45, 0.5);
@@ -104,7 +119,8 @@ export function createLulu(colors = LULU_COLORS) {
   let parent = body;
   for (let i = 0; i < NECK_REST.length; i++) {
     const seg = new THREE.Group();
-    if (i === 0) seg.position.set(0, 1.7, 0.2); else seg.position.y = SEG;
+    if (i === 0) seg.position.set(0, 1.7, 0.2);
+    else seg.position.y = SEG;
     // smooth taper: each segment is a cone frustum from this radius to the next, with a ball at the joint
     const r0 = THREE.MathUtils.lerp(0.42, 0.26, i / NECK_REST.length);
     const r1 = THREE.MathUtils.lerp(0.42, 0.26, (i + 1) / NECK_REST.length);
@@ -113,7 +129,14 @@ export function createLulu(colors = LULU_COLORS) {
     seg.add(mesh, ball(r1, M.body, [0, SEG, 0], [1, 1, 1], 24));
     if (i === 0) seg.add(ball(r0, M.body, [0, 0, 0], [1, 1, 1], 24));
     const r = (r0 + r1) / 2;
-    if (i % 2 === 0) seg.add(stickOn(ball(0.09, M.spot, [0, 0, 0], [1, 1, 0.3]), new THREE.Vector3(0.05, SEG / 2, -r * 0.97), new THREE.Vector3(0.1, 0, -1).normalize()));
+    if (i % 2 === 0)
+      seg.add(
+        stickOn(
+          ball(0.09, M.spot, [0, 0, 0], [1, 1, 0.3]),
+          new THREE.Vector3(0.05, SEG / 2, -r * 0.97),
+          new THREE.Vector3(0.1, 0, -1).normalize(),
+        ),
+      );
     seg.rotation.x = NECK_REST[i];
     parent.add(seg);
     parent = seg;
@@ -123,27 +146,37 @@ export function createLulu(colors = LULU_COLORS) {
   const head = new THREE.Group();
   head.position.y = SEG;
   parent.add(head);
-  const face = new THREE.Group();     // head center, offset so the neck joins underneath
+  const face = new THREE.Group(); // head center, offset so the neck joins underneath
   face.position.set(0, 0.3, 0.15);
   head.add(face);
   face.add(ball(0.6, M.body, [0, 0, 0], [1, 0.9, 1.1]));
-  face.add(ball(0.4, M.body, [0, -0.12, 0.4], [1, 0.7, 0.9]));     // snout
+  face.add(ball(0.4, M.body, [0, -0.12, 0.4], [1, 0.7, 0.9])); // snout
   for (const s of [-1, 1]) face.add(ball(0.025, M.dark, [s * 0.09, -0.05, 0.76], [1.2, 0.8, 0.6], 10)); // nostrils
 
-  const eyes = [], cheeks = [];
+  const eyes = [],
+    cheeks = [];
   for (const s of [-1, 1]) {
     const eye = new THREE.Group();
     eye.position.set(s * 0.26, 0.12, 0.55);
     eye.rotation.y = s * 0.3;
-    if (colors.eyes != null) {                                        // colored iris + dark pupil
-      eye.add(ball(0.17, new THREE.MeshPhysicalMaterial({ color: colors.eyes, roughness: 0.15, clearcoat: 1 }), [0, 0, 0], [1, 1.1, 0.6]));
+    if (colors.eyes != null) {
+      // colored iris + dark pupil
+      eye.add(
+        ball(
+          0.17,
+          new THREE.MeshPhysicalMaterial({ color: colors.eyes, roughness: 0.15, clearcoat: 1 }),
+          [0, 0, 0],
+          [1, 1.1, 0.6],
+        ),
+      );
       eye.add(ball(0.095, M.eye, [0, -0.01, 0.06], [1, 1.1, 0.5]));
     } else {
       eye.add(ball(0.17, M.eye, [0, 0, 0], [1, 1.1, 0.6]));
     }
     eye.add(ball(0.055, M.shine, [0.05, 0.06, 0.11], [1, 1, 0.4], 12));
     eye.add(ball(0.025, M.shine, [-0.04, -0.05, 0.11], [1, 1, 0.4], 12));
-    for (const th of [0.35, 0.8, 1.25]) {                            // eyelashes on the outer corner
+    for (const th of [0.35, 0.8, 1.25]) {
+      // eyelashes on the outer corner
       const lash = new THREE.Mesh(new THREE.CapsuleGeometry(0.012, 0.06, 4, 6), M.dark);
       const d = new THREE.Vector2(s * Math.cos(th), Math.sin(th));
       lash.position.set(d.x * 0.2, d.y * 0.21, 0.02);
@@ -168,7 +201,7 @@ export function createLulu(colors = LULU_COLORS) {
   mouth.visible = false;
   face.add(mouth);
 
-  const flower = new THREE.Group();                                   // behind her right ear
+  const flower = new THREE.Group(); // behind her right ear
   for (let p = 0; p < 5; p++) {
     const a = (p / 5) * Math.PI * 2;
     flower.add(ball(0.075, M.flower, [Math.cos(a) * 0.09, Math.sin(a) * 0.09, 0], [1, 1, 0.45]));

@@ -1,6 +1,6 @@
-import { audio } from './context.js';
-import { midi } from './piano.js';
-import { rng } from '../engine/math.js';
+import { audio } from './context';
+import { midi } from './piano';
+import { rng } from '../engine/math';
 
 const { ctx } = audio;
 const cache = new Map();
@@ -15,22 +15,32 @@ export function pluck(f, { dur, rho, bright, seed }) {
   const key = `${f}|${dur}|${rho}|${bright}|${seed}`;
   if (cache.has(key)) return cache.get(key);
 
-  const sr = ctx.sampleRate, len = Math.ceil(dur * sr);
-  const buf = ctx.createBuffer(1, len, sr), y = buf.getChannelData(0);
-  const D = sr / f - 1;                // the 3-tap loop filter adds one sample of delay
-  const N = Math.floor(D), frac = D - N;
+  const sr = ctx.sampleRate,
+    len = Math.ceil(dur * sr);
+  const buf = ctx.createBuffer(1, len, sr),
+    y = buf.getChannelData(0);
+  const D = sr / f - 1; // the 3-tap loop filter adds one sample of delay
+  const N = Math.floor(D),
+    frac = D - N;
   const r = rng(seed);
 
-  let lp = 0, mean = 0;
-  for (let i = 0; i <= N && i < len; i++) { lp += bright * (r() * 2 - 1 - lp); y[i] = lp; mean += lp; }
+  let lp = 0,
+    mean = 0;
+  for (let i = 0; i <= N && i < len; i++) {
+    lp += bright * (r() * 2 - 1 - lp);
+    y[i] = lp;
+    mean += lp;
+  }
   mean /= N + 1;
   for (let i = 0; i <= N && i < len; i++) y[i] -= mean; // no DC thump
 
-  let x1 = 0, x2 = 0;
+  let x1 = 0,
+    x2 = 0;
   for (let i = N + 1; i < len; i++) {
     const x = y[i - N] + (y[i - N - 1] - y[i - N]) * frac; // fractional delay → in tune
-    y[i] = rho * (0.25 * x + 0.5 * x1 + 0.25 * x2);          // warm loop filter: highs fade fast
-    x2 = x1; x1 = x;
+    y[i] = rho * (0.25 * x + 0.5 * x1 + 0.25 * x2); // warm loop filter: highs fade fast
+    x2 = x1;
+    x1 = x;
   }
   cache.set(key, buf);
   return buf;
@@ -52,15 +62,15 @@ const filter = (type, frequency, Q = 0.7, gain = 0) => new BiquadFilterNode(ctx,
 /** Amp + speaker-cab chain: tighten lows → smooth → drive → soft clip → cab EQ → pan. */
 function createAmp(bus, pan) {
   const chain = [
-    filter('highpass', 90),                    // tighten low end
-    filter('lowpass', 3200),                   // smooth pick fizz before it hits the clipper
-    new GainNode(ctx, { gain: 5 }),            // drive
+    filter('highpass', 90), // tighten low end
+    filter('lowpass', 3200), // smooth pick fizz before it hits the clipper
+    new GainNode(ctx, { gain: 5 }), // drive
     new WaveShaperNode(ctx, { curve: CURVE, oversample: '4x' }),
-    filter('peaking', 180, 0.8, 3),            // body / warmth
-    filter('peaking', 2600, 1.2, -3),          // tame harsh upper mids
-    filter('lowpass', 3600, 0.6),              // speaker rolloff…
-    filter('lowpass', 5000, 0.5),              // …steeper, like a real 12" cab
-    new GainNode(ctx, { gain: 0.2 }),          // level
+    filter('peaking', 180, 0.8, 3), // body / warmth
+    filter('peaking', 2600, 1.2, -3), // tame harsh upper mids
+    filter('lowpass', 3600, 0.6), // speaker rolloff…
+    filter('lowpass', 5000, 0.5), // …steeper, like a real 12" cab
+    new GainNode(ctx, { gain: 0.2 }), // level
     new StereoPannerNode(ctx, { pan }),
   ];
   const hp = chain[0];
@@ -89,14 +99,18 @@ export function playRiff(bus, t0, { bpm, notes }) {
       [0, 7, 12].forEach((interval, i) => {
         const f = 440 * 2 ** ((midi(root) + interval - 69 + take.cents / 100) / 12);
         const src = ctx.createBufferSource();
-        src.buffer = pluck(f, muted
-          ? { dur: 0.45, rho: 0.88, bright: 0.3, seed: take.seed * 31 + i }
-          : { dur: 3.0, rho: 0.999, bright: 0.5, seed: take.seed * 31 + i });
+        src.buffer = pluck(
+          f,
+          muted
+            ? { dur: 0.45, rho: 0.88, bright: 0.3, seed: take.seed * 31 + i }
+            : { dur: 3.0, rho: 0.999, bright: 0.5, seed: take.seed * 31 + i },
+        );
         const g = ctx.createGain();
-        const when = start + take.late + i * 0.006;          // downstroke strum
+        const when = start + take.late + i * 0.006; // downstroke strum
         g.gain.setValueAtTime((muted ? 0.8 : 1) * vel, when);
-        g.gain.setTargetAtTime(0, stop + take.late, 0.03);    // fret hand lets go
-        src.connect(g); g.connect(take.amp);
+        g.gain.setTargetAtTime(0, stop + take.late, 0.03); // fret hand lets go
+        src.connect(g);
+        g.connect(take.amp);
         src.start(when);
         src.stop(stop + 0.4);
       });
