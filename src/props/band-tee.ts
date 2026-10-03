@@ -2,13 +2,11 @@ import * as THREE from 'three';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
 import { textTexture } from '../world/text-texture';
 import { enableShadows } from '../characters/materials';
-import type { CharacterRig } from '../characters/types';
+import type { FittedRig } from '../characters/types';
 
 export interface BandTeeOptions {
   /** Text printed across the chest. */
   text: string;
-  /** Body ellipsoid the tee wraps (torso space). */
-  body: { center: [number, number, number]; radii: [number, number, number] };
   color?: number;
   ink?: string;
   /** Print font (CSS family, loaded in index.html). */
@@ -20,12 +18,13 @@ export interface BandTeeOptions {
  * (projected onto the curved shirt so it follows the body). Uses a plain font — not any band's logo artwork.
  */
 export function addBandTee(
-  rig: CharacterRig,
-  { text, body, color = 0x16161c, ink = '#f2efe6', font = "'Cinzel'" }: BandTeeOptions,
+  rig: FittedRig,
+  { text, color = 0x16161c, ink = '#f2efe6', font = "'Cinzel'" }: BandTeeOptions,
 ) {
   const cloth = new THREE.MeshStandardMaterial({ color, roughness: 0.95 });
-  const [cx, cy, cz] = body.center;
-  const [rx, ry, rz] = body.radii;
+  // the shirt fits the body the rig publishes, so it follows any change to the shape
+  const [cx, cy, cz] = rig.fit.torso.center;
+  const [rx, ry, rz] = rig.fit.torso.radii;
 
   const shirt = new THREE.Mesh(
     new THREE.SphereGeometry(1, 56, 36, 0, Math.PI * 2, Math.PI * 0.1, Math.PI * 0.55),

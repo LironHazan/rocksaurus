@@ -17,8 +17,8 @@ export function createKeyboardist(parts: readonly KeyboardPart[], clock: SongClo
   root.add(keyboard.group);
   const steggy = createStegosaurus();
   root.add(steggy.root);
-  addBandTee(steggy, { text: 'DREAM THEATER', body: { center: [0, 1.15, -0.1], radii: [1.0, 0.95, 1.15] } });
-  addShortHair(steggy.head, { head: [0.525, 0.45, 0.55] });
+  addBandTee(steggy, { text: 'DREAM THEATER' });
+  addShortHair(steggy);
 
   // keys + paws follow everything except the pad (a held background wash)
   const notes = parts
