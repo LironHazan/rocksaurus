@@ -27,15 +27,15 @@ Debug tip: add `&cam=x,y,z,lookX,lookY,lookZ` to the URL to view any episode fro
 
 ## Scripts
 
-| Script                            | What it does                                  |
-| --------------------------------- | --------------------------------------------- |
-| `npm run dev`                     | Dev server with hot reload                    |
-| `npm run build`                   | Type-check, then production build to `dist/`  |
-| `npm run typecheck`               | TypeScript (strict)                           |
-| `npm run lint`                    | ESLint (typescript-eslint, React hooks rules) |
-| `npm run format` / `format:check` | Prettier                                      |
-| `npm test` / `test:watch`         | Vitest + Testing Library                      |
-| `npm run check`                   | Everything CI runs, in one go                 |
+| Script                            | What it does                                 |
+| --------------------------------- | -------------------------------------------- |
+| `npm run dev`                     | Dev server with hot reload                   |
+| `npm run build`                   | Type-check, then production build to `dist/` |
+| `npm run typecheck`               | TypeScript (strict)                          |
+| `npm run lint`                    | oxlint (correctness, React hooks rules)      |
+| `npm run format` / `format:check` | Prettier                                     |
+| `npm test` / `test:watch`         | Vitest + Testing Library                     |
+| `npm run check`                   | Everything CI runs, in one go                |
 
 CI (GitHub Actions) runs type-check, lint, format check, tests and build on every push and pull request.
 
