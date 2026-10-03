@@ -1,13 +1,13 @@
 import type { DrumName, DrumPart } from '../../audio/drum-patterns';
 import { playDrums, snare, tom, crash, kick } from '../../audio/drums';
 import { atTime } from '../../audio/schedule';
-import { CUE, PACE, SCENES, type SceneId } from './timeline';
+import { CUE, PACE, SCENES, playedTime, type SceneId } from './timeline';
 import { keystrokes } from '../../world/screen-script';
 import { OFFICE_SCRIPT, NIGHT_SCRIPT } from './terminal';
 import * as fx from '../../audio/foley';
 
 // The soundtrack is Lulu's own drum kit, played softly, at each scene's tempo (16 steps per bar).
-// Times here are story seconds (see PACE in timeline.ts).
+// Times here are script seconds; the walk is shortened, so they go through playedTime() when scheduled (see timeline.ts).
 
 type Bar = Partial<Record<DrumName, string>>;
 
@@ -105,10 +105,10 @@ export function soundtrack(bus: AudioNode, t0: number): void {
   const drums = new GainNode(bus.context, { gain: 0.42 }); // soft: it's background
   drums.connect(bus);
   // the story plays PACE times slower than written, so the tempo drops by the same factor
-  for (const s of SECTIONS) playDrums(drums, t0 + s.at * PACE, { ...s.part, bpm: s.part.bpm / PACE });
+  for (const s of SECTIONS) playDrums(drums, t0 + playedTime(s.at) * PACE, { ...s.part, bpm: s.part.bpm / PACE });
 
   const at = (s: number, play: (when: number) => void) => {
-    const when = t0 + s * PACE;
+    const when = t0 + playedTime(s) * PACE;
     atTime(when, () => play(when));
   };
   for (const k of [...keystrokes(OFFICE_SCRIPT), ...keystrokes(NIGHT_SCRIPT)]) at(k, w => fx.keyTap(bus, w));

@@ -3,10 +3,22 @@ import { seg, ease, lerp, clamp01 } from '../../engine/math';
 import { disposeObject } from '../../engine/dispose';
 import type { Episode } from '../../engine/types';
 import { createLulu, idleLulu } from '../../characters/lulu';
+import { armOf, reachArm, releaseArm } from '../../characters/reach';
 import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
 import { recentHit } from '../../band/timing';
-import { CUE, DURATION, PACE, SCENES, beatPulse, sceneAt, type SceneSpan } from './timeline';
+import {
+  CUE,
+  DURATION,
+  PACE,
+  SCENES,
+  WALK_END,
+  beatPulse,
+  playedCaptions,
+  sceneAt,
+  scriptTime,
+  type SceneSpan,
+} from './timeline';
 import { linesAt, keystrokes } from '../../world/screen-script';
 import { OFFICE_SCRIPT, NIGHT_SCRIPT } from './terminal';
 import { CAPTIONS } from './captions';
@@ -14,7 +26,7 @@ import { atPace } from '../../engine/subtitles';
 import { soundtrack, STEPS, GULPS } from './music';
 import { createOffice, DESK_SPOT } from './sets/office';
 import { createTown } from './sets/town';
-import { createHome, SHAKE_SPOT, MAT_SPOT, SHAKER_GRIP, SHAKER_LENGTH } from './sets/home';
+import { createHome, SHAKE_SPOT, MAT_SPOT, SHAKER_GRIP, SHAKER_LENGTH, SHAKER_SCALE } from './sets/home';
 import { createBedroom, BED_TOP } from './sets/bedroom';
 
 // Beat sheet (see timeline.ts for the exact cues and captions.ts for the story text)
@@ -57,7 +69,7 @@ const episode: Episode = {
   id: 'lulu-on-call',
   title: 'Lulu On Call 📟',
   duration: DURATION,
-  captions: atPace(CAPTIONS, PACE),
+  captions: atPace(playedCaptions(CAPTIONS), PACE),
 
   setup(stage) {
     const { camera } = stage;
@@ -94,7 +106,10 @@ const episode: Episode = {
       lulu.squash.position.set(0, 0, 0);
       lulu.head.rotation.set(0, 0, 0);
       lulu.tail.rotation.set(0, 0, 0);
-      for (const a of lulu.arms) a.rotation.set(-0.3, 0, a.userData.side * 0.15);
+      for (const a of lulu.arms) {
+        releaseArm(a); // undo last frame's reaching
+        a.rotation.set(-0.3, 0, a.userData.side * 0.15);
+      }
       for (const f of lulu.feet) f.position.y = 0;
       for (const c of lulu.cheeks) c.scale.set(1, 0.7, 0.35);
       for (const e of lulu.eyes) e.scale.set(1, 1, 1);
@@ -136,13 +151,14 @@ const episode: Episode = {
       });
     }
 
-    /** The point between Lulu's two paws (world space), after her arms are posed. */
-    function pawsMid(out: THREE.Vector3): THREE.Vector3 {
-      lulu.root.updateMatrixWorld(true);
-      const [l, r] = lulu.arms;
-      l!.localToWorld(out.set(0, -0.36, 0));
-      r!.localToWorld(tmp.set(0, -0.36, 0));
-      return out.add(tmp).multiplyScalar(0.5);
+    /** Reaches a paw out to a world point, elbow bent outward (the arms stretch, so anything is in reach). */
+    function gripAt(side: -1 | 1, world: THREE.Vector3) {
+      const pivot = armOf(lulu, side);
+      const target = lulu.body.worldToLocal(tmp.copy(world));
+      const elbow = pivot.position.clone().lerp(target, 0.5);
+      elbow.x += side * 0.3;
+      elbow.y -= 0.15;
+      reachArm(pivot, target, elbow);
     }
 
     /**
@@ -204,7 +220,7 @@ const episode: Episode = {
     function walkScene(t: number): Shot {
       const travel =
         WALK_SPEED * (clamp01((t - CUE.walkStart) / (CUE.walkStop - CUE.walkStart)) * (CUE.walkStop - CUE.walkStart));
-      town.update(t, travel, ARRIVE, seg(t, WALK.from, WALK.to));
+      town.update(t, travel, ARRIVE, seg(t, WALK.from, WALK_END));
       lulu.root.position.set(-0.6, 0, 0);
       idleLulu(lulu, t, { eyesOpen: 0.85 });
       const walking = t >= CUE.walkStart && t < CUE.walkStop;
@@ -212,69 +228,126 @@ const episode: Episode = {
         walkCycle((t - CUE.walkStart) / WALK_BEAT, 1);
         const stomp = recentHit(t, STEPS, 10);
         lulu.squash.scale.set(1 + stomp * 0.04, 1 - stomp * 0.06, 1 + stomp * 0.04);
-        lulu.setMouth(t > 25.4 && t < 28.3 ? 0.35 : 0); // singing along to Walk
+        lulu.setMouth(t >= CUE.walkShots[1] && t < CUE.walkShots[2] ? 0.35 : 0); // singing along to Walk
       }
       if (t >= CUE.walkStop) {
         lulu.root.rotation.y = lerp(0, -Math.PI / 2, ease(seg(t, CUE.walkStop + 0.2, CUE.walkStop + 0.9)));
         lulu.setMouth(0.4);
       }
 
-      if (t < 18.6) return { cam: [7, 9.5, 15], look: [0, 1.5, -6] };
-      if (t < 25.4) return { cam: [4.2, 5.6, 9.5], look: [-0.4, 2.8, 0] };
-      if (t < 28.4) return { cam: [-1.1, 1.3, 8.5], look: [-0.6, 3.6, 0] }; // low angle: she's huge
+      const [close, low, wide] = CUE.walkShots;
+      if (t < close) return { cam: [7, 9.5, 15], look: [0, 1.5, -6] };
+      if (t < low) return { cam: [4.2, 5.6, 9.5], look: [-0.4, 2.8, 0] };
+      if (t < wide) return { cam: [-1.1, 1.3, 8.5], look: [-0.6, 3.6, 0] }; // low angle: she's huge
       return { cam: [3.2, 5.2, 11.5], look: [-2.6, 3, -1] };
     }
+
+    // The shake bottle is held in both paws: upright in front of her belly while she shakes it, then lifted to her
+    // mouth and tipped back to drink, like anyone would (her neck stays up; her tiny arms stretch to keep their grip).
+    const UP = THREE.Object3D.DEFAULT_UP;
+    const HOLD = new THREE.Vector3(0, 1.55, 1.25); // grip point, in body space
+    const DRINK_DIR = new THREE.Vector3(0, 0.78, 0.62).normalize(); // from her mouth to the bottle's base: up and out
+    const DRINK_AXIS = DRINK_DIR.clone().negate(); // base → spout: the bottle is upside down
+    const DRINK_NOD = 0.3; // her neck dips only a little
+    const DRINK_TILT = 0.5; // her head tips back
+    const GRIP_AT = SHAKER_GRIP / SHAKER_SCALE; // grip height and distance from the axis, in bottle units
+    const GRIP_OUT = 0.27;
+    const mouth = new THREE.Vector3();
+    const grip = new THREE.Vector3();
+    const axis = new THREE.Vector3();
+    const qBottle = new THREE.Quaternion();
+    const qDrink = new THREE.Quaternion();
+    const qSpin = new THREE.Quaternion();
+    const qWobble = new THREE.Quaternion();
+    const qBody = new THREE.Quaternion();
+    const Z = new THREE.Vector3(0, 0, 1);
 
     function gainsScene(t: number): Shot {
       const beat = beatPulse(t, GAINS);
       lulu.root.position.copy(SHAKE_SPOT);
       lulu.root.rotation.y = 0.2;
       const drinking = t >= CUE.drink && t < CUE.flex;
-      const bow = drinking
-        ? ease(seg(t, CUE.drink, CUE.drink + 0.5)) * (1 - ease(seg(t, CUE.flex - 0.4, CUE.flex)))
-        : 0;
-      idleLulu(lulu, t, { eyesOpen: drinking ? 0.15 : 0.85, nod: bow * 0.95 + (drinking ? 0 : beat * 0.05) });
+      // 0 → 1 as she lifts the bottle to her mouth and tips it back, and back to 0 as she lowers it
+      const k = drinking ? ease(seg(t, CUE.drink, CUE.drink + 0.7)) * (1 - ease(seg(t, CUE.flex - 0.5, CUE.flex))) : 0;
+      const gulp = drinking ? recentHit(t, GULPS, 6) : 0;
+      const tilt = DRINK_TILT + gulp * 0.12;
+      const eyesOpen = drinking ? 0.15 : 0.85;
+
+      if (k > 0) {
+        // where her mouth is when she drinks: the bottle's spout goes there
+        idleLulu(lulu, t, { eyesOpen, nod: DRINK_NOD });
+        lulu.head.rotation.x -= tilt;
+        lulu.root.updateMatrixWorld(true);
+        mouth.set(0, -0.23, 0.72);
+        lulu.body.worldToLocal(lulu.face.localToWorld(mouth));
+      }
+      idleLulu(lulu, t, { eyesOpen, nod: k * DRINK_NOD + (drinking ? 0 : beat * 0.05) });
+      lulu.head.rotation.x -= k * tilt;
+      lulu.root.updateMatrixWorld(true);
 
       const bottle = home.shaker;
-      bottle.rotation.set(0, 0, 0);
-      bottle.quaternion.identity();
-      if (t < 33.4) bottle.position.copy(home.counterTop);
-      else if (t < CUE.drink) {
-        // held in both paws at the chest, shaking up and down
-        const shake = t >= CUE.shake ? Math.sin(((t - CUE.shake) / 0.3) * Math.PI * 2) : 0;
-        for (const a of lulu.arms) a.rotation.set(-1.15 + shake * 0.25, 0, -a.userData.side * 0.8);
-        pawsMid(v);
-        v.y -= SHAKER_GRIP;
-        bottle.position.lerpVectors(home.counterTop, v, ease(seg(t, 33.4, 34)));
-        bottle.rotation.z = shake * 0.12;
-        lulu.setMouth(t >= CUE.shake ? 0.3 : 0);
-        hair.ponytail.rotation.x = 0.1 + Math.abs(shake) * 0.15;
-      } else if (t < CUE.flex) {
-        // paws lift it, the long neck comes down, spout in mouth
-        for (const a of lulu.arms) a.rotation.set(-1.7, 0, -a.userData.side * 0.8);
-        pawsMid(v);
-        lulu.face.localToWorld(n.set(0, -0.23, 0.72)); // mouth
-        const dir = tmp.copy(n).sub(v).normalize();
-        bottle.quaternion.setFromUnitVectors(THREE.Object3D.DEFAULT_UP, dir);
-        bottle.position.copy(n).addScaledVector(dir, -SHAKER_LENGTH); // spout at her mouth, paws on the bottle
-        const g = recentHit(t, GULPS, 6);
-        for (const c of lulu.cheeks) c.scale.set(1 + g * 0.4, 0.7 + g * 0.3, 0.35 + g * 0.2);
-        lulu.squash.scale.y = 1 + g * 0.03;
-      } else {
+      const holding = t >= CUE.grab && t < CUE.flex;
+      if (!holding) {
         bottle.position.copy(home.counterTop);
+        bottle.quaternion.identity();
         // flex those tiny arms
-        for (const a of lulu.arms) a.rotation.set(-0.2, 0, a.userData.side * (2.2 + beat * 0.25));
-        lulu.setMouth(0.7);
-        lulu.root.position.y += beat * 0.12;
+        if (t >= CUE.flex) {
+          for (const a of lulu.arms) a.rotation.set(-0.2, 0, a.userData.side * (2.2 + beat * 0.25));
+          lulu.setMouth(0.7);
+          lulu.root.position.y += beat * 0.12;
+        }
+      } else {
+        const shake = t >= CUE.shake && t < CUE.drink ? Math.sin(((t - CUE.shake) / 0.3) * Math.PI * 2) : 0;
+        // the grip point and tilt, blended from "held upright at her belly" to "spout in her mouth, base up"
+        grip.copy(HOLD);
+        qBottle.identity();
+        if (k > 0) {
+          grip.lerp(mouth.clone().addScaledVector(DRINK_DIR, SHAKER_LENGTH - SHAKER_GRIP), k);
+          qBottle.slerp(qDrink.setFromUnitVectors(UP, DRINK_AXIS), k);
+        }
+        grip.y += shake * 0.2;
+        axis.set(0, 1, 0).applyQuaternion(qBottle);
+        const base = grip.clone().addScaledVector(axis, -SHAKER_GRIP);
+        // the label turns to the side as she tips it, so it shows from where the camera is
+        const spin = k * (Math.PI / 2);
+        lulu.body.getWorldQuaternion(qBody);
+        bottle.quaternion
+          .copy(qBody)
+          .multiply(qBottle)
+          .multiply(qSpin.setFromAxisAngle(UP, spin))
+          .multiply(qWobble.setFromAxisAngle(Z, shake * 0.12));
+        lulu.body.localToWorld(base);
+
+        // reeled in from the counter, then held
+        const pull = ease(seg(t, CUE.grab, CUE.grab + 0.6));
+        if (pull < 1) {
+          bottle.position.lerpVectors(home.counterTop, base, pull);
+          bottle.quaternion.slerp(qBody.identity(), 1 - pull);
+        } else bottle.position.copy(base);
+
+        bottle.updateMatrixWorld(true);
+        // paws on the left and right of the bottle (in bottle space, turned back by the label's spin)
+        for (const side of [-1, 1] as const)
+          gripAt(
+            side,
+            bottle.localToWorld(
+              new THREE.Vector3(side * GRIP_OUT * Math.cos(spin), GRIP_AT, side * GRIP_OUT * Math.sin(spin)),
+            ),
+          );
+
+        lulu.setMouth(k > 0 ? 0.22 * k : t >= CUE.shake ? 0.3 : 0);
+        hair.ponytail.rotation.x = 0.1 + Math.abs(shake) * 0.15;
+        for (const c of lulu.cheeks) c.scale.set(1 + gulp * 0.4, 0.7 + gulp * 0.3, 0.35 + gulp * 0.2);
+        lulu.squash.scale.y = 1 + gulp * 0.03;
       }
 
       if (t < 34.4) return { cam: [0, 4.6, 12.5], look: [-1, 3, 0] };
       if (t < CUE.drink) return { cam: [0.2, 3.6, 7.2], look: [-1.5, 2.6, 0.5] };
       if (t < CUE.flex)
         return {
-          cam: [SHAKE_SPOT.x + 4.6, 3.1, SHAKE_SPOT.z + 3.4],
-          look: [SHAKE_SPOT.x + 0.2, 2.4, SHAKE_SPOT.z + 1],
-        }; // from her side: the neck bows down to the bottle
+          cam: [SHAKE_SPOT.x + 8.6, 4.4, SHAKE_SPOT.z + 4.2],
+          look: [SHAKE_SPOT.x + 0.1, 3.3, SHAKE_SPOT.z + 1.0],
+        }; // from her side: the bottle reaches up to her mouth
       return { cam: [-1.4, 3.8, 8.5], look: [-1.5, 3, 0.4] };
     }
 
@@ -420,7 +493,7 @@ const episode: Episode = {
 
     let current: THREE.Scene | null = null;
     function update(videoTime: number) {
-      const t = videoTime / PACE; // story time
+      const t = scriptTime(videoTime / PACE); // script time (the walk is shortened)
       const s = sceneAt(t);
       const target = scenes[s.id];
       if (current !== target) {

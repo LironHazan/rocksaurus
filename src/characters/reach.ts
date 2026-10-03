@@ -5,6 +5,8 @@ const UP = new THREE.Vector3(0, 1, 0);
 
 interface ReachParts {
   arm: THREE.Mesh;
+  /** Where the capsule sat before any reaching, to put it back. */
+  restY: number;
   radius: number;
   full: number;
   paw: THREE.Mesh;
@@ -39,6 +41,7 @@ function parts(pivot: THREE.Object3D): ReachParts {
   };
   const created: ReachParts = {
     arm,
+    restY: arm.position.y,
     radius,
     full: length + radius * 2,
     paw: mk(new THREE.SphereGeometry(radius * 1.12, 20, 14)),
@@ -76,6 +79,18 @@ export function reachArm(pivot: THREE.Object3D, target: THREE.Vector3, elbow: TH
     p.forearm.scale.set(1, Math.max(0.2, flen / p.full), 1);
   }
   p.paw.position.copy(target);
+}
+
+/**
+ * Undoes `reachArm`: hides the extra paw, elbow and forearm and puts the capsule back at its natural length, so
+ * the arm can be posed by rotating the pivot again. Safe to call on an arm that never reached.
+ */
+export function releaseArm(pivot: THREE.Object3D): void {
+  const p = pivot.userData.reach as ReachParts | undefined;
+  if (!p) return;
+  p.paw.visible = p.joint.visible = p.forearm.visible = false;
+  p.arm.scale.set(1, 1, 1);
+  p.arm.position.y = p.restY;
 }
 
 /** A rig's left (−1) or right (1) arm pivot. */
