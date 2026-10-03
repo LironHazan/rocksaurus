@@ -23,6 +23,9 @@ Open the URL Vite prints (usually http://localhost:5173):
   recording; browsers slow down hidden tabs.
 - **Snapshots** (for Pinterest and thumbnails): press **Pause**, scrub to the exact frame, pick **Pinterest 2:3**
   (a centered 1000×1500 crop) or **Full frame**, with or without captions, and click **Save snapshot** to download a PNG.
+- **Watch** (`/watch`): a read-only, phone-friendly player. Big "tap to play with sound" button, simple controls and the
+  whole episode list, with no recording or editing. Link to one episode with `/watch?episode=meet-rory`. **Phones
+  never get the studio**: any studio address opened on a touch phone is redirected here (the episode is kept).
 - **Channel art** (`/brand`): profile picture and banner PNGs rendered from the same 3D Rory.
 
 Debug tip: add `&cam=x,y,z,lookX,lookY,lookZ` to the URL to view any episode from a fixed camera (great for close-ups).
