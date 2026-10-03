@@ -13,15 +13,17 @@ video. React 19 + TypeScript, Vite, Vitest. Deployed to GitHub Pages from `main`
 | `npm run build`  | `tsc -b && vite build` — CI runs this too, so keep it passing |
 | `npm run format` | Prettier write (formatting is enforced, not advisory)         |
 
-Verified on Node 22.22 (2026-10-03): `npm run check` passes — 18 test files, 67 tests — and `npm run build`
+Verified on Node 24.21 (2026-10-03): `npm run check` passes — 18 test files, 67 tests — and `npm run build`
 succeeds. Nothing in the repo is currently failing or skipped. Two non-blocking notes:
 
 - Vitest prints a perf hint ("jsdom was created 18 times… use `pool: 'vmThreads'`"). Environment setup is ~74%
   of the ~8 s run. Not configured; left as-is.
 - The vendor bundle is ~1.1 MB (three.js). `vite.config.ts` raises `chunkSizeWarningLimit` to 1500 on purpose.
 
-`package.json` requires Node `>=22`; `.nvmrc` pins `24` and both CI workflows use `node-version-file: .nvmrc`.
-So CI runs 24 while 22 also works locally — don't "fix" one to match the other without checking both.
+**Node 24.** `.nvmrc` pins `24`, `package.json` engines requires `>=24`, and both CI workflows resolve the
+version through `node-version-file: .nvmrc` — so one bump keeps all three in step. Older Node may still run the
+toolchain (there is no `.npmrc`, so npm only warns on an engine mismatch rather than failing), but 24 is what
+CI uses and what the gate is verified against.
 
 ## The one rule: episodes are pure functions of time
 

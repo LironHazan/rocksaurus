@@ -48,6 +48,6 @@
   },
   "description": "Rocksaurus Dino Studio — 3D dinosaur band shorts made with React, Three.js and Web Audio.",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   }
 }
