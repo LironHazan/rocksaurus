@@ -20,10 +20,10 @@ succeeds. Nothing in the repo is currently failing or skipped. Two non-blocking 
   of the ~8 s run. Not configured; left as-is.
 - The vendor bundle is ~1.1 MB (three.js). `vite.config.ts` raises `chunkSizeWarningLimit` to 1500 on purpose.
 
-**Node 24.** `.nvmrc` pins `24`, `package.json` engines requires `>=24`, and both CI workflows resolve the
-version through `node-version-file: .nvmrc` — so one bump keeps all three in step. Older Node may still run the
-toolchain (there is no `.npmrc`, so npm only warns on an engine mismatch rather than failing), but 24 is what
-CI uses and what the gate is verified against.
+**Node 24.** `.nvmrc` pins `24` and both CI workflows resolve the version through
+`node-version-file: .nvmrc`, so 24 is what CI runs and what the gate is verified against; check
+`package.json` engines for the supported floor. Older Node may still run the toolchain — there is no `.npmrc`,
+so npm only warns on an engine mismatch rather than failing — but don't rely on that.
 
 ## The one rule: episodes are pure functions of time
 
