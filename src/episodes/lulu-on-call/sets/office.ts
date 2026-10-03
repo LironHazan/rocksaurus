@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { box, createRoom, createScreen, createWallClock, cylinder, mat, picture, ROUND } from './common';
+import { box, createRoom, createScreen, createWallClock, cylinder, mat, picture, ROUND } from '../../../world/interior';
 import { ball } from '../../../characters/materials';
 
 /** Where Lulu stands at her desk (she faces +z, toward the camera). */

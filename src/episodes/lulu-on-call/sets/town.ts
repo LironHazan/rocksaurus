@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { rng, lerp } from '../../../engine/math';
-import { box, cylinder, mat, picture, ROUND } from './common';
+import { box, cylinder, mat, picture, ROUND } from '../../../world/interior';
 import { ball } from '../../../characters/materials';
 import { textTexture } from '../../../world/text-texture';
 

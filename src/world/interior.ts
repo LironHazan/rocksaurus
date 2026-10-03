@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { textTexture } from '../../../world/text-texture';
-import type { ShownLine, LineKind } from '../terminal';
+import { textTexture } from './text-texture';
+import type { ShownLine, LineKind } from './screen-script';
 
 export const MONO = '"SF Mono", Menlo, Consolas, monospace';
 export const ROUND = 'Fredoka, "Arial Rounded MT Bold", system-ui, sans-serif';
@@ -93,27 +93,71 @@ export function picture(
   return g;
 }
 
-const KIND_COLOR: Record<LineKind, string> = {
-  title: '#7c86a8',
-  prompt: '#f4f1ff',
-  agent: '#c9a8ff',
-  ok: '#7fe0b0',
-  err: '#ff6b8b',
-  dim: '#7c86a8',
+export type ScreenTheme = 'terminal' | 'document';
+
+interface Theme {
+  bg: string;
+  bar: string;
+  barText: string;
+  font: string;
+  cursor: string;
+  colors: Record<LineKind, string>;
+}
+
+const SERIF = 'Georgia, "Times New Roman", serif';
+const THEMES: Record<ScreenTheme, Theme> = {
+  terminal: {
+    bg: '#0f1222',
+    bar: '#1c2140',
+    barText: '#7c86a8',
+    font: MONO,
+    cursor: '#f4f1ff',
+    colors: {
+      title: '#7c86a8',
+      prompt: '#f4f1ff',
+      agent: '#c9a8ff',
+      ok: '#7fe0b0',
+      err: '#ff6b8b',
+      dim: '#7c86a8',
+      heading: '#f4f1ff',
+      body: '#f4f1ff',
+    },
+  },
+  document: {
+    bg: '#fbfaf6',
+    bar: '#e9e6dd',
+    barText: '#8a8577',
+    font: SERIF,
+    cursor: '#2b2b33',
+    colors: {
+      title: '#8a8577',
+      prompt: '#2b2b33',
+      agent: '#5b4a9a',
+      ok: '#2f8a5a',
+      err: '#c1121f',
+      dim: '#8a8577',
+      heading: '#16161c',
+      body: '#2b2b33',
+    },
+  },
 };
 
 export interface Screen {
   mesh: THREE.Mesh;
-  /** Repaints the terminal (only when what's shown changed). */
+  /** Repaints the screen (only when what's shown changed). */
   show(lines: readonly ShownLine[], cursor: boolean): void;
 }
 
-/** A glowing terminal screen (faces +z). */
-export function createScreen(w: number, h: number, { px = 1024, header = '' } = {}): Screen {
+/** A glowing screen (faces +z): a dark terminal, or a word-processor page with `theme: 'document'`. */
+export function createScreen(
+  w: number,
+  h: number,
+  { px = 1024, header = '', theme = 'terminal' as ScreenTheme } = {},
+): Screen {
   let lines: readonly ShownLine[] = [];
   let cursor = false;
   const draw = (ctx: CanvasRenderingContext2D, cw: number, ch: number) =>
-    drawTerminal(ctx, cw, ch, header, lines, cursor);
+    drawScreen(ctx, cw, ch, THEMES[theme], header, lines, cursor);
   const tex = textTexture(px, Math.round((px * h) / w), draw);
   const canvas = tex.image as HTMLCanvasElement;
   const mesh = new THREE.Mesh(
@@ -135,17 +179,18 @@ export function createScreen(w: number, h: number, { px = 1024, header = '' } = 
   };
 }
 
-function drawTerminal(
+function drawScreen(
   ctx: CanvasRenderingContext2D,
   cw: number,
   ch: number,
+  theme: Theme,
   header: string,
   lines: readonly ShownLine[],
   cursor: boolean,
 ) {
-  ctx.fillStyle = '#0f1222';
+  ctx.fillStyle = theme.bg;
   ctx.fillRect(0, 0, cw, ch);
-  ctx.fillStyle = '#1c2140';
+  ctx.fillStyle = theme.bar;
   ctx.fillRect(0, 0, cw, ch * 0.09);
   for (const [i, c] of ['#ff6b6b', '#ffd36b', '#7fe0b0'].entries()) {
     ctx.fillStyle = c;
@@ -153,25 +198,32 @@ function drawTerminal(
     ctx.arc(cw * 0.04 + i * cw * 0.035, ch * 0.045, ch * 0.017, 0, Math.PI * 2);
     ctx.fill();
   }
-  ctx.fillStyle = '#7c86a8';
-  ctx.font = `${ch * 0.04}px ${MONO}`;
+  ctx.fillStyle = theme.barText;
+  ctx.font = `${ch * 0.04}px ${theme.font}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(header, cw / 2, ch * 0.047);
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
   const size = ch * 0.058;
-  ctx.font = `600 ${size}px ${MONO}`;
-  lines.forEach((l, i) => {
-    ctx.fillStyle = KIND_COLOR[l.kind];
-    ctx.fillText(l.text, cw * 0.045, ch * 0.2 + i * size * 1.45);
+  let y = ch * 0.2;
+  let lastWidth = 0,
+    lastY = y,
+    lastSize = size;
+  lines.forEach(l => {
+    const s = l.kind === 'heading' ? size * 1.12 : size;
+    ctx.font = `${l.kind === 'heading' ? 700 : 600} ${s}px ${theme.font}`;
+    ctx.fillStyle = theme.colors[l.kind];
+    ctx.fillText(l.text, cw * 0.045, y);
+    lastWidth = ctx.measureText(l.text).width;
+    lastY = y;
+    lastSize = s;
+    y += s * 1.45;
   });
   if (cursor) {
-    const last = lines.at(-1);
-    const x = cw * 0.045 + (last ? ctx.measureText(last.text).width : 0) + 4;
-    const y = ch * 0.2 + Math.max(0, lines.length - 1) * size * 1.45;
-    ctx.fillStyle = '#f4f1ff';
-    ctx.fillRect(x, y - size * 0.8, size * 0.5, size * 0.95);
+    const x = cw * 0.045 + (lines.length ? lastWidth : 0) + 4;
+    ctx.fillStyle = theme.cursor;
+    ctx.fillRect(x, lastY - lastSize * 0.8, lastSize * (theme.font === MONO ? 0.5 : 0.08), lastSize * 0.95);
   }
 }
 

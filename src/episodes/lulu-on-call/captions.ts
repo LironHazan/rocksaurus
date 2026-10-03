@@ -1,41 +1,7 @@
 import type { Caption } from '../../engine/types';
+import { title, sub, punch } from '../../engine/subtitles';
 
-// Subtitle style: everything is left-aligned at the bottom, so the middle of the frame stays clear.
-// Each scene opens with a title card, then a subtitle explains what's going on, with a metal punchline
-// on the line under it. Times are story seconds (the episode scales them by PACE).
-
-const LINE_1 = 0.75; // title cards and subtitles
-const LINE_2 = 0.83; // punchlines
-const TITLE_Y = 0.8; // two-line scene titles, centered between the two lines (shown before any punchline)
-const BASE = { align: 'left' } as const;
-const title = (from: number, to: number, text: string): Caption => ({
-  from,
-  to,
-  text,
-  ...BASE,
-  y: TITLE_Y,
-  size: 0.078,
-  color: '#ffe08a',
-});
-const sub = (from: number, to: number, text: string, extra: Partial<Caption> = {}): Caption => ({
-  from,
-  to,
-  text,
-  ...BASE,
-  y: LINE_1,
-  size: 0.068,
-  ...extra,
-});
-const punch = (from: number, to: number, text: string, extra: Partial<Caption> = {}): Caption => ({
-  from,
-  to,
-  text,
-  ...BASE,
-  y: LINE_2,
-  size: 0.058,
-  color: '#c9f2ff',
-  ...extra,
-});
+// Times are story seconds (the episode scales them by PACE).
 
 export const CAPTIONS: Caption[] = [
   // ── The office ──────────────────────────────────────────────
