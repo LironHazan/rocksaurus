@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
-import type { CharacterRig } from './types';
+import type { CharacterRig, RigFit, Vec3 } from './types';
 import { taperedTube } from '../props/tube';
 
 export const STEGGY_COLORS = {
@@ -15,9 +15,17 @@ export const STEGGY_COLORS = {
   mustache: 0x2a1f18,
 };
 
+// Body and head ellipsoids. The meshes below and the `fit` the rig publishes both come from these, so a tweak
+// here moves the shirt and the hair with the shape instead of leaving them fitted to the old one.
+const BODY = { radius: 1, at: [0, 1.15, -0.1] as Vec3, scale: [1.0, 0.95, 1.15] as Vec3 };
+const HEAD = { radius: 0.5, scale: [1.05, 0.9, 1.1] as Vec3 };
+const radiiOf = (radius: number, scale: Vec3): Vec3 => [radius * scale[0], radius * scale[1], radius * scale[2]];
+
 export interface StegosaurusRig extends CharacterRig {
   /** Back plates, front to back — scale/rotate them to make them bounce to the music. */
   plates: THREE.Group[];
+  /** Always published: Steggy wears a band tee and short hair. */
+  fit: RigFit;
 }
 
 /**
@@ -48,7 +56,9 @@ export function createStegosaurus(colors: StegosaurusColors = STEGGY_COLORS): St
   squash.add(torso);
 
   // high-arched body
-  torso.add(ball(1, M.body, [0, 1.15, -0.1], [1.0, 0.95, 1.15]));
+  const bodyBall = ball(BODY.radius, M.body, [...BODY.at], [...BODY.scale]);
+  bodyBall.name = 'body';
+  torso.add(bodyBall);
   torso.add(ball(0.72, M.belly, [0, 1.0, 0.45], [1, 1.05, 0.6]));
 
   // two alternating rows of back plates along the arch, biggest in the middle
@@ -123,7 +133,9 @@ export function createStegosaurus(colors: StegosaurusColors = STEGGY_COLORS): St
   torso.add(ball(0.36, M.body, [0, 1.75, 0.72], [1, 1.1, 1]));
   const head = new THREE.Group();
   head.position.set(0, 2.08, 0.95);
-  head.add(ball(0.5, M.body, [0, 0, 0], [1.05, 0.9, 1.1]));
+  const skull = ball(HEAD.radius, M.body, [0, 0, 0], [...HEAD.scale]);
+  skull.name = 'skull';
+  head.add(skull);
   head.add(ball(0.3, M.body, [0, -0.12, 0.42], [1.05, 0.75, 0.9])); // snout
   for (const s of [-1, 1]) head.add(ball(0.025, M.dark, [s * 0.08, -0.06, 0.69], [1.2, 0.8, 0.6], 10)); // nostrils
 
@@ -211,6 +223,10 @@ export function createStegosaurus(colors: StegosaurusColors = STEGGY_COLORS): St
     feet,
     tail,
     plates,
+    fit: {
+      torso: { center: [...BODY.at], radii: radiiOf(BODY.radius, BODY.scale) },
+      head: radiiOf(HEAD.radius, HEAD.scale),
+    },
     setMouth(k) {
       smile.visible = k < 0.05;
       mouth.visible = k >= 0.05;

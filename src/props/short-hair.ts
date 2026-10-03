@@ -1,10 +1,9 @@
 import * as THREE from 'three';
 import { rng } from '../engine/math';
 import { taperedTube } from './tube';
+import type { FittedRig } from '../characters/types';
 
 export interface ShortHairOptions {
-  /** Head ellipsoid radii (head space, centered at the head origin). */
-  head: [number, number, number];
   color?: number;
   /** Tuft length (head units). */
   length?: number;
@@ -16,9 +15,11 @@ export interface ShortHairOptions {
  * into a fringe — overlapping clumps with direction and pointed tips, like stylized animation hair.
  */
 export function addShortHair(
-  head: THREE.Group,
-  { head: [ax, ay, az], color = 0x2a1f18, length = 0.42, seed = 9 }: ShortHairOptions,
+  rig: FittedRig,
+  { color = 0x2a1f18, length = 0.42, seed = 9 }: ShortHairOptions = {},
 ): THREE.Group {
+  // tufts are sized to the head the rig publishes
+  const [ax, ay, az] = rig.fit.head;
   const r = rng(seed);
   const base = new THREE.Color(color);
   const materials = [0, 0.04, 0.08].map(
@@ -75,6 +76,6 @@ export function addShortHair(
   group.traverse(o => {
     if ((o as THREE.Mesh).isMesh) o.castShadow = o.receiveShadow = true;
   });
-  head.add(group);
+  rig.head.add(group);
   return group;
 }

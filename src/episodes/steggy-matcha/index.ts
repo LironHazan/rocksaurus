@@ -72,8 +72,8 @@ const episode: Episode = {
     const cafe = createCafe();
 
     const steggy = createStegosaurus();
-    addBandTee(steggy, { text: 'DREAM THEATER', body: { center: [0, 1.15, -0.1], radii: [1.0, 0.95, 1.15] } });
-    addShortHair(steggy.head, { head: [0.525, 0.45, 0.55] });
+    addBandTee(steggy, { text: 'DREAM THEATER' });
+    addShortHair(steggy);
     addGlasses(steggy.head, { eyeX: 0.22, eyeY: 0.1, eyeZ: 0.52, rim: 0.14 });
 
     const sister = createStegosaurus(SISTER_COLORS);

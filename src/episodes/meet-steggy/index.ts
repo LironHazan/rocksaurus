@@ -50,8 +50,8 @@ const episode: Episode = {
     const steggy = createStegosaurus();
     steggy.root.position.set(0, 0, -0.25);
     scene.add(steggy.root);
-    addBandTee(steggy, { text: 'DREAM THEATER', body: { center: [0, 1.15, -0.1], radii: [1.0, 0.95, 1.15] } });
-    addShortHair(steggy.head, { head: [0.525, 0.45, 0.55] }); // short dark crop
+    addBandTee(steggy, { text: 'DREAM THEATER' });
+    addShortHair(steggy); // short dark crop
 
     const leftArm = armOf(steggy, -1);
     const rightArm = armOf(steggy, 1);
