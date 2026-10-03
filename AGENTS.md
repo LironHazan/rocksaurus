@@ -121,6 +121,9 @@ fight the "pure function of `t`" model, and a wrapper would have to be threaded 
   as `basename`). `pages.yml` builds with `--base /<repo>/`. Local dev stays at `/`.
 - **Canvas text needs its fonts loaded** (Google Fonts `<link>` in `index.html`). `StudioPage.record()` awaits
   `document.fonts.load()` before recording and `textTexture()` repaints once its fonts arrive. Keep that pattern.
+- **Phones never see the studio.** `StudioGuard` (`src/app/`) redirects every studio route to `/watch` when the
+  device is a touch phone (`PHONE_QUERY` in `lib/useIsPhone.ts`), keeping only `?episode=`. New studio pages go
+  under that guard; new viewer pages go beside `/watch`.
 - **Recording** runs one full pass with sound forced on, so the episode restarts. It needs a visible tab.
 - **Dispose properly.** `disposeObject` walks geometries, materials and textures; `stage.dispose()` also forces
   WebGL context loss. Leaking a context per format switch is the easy bug here.
