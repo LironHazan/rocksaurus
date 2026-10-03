@@ -7,7 +7,9 @@ const props = {
   time: 5.2,
   duration: 12,
   soundOn: false,
+  paused: false,
   disabled: false,
+  onTogglePause: vi.fn(),
   onRestart: vi.fn(),
   onToggleSound: vi.fn(),
   onSeek: vi.fn(),
@@ -26,6 +28,18 @@ describe('<Transport>', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Sound' }));
     expect(props.onRestart).toHaveBeenCalled();
     expect(props.onToggleSound).toHaveBeenCalled();
+  });
+
+  it('pauses', async () => {
+    renderWithProviders(<Transport {...props} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Pause' }));
+    expect(props.onTogglePause).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers to play again once paused', async () => {
+    renderWithProviders(<Transport {...props} paused />);
+    await userEvent.click(screen.getByRole('button', { name: 'Play' }));
+    expect(props.onTogglePause).toHaveBeenCalled();
   });
 
   it('seeks with the keyboard on the timeline', async () => {

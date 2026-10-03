@@ -191,6 +191,15 @@
   border-top: 1px solid var(--border);
   background: var(--surface);
 }
+.snapshotBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
 .clock {
   min-width: 92px;
   text-align: right;

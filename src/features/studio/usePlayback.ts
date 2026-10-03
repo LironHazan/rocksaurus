@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import type { Player, PlayerSnapshot } from '../../engine/player';
 
-const IDLE: PlayerSnapshot = { time: 0, soundOn: false };
+const IDLE: PlayerSnapshot = { time: 0, soundOn: false, paused: false };
 const noopSubscribe = () => () => {};
 const idleSnapshot = () => IDLE;
 
