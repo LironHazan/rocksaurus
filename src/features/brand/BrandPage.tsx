@@ -5,7 +5,7 @@ import { Button, ui } from '../../ui';
 import { BANNER, drawBanner, drawProfile, renderArtBackgrounds, type BannerText } from './channelArt';
 import styles from './Brand.module.css';
 
-type Backgrounds = ReturnType<typeof renderArtBackgrounds>;
+type Backgrounds = Awaited<ReturnType<typeof renderArtBackgrounds>>;
 
 const saveCanvas = (canvas: HTMLCanvasElement, filename: string) =>
   canvas.toBlob(blob => blob && downloadBlob(blob, filename), 'image/png');
@@ -24,9 +24,11 @@ export function BrandPage() {
   // Render the slow 3D backgrounds once, after the art fonts have loaded.
   useEffect(() => {
     let cancelled = false;
-    void Promise.all([document.fonts.load('100px Bungee'), document.fonts.load('700 50px Fredoka')]).then(() => {
-      if (!cancelled) setBackgrounds(renderArtBackgrounds());
-    });
+    void Promise.all([document.fonts.load('100px Bungee'), document.fonts.load('700 50px Fredoka')])
+      .then(() => renderArtBackgrounds())
+      .then(art => {
+        if (!cancelled) setBackgrounds(art);
+      });
     return () => {
       cancelled = true;
     };

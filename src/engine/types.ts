@@ -1,4 +1,5 @@
 import type * as THREE from 'three';
+import type { WebGPURenderer } from 'three/webgpu';
 
 /** Output video format (see formats.ts). `safe` = vertical caption positions (0..1) clear of YouTube's UI. */
 export interface Format {
@@ -31,7 +32,7 @@ export type Overlay = (ctx: CanvasRenderingContext2D) => void;
 /** Renderer + camera an episode draws into. `scene` may be swapped by an episode to cut between locations. */
 export interface Stage {
   format: Format;
-  renderer: THREE.WebGLRenderer;
+  renderer: WebGPURenderer;
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   /** The composited output canvas (3D + overlay) — what is shown and recorded. */
