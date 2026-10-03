@@ -6,7 +6,7 @@ import { title, sub, punch } from '../../engine/subtitles';
 export const CAPTIONS: Caption[] = [
   // ── The office ──────────────────────────────────────────────
   title(0.2, 2.8, '🏢 THE OFFICE\n5:58 PM'),
-  sub(3.0, 6.6, 'Meet Lulu: drummer by night, ninga dev by day'),
+  sub(3.0, 6.6, 'Meet Lulu: \n drummer by night, developer by day />'),
   sub(6.8, 10.4, 'She tells the coding agent to do her tasks'),
   sub(10.6, 13.4, 'The agent writes the code…'),
   punch(10.9, 13.4, 'She is the Master of Puppets 🤘'),
