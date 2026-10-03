@@ -32,7 +32,7 @@ optional `audio(bus, t0)`, `captions`, `preload()`.
 ```
 src/
   app/        React shell (router, layout)
-  features/   studio/ (useStudioSession = stage + player lifecycle, usePlayback), brand/ (channel-art PNGs)
+  features/   studio/ (useStudioSession = stage + player lifecycle, usePlayback), watch/ (read-only mobile player at /watch, 720×1280), brand/ (channel-art PNGs)
   ui/         Radix-based primitives, re-exported from ui/index.ts
   engine/     stage (renderer + 2D compositing), player (loop, audio clock, cleanup), recorder, captions/subtitles, math, types
   band/       One module per instrument → Performer { root, update(t) }; timing.ts has beatPulse, recentHit, latestStarted

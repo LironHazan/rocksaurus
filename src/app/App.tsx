@@ -3,6 +3,7 @@ import { TooltipProvider } from '../ui';
 import { Layout } from './Layout';
 import { StudioPage } from '../features/studio/StudioPage';
 import { BrandPage } from '../features/brand/BrandPage';
+import { WatchPage } from '../features/watch/WatchPage';
 
 export function App() {
   return (
@@ -13,6 +14,8 @@ export function App() {
             <Route index element={<StudioPage />} />
             <Route path="brand" element={<BrandPage />} />
           </Route>
+          {/* watch-only, phone-friendly: no studio chrome */}
+          <Route path="watch" element={<WatchPage />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
