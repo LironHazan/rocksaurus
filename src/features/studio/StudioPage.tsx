@@ -4,16 +4,18 @@ import { folders, findEpisode } from '../../episodes';
 import { DEFAULT_FORMAT, FORMATS, isFormatId } from '../../engine/formats';
 import { CAPTION_FONT } from '../../engine/captions';
 import { recordEpisode } from '../../engine/recorder';
+import { saveSnapshot, snapshotCanvas, snapshotName, type SnapshotCrop } from '../../engine/snapshot';
 import type { FormatId } from '../../engine/types';
 import { parseDebugCamera } from './debugCamera';
 import { useStudioSession } from './useStudioSession';
 import { usePlayback } from './usePlayback';
 import { EpisodeList } from './components/EpisodeList';
 import { StudioHeader } from './components/StudioHeader';
+import { SnapshotBar } from './components/SnapshotBar';
 import { Transport } from './components/Transport';
 import styles from './Studio.module.css';
 
-/** The studio: pick an episode and format, preview it, scrub it, record it to a video file. */
+/** The studio: pick an episode and format, preview it, scrub it, record it to a video or save a frame as an image. */
 export function StudioPage() {
   const [params, setParams] = useSearchParams();
   const episode = findEpisode(params.get('episode'));
@@ -22,9 +24,11 @@ export function StudioPage() {
   const debugCamera = parseDebugCamera(params.get('cam'));
 
   const { containerRef, session } = useStudioSession(episode, FORMATS[formatId], debugCamera);
-  const { time, soundOn } = usePlayback(session?.player ?? null);
+  const { time, soundOn, paused } = usePlayback(session?.player ?? null);
   const [recording, setRecording] = useState(false);
   const [status, setStatus] = useState('');
+  const [crop, setCrop] = useState<SnapshotCrop>('pinterest');
+  const [snapshotCaptions, setSnapshotCaptions] = useState(false);
 
   const updateParam = (key: string, value: string) =>
     setParams(prev => {
@@ -46,6 +50,18 @@ export function StudioPage() {
       setStatus(err instanceof Error ? err.message : String(err));
     } finally {
       setRecording(false);
+    }
+  }
+
+  async function snapshot() {
+    if (!session) return;
+    try {
+      await document.fonts.load(`700 80px ${CAPTION_FONT}`); // captions must not fall back to another font
+      const t = session.player.time();
+      const canvas = snapshotCanvas(session.player.renderAt(t, snapshotCaptions), crop);
+      setStatus(`Saved ${await saveSnapshot(canvas, snapshotName(episode.id, t, crop))}`);
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -76,10 +92,21 @@ export function StudioPage() {
             time={time}
             duration={episode.duration}
             soundOn={soundOn}
+            paused={paused}
             disabled={!session || recording}
+            onTogglePause={() => (paused ? session?.player.resume() : session?.player.pause())}
             onRestart={() => session?.player.restart()}
             onToggleSound={() => void session?.player.setSound(!soundOn)}
             onSeek={t => session?.player.seek(t)}
+          />
+          <SnapshotBar
+            time={time}
+            crop={crop}
+            captions={snapshotCaptions}
+            disabled={!session || recording}
+            onCropChange={setCrop}
+            onCaptionsChange={setSnapshotCaptions}
+            onSave={() => void snapshot()}
           />
         </div>
         <p className={styles.status} role="status">

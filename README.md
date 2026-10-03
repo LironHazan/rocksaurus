@@ -21,6 +21,8 @@ Open the URL Vite prints (usually http://localhost:5173):
 - **Studio**: pick an episode in the sidebar, switch **Shorts 9:16 / YouTube 16:9**, scrub the timeline, turn on sound,
   and click **Record video** to download an `.mp4` (Chrome/Safari) or `.webm` (Firefox). Keep the tab visible while
   recording; browsers slow down hidden tabs.
+- **Snapshots** (for Pinterest and thumbnails): press **Pause**, scrub to the exact frame, pick **Pinterest 2:3**
+  (a centered 1000×1500 crop) or **Full frame**, with or without captions, and click **Save snapshot** to download a PNG.
 - **Channel art** (`/brand`): profile picture and banner PNGs rendered from the same 3D Rory.
 
 Debug tip: add `&cam=x,y,z,lookX,lookY,lookZ` to the URL to view any episode from a fixed camera (great for close-ups).
