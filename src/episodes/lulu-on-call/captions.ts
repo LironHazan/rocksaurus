@@ -6,22 +6,17 @@ import { title, sub, punch } from '../../engine/subtitles';
 export const CAPTIONS: Caption[] = [
   // ── The office ──────────────────────────────────────────────
   title(0.2, 2.8, '🏢 THE OFFICE\n5:58 PM'),
-  sub(3.0, 6.6, 'Meet Lulu: drummer by night, dev by day'),
-  sub(6.8, 10.4, 'She tells the coding agent to do her task'),
-  punch(7.6, 10.4, '(Typing with drumsticks, obviously 🥁)'),
+  sub(3.0, 6.6, 'Meet Lulu: drummer by night, ninga dev by day'),
+  sub(6.8, 10.4, 'She tells the coding agent to do her tasks'),
   sub(10.6, 13.4, 'The agent writes the code…'),
   punch(10.9, 13.4, 'She is the Master of Puppets 🤘'),
-  sub(13.6, 15.9, '6:00 PM sharp. Logged off 👋'),
   punch(13.9, 15.9, 'PR #666: the number of the beast'),
 
   // ── The walk home ───────────────────────────────────────────
-  title(16.2, 18.6, '🚶‍♀️ THE COMMUTE\n20 km on foot'),
-  sub(18.8, 22.0, 'Lulu walks home. All 20 km.'),
-  sub(22.1, 25.3, 'It takes her 30 min'),
-  sub(25.4, 28.3, 'Commute playlist: Walk 🎧'),
-  punch(25.8, 28.3, 'On repeat, stomping on the beat'),
-  sub(28.4, 31.9, 'Home by 6:30 🏠'),
-  punch(28.8, 31.9, 'Run to the Hills? She walked over them'),
+  sub(18.0, 20.7, 'Lulu walks home. All 20 km!'),
+  sub(21.0, 23.3, 'Commute playlist: Walk 🎧'),
+  punch(21.3, 23.3, 'On repeat, stomping on the beat'),
+  punch(23.7, 25.9, 'Run to the Hills? She walked over them'),
 
   // ── Gains ───────────────────────────────────────────────────
   title(32.2, 34.4, '🥤 GAINS\n6:31 PM'),
@@ -44,7 +39,7 @@ export const CAPTIONS: Caption[] = [
   sub(56.5, 59.9, 'Enter Sandman 😴'),
   punch(56.9, 59.9, 'Dreaming of double-kick solos'),
   sub(60.0, 62.9, '📟 PAGED! Prod is down 🔥', { color: '#ff6b8b' }),
-  punch(60.4, 62.9, 'Fear of the Dark? No. Fear of the pager'),
+  punch(60.4, 62.9, 'Fear of the Dark? No. Fear of the bug!'),
   sub(63.0, 66.4, 'Awake faster than a blast beat'),
   punch(63.4, 66.4, 'Typing at 240 BPM 🥁'),
   sub(66.5, 70.4, 'She asks the agent to hotfix it'),

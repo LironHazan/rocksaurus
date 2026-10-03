@@ -6,7 +6,7 @@ import { createDrumKit } from '../../../props/drums';
 export const SHAKE_SPOT = new THREE.Vector3(-1.6, 0, 0.4);
 export const MAT_SPOT = new THREE.Vector3(2.2, 0.06, 0.9);
 /** A shaker sized for a dinosaur. */
-const SHAKER_SCALE = 1.35;
+export const SHAKER_SCALE = 1.35;
 /** Height of the bottle's middle, where paws grip it. */
 export const SHAKER_GRIP = 0.42 * SHAKER_SCALE;
 /** Base to spout tip. */
