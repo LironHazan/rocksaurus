@@ -11,7 +11,11 @@ export interface StudioSession {
 
 /**
  * Creates the stage + player inside the element the returned ref is attached to, and tears both down
- * (WebGL context, animation loop, audio) when the episode/format changes or the component unmounts.
+ * (GPU device, animation loop, audio) when the episode/format changes or the component unmounts.
+ *
+ * Building a stage is async (the renderer initializes its backend), so the ref callback starts the work and
+ * the cleanup may run before it finishes — hence the `cancelled` flag: a stage that arrives after teardown is
+ * disposed immediately instead of leaking a device and a canvas.
  */
 export function useStudioSession(episode: Episode, format: Format, debugCamera: DebugCamera | null) {
   const [session, setSession] = useState<StudioSession | null>(null);
@@ -20,22 +24,33 @@ export function useStudioSession(episode: Episode, format: Format, debugCamera: 
   const containerRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (!node) return;
-      const stage = createStage(node, format);
-      const cam = parseDebugCamera(camKey);
-      if (cam) {
-        const [x, y, z, lx, ly, lz] = cam;
-        const render = stage.render;
-        stage.render = overlay => {
-          stage.camera.position.set(x, y, z);
-          stage.camera.lookAt(lx, ly, lz);
-          render(overlay);
-        };
-      }
-      const player = createPlayer(stage, episode);
-      setSession({ stage, player });
+      let live: StudioSession | null = null;
+      let cancelled = false;
+
+      void createStage(node, format).then(stage => {
+        if (cancelled) {
+          stage.dispose();
+          return;
+        }
+        const cam = parseDebugCamera(camKey);
+        if (cam) {
+          const [x, y, z, lx, ly, lz] = cam;
+          const render = stage.render;
+          stage.render = overlay => {
+            stage.camera.position.set(x, y, z);
+            stage.camera.lookAt(lx, ly, lz);
+            render(overlay);
+          };
+        }
+        live = { stage, player: createPlayer(stage, episode) };
+        setSession(live);
+      });
+
       return () => {
-        player.dispose();
-        stage.dispose();
+        cancelled = true;
+        live?.player.dispose();
+        live?.stage.dispose();
+        live = null;
         setSession(null);
       };
     },

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { WebGPURenderer } from 'three/webgpu';
 import { createRockStage } from '../../world/rock-stage';
 import { createRockerRory } from '../../characters/rocker';
 import { disposeObject } from '../../engine/dispose';
@@ -16,8 +17,8 @@ interface ShotOptions {
 }
 
 /** Renders the rock-stage scene with Rory once, at the given size, into a plain 2D canvas. */
-function renderShot({ width, height, fov, camPos, lookAt, roryX = 0 }: ShotOptions): HTMLCanvasElement {
-  const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+async function renderShot({ width, height, fov, camPos, lookAt, roryX = 0 }: ShotOptions): Promise<HTMLCanvasElement> {
+  const renderer = new WebGPURenderer({ antialias: true });
   renderer.setPixelRatio(1);
   renderer.setSize(width, height, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -35,23 +36,24 @@ function renderShot({ width, height, fov, camPos, lookAt, roryX = 0 }: ShotOptio
   const camera = new THREE.PerspectiveCamera(fov, width / height, 0.1, 200);
   camera.position.set(...camPos);
   camera.lookAt(...lookAt);
-  renderer.render(scene, camera);
+  // renderAsync (not render) so the frame is submitted before the canvas is copied below: this is a one-shot
+  // render read straight back as pixels, unlike the stage's continuous loop.
+  await renderer.renderAsync(scene, camera);
 
   const out = document.createElement('canvas');
   out.width = width;
   out.height = height;
   out.getContext('2d')?.drawImage(renderer.domElement, 0, 0);
   disposeObject(scene);
-  renderer.dispose();
-  renderer.forceContextLoss();
+  await renderer.dispose(); // ends in device.destroy() (or loseContext() on the WebGL fallback)
   return out;
 }
 
 /** The two 3D renders the art is built from (slow — render once, reuse while editing text). */
-export function renderArtBackgrounds() {
-  return {
+export async function renderArtBackgrounds() {
+  const [profile, banner] = await Promise.all([
     // Rory's upper body and guitar, centered for YouTube's circle crop
-    profile: renderShot({
+    renderShot({
       width: PROFILE_SIZE,
       height: PROFILE_SIZE,
       fov: 34,
@@ -59,7 +61,7 @@ export function renderArtBackgrounds() {
       lookAt: [0, 2.15, 0],
     }),
     // Rory inside the always-visible center strip, title to his left
-    banner: renderShot({
+    renderShot({
       width: BANNER.width,
       height: BANNER.height,
       fov: 18,
@@ -67,7 +69,8 @@ export function renderArtBackgrounds() {
       lookAt: [0, 1.85, 0],
       roryX: 3.6,
     }),
-  };
+  ]);
+  return { profile, banner };
 }
 
 function drawTitle(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, size: number) {
