@@ -24,7 +24,10 @@ export interface StegosaurusRig extends CharacterRig {
  * Steggy — the band's pianist: a round Stegosaurus with two rows of coral back plates, a spiked tail,
  * a small cute head on a short neck and a red bow tie. Built to sit on a piano bench (feet forward).
  */
-export function createStegosaurus(colors = STEGGY_COLORS): StegosaurusRig {
+/** Colors for a Stegosaurus; `mustache: null` for none. */
+export type StegosaurusColors = Omit<typeof STEGGY_COLORS, 'mustache'> & { mustache: number | null };
+
+export function createStegosaurus(colors: StegosaurusColors = STEGGY_COLORS): StegosaurusRig {
   const M = {
     body: plush(colors.body),
     belly: plush(colors.belly),
@@ -130,12 +133,12 @@ export function createStegosaurus(colors = STEGGY_COLORS): StegosaurusRig {
   head.add(smile);
   // handlebar mustache under the nose, tips curling up
   const stache = new THREE.MeshPhysicalMaterial({
-    color: colors.mustache,
+    color: colors.mustache ?? 0,
     roughness: 0.5,
     sheen: 1,
     sheenColor: new THREE.Color(0x8a6a50),
   });
-  for (const s of [-1, 1]) {
+  for (const s of colors.mustache === null ? [] : [-1, 1]) {
     const half = new THREE.CatmullRomCurve3([
       new THREE.Vector3(0, -0.12, 0.69),
       new THREE.Vector3(s * 0.11, -0.15, 0.66),

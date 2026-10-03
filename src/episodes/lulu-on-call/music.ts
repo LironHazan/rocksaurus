@@ -2,8 +2,9 @@ import type { DrumName, DrumPart } from '../../audio/drum-patterns';
 import { playDrums, snare, tom, crash, kick } from '../../audio/drums';
 import { atTime } from '../../audio/schedule';
 import { CUE, PACE, SCENES, type SceneId } from './timeline';
-import { keystrokes, OFFICE_SCRIPT, NIGHT_SCRIPT } from './terminal';
-import * as fx from './sounds';
+import { keystrokes } from '../../world/screen-script';
+import { OFFICE_SCRIPT, NIGHT_SCRIPT } from './terminal';
+import * as fx from '../../audio/foley';
 
 // The soundtrack is Lulu's own drum kit, played softly, at each scene's tempo (16 steps per bar).
 // Times here are story seconds (see PACE in timeline.ts).

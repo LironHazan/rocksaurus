@@ -1,9 +1,10 @@
 import { piano } from './piano';
+import { grand } from './grand-piano';
 import { lead, organ, pad } from './synth';
 import { midi, type Note } from './notes';
 import { atTime } from './schedule';
 
-export type KeyboardSound = 'piano' | 'organ' | 'lead' | 'pad';
+export type KeyboardSound = 'piano' | 'grand' | 'organ' | 'lead' | 'pad';
 export type Hand = 'L' | 'R';
 
 /** [eighth, note, lengthInEighths, velocity = 0.55, hand = 'R'] */
@@ -33,7 +34,7 @@ export function timedNotes({ bpm, notes }: Pick<KeyboardPart, 'bpm' | 'notes'>):
     .sort((a, b) => a.start - b.start);
 }
 
-const VOICES = { piano, organ, lead, pad } as const;
+const VOICES = { piano, grand, organ, lead, pad } as const;
 
 /** Schedules a keyboard part with its sound. */
 export function playKeyboardPart(bus: AudioNode, t0: number, part: KeyboardPart): void {

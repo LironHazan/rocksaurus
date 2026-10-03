@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { box, createRoom, cylinder, mat, picture, ROUND } from './common';
+import { box, createRoom, cylinder, mat, picture, ROUND } from '../../../world/interior';
 import { textTexture } from '../../../world/text-texture';
 import { createDrumKit } from '../../../props/drums';
 

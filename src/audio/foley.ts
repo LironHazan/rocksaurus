@@ -1,6 +1,6 @@
-import { audio } from '../../audio/context';
+import { audio } from './context';
 
-// Little foley for Lulu's day: keys, the shaker, gulps and the dreaded pager.
+// Everyday foley: keys, a shaker, gulps, a pager, a clock, footsteps.
 const { ctx } = audio;
 
 let noiseBuf: AudioBuffer | null = null;

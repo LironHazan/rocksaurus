@@ -7,8 +7,10 @@ import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
 import { recentHit } from '../../band/timing';
 import { CUE, DURATION, PACE, SCENES, beatPulse, sceneAt, type SceneSpan } from './timeline';
-import { linesAt, keystrokes, OFFICE_SCRIPT, NIGHT_SCRIPT } from './terminal';
+import { linesAt, keystrokes } from '../../world/screen-script';
+import { OFFICE_SCRIPT, NIGHT_SCRIPT } from './terminal';
 import { CAPTIONS } from './captions';
+import { atPace } from '../../engine/subtitles';
 import { soundtrack, STEPS, GULPS } from './music';
 import { createOffice, DESK_SPOT } from './sets/office';
 import { createTown } from './sets/town';
@@ -55,7 +57,7 @@ const episode: Episode = {
   id: 'lulu-on-call',
   title: 'Lulu On Call 📟',
   duration: DURATION,
-  captions: CAPTIONS.map(c => ({ ...c, from: c.from * PACE, to: c.to * PACE })),
+  captions: atPace(CAPTIONS, PACE),
 
   setup(stage) {
     const { camera } = stage;
