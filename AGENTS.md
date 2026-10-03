@@ -13,6 +13,12 @@ video. React 19 + TypeScript, Vite, Vitest. Deployed to GitHub Pages from `main`
 | `npm run build`  | `tsc -b && vite build` — CI runs this too, so keep it passing |
 | `npm run format` | Prettier write (formatting is enforced, not advisory)         |
 
+The toolchain is TypeScript 7 (the native compiler) and **oxlint**, not ESLint — `.oxlintrc.json` is the lint
+config and there is no `eslint.config.js`. oxlint enables the `correctness` category plus
+`typescript/consistent-type-imports` and the two `react-hooks` rules; the stricter categories are deliberately
+off (`style` alone reports >13k findings here). `react-refresh/only-export-components` has no oxlint equivalent,
+so that HMR check is gone.
+
 Verified on Node 24.21 (2026-10-03): `npm run check` passes — 18 test files, 67 tests — and `npm run build`
 succeeds. Nothing in the repo is currently failing or skipped. Two non-blocking notes:
 
@@ -20,10 +26,10 @@ succeeds. Nothing in the repo is currently failing or skipped. Two non-blocking 
   of the ~8 s run. Not configured; left as-is.
 - The vendor bundle is ~1.1 MB (three.js). `vite.config.ts` raises `chunkSizeWarningLimit` to 1500 on purpose.
 
-**Node 24.** `.nvmrc` pins `24` and both CI workflows resolve the version through
-`node-version-file: .nvmrc`, so 24 is what CI runs and what the gate is verified against; check
-`package.json` engines for the supported floor. Older Node may still run the toolchain — there is no `.npmrc`,
-so npm only warns on an engine mismatch rather than failing — but don't rely on that.
+**Node 24.** `.nvmrc` pins `24`, `package.json` engines requires `>=24`, and both CI workflows resolve the
+version through `node-version-file: .nvmrc` — so one bump keeps all three in step. Older Node may still run the
+toolchain (there is no `.npmrc`, so npm only warns on an engine mismatch rather than failing), but 24 is what
+CI uses and what the gate is verified against.
 
 ## The one rule: episodes are pure functions of time
 
@@ -130,7 +136,8 @@ The checkout directory (`.agents/`) is gitignored and not present in a fresh clo
 
 - **Imports are extensionless**, including TS importing JS (`import { enableShadows } from '../characters/materials'`)
   and directory indexes (`import bandLive from './band-live'`). Only `three/addons/**/*.js` carries an extension.
-- **`import type` is mandatory** for types: `verbatimModuleSyntax` + `@typescript-eslint/consistent-type-imports: error`.
+- **`import type` is mandatory** for types: `verbatimModuleSyntax` + `typescript/consistent-type-imports: error`
+  (oxlint). Adding a value import of a type fails `npm run lint`.
 - **`noUncheckedIndexedAccess` is on**, plus `noUnusedLocals`/`noUnusedParameters`. Hence the `episodes[0]!`,
   `clicks.at(-1) ?? -1` and `arms.find(...)!` style throughout — keep it, don't widen types to avoid it.
 - **TS episodes declare `const episode: Episode = {…}` then `export default episode`** so the contract is checked
