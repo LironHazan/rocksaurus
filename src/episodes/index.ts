@@ -4,6 +4,7 @@ import type { Episode } from '../engine/types';
 import bandLive from './band-live';
 import meetRory from './meet-rory';
 import meetParis from './meet-paris';
+import parisRotHotic from './paris-rot-hotic';
 import meetSteggy from './meet-steggy';
 import meetTiki from './meet-tiki';
 import meetLulu from './meet-lulu';
@@ -22,6 +23,7 @@ export interface EpisodeFolder {
 export const folders: readonly EpisodeFolder[] = [
   { id: 'the-band', title: 'The Band', episodes: [bandLive] },
   { id: 'meet-the-band', title: 'Meet the Band', episodes: [meetRory, meetParis, meetSteggy, meetTiki, meetLulu] },
+  { id: 'paris', title: 'Paris', episodes: [parisRotHotic] },
   { id: 'lulu', title: 'Lulu', episodes: [luluOnCall] },
   { id: 'steggy', title: 'Steggy', episodes: [steggyMatcha] },
   { id: 'rory', title: 'Rory', episodes: [roryPizza, roryFriday, roryRocks] },
