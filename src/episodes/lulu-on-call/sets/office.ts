@@ -74,8 +74,8 @@ export function createOffice() {
     ctx.fillStyle = '#ffd36b';
     ctx.textAlign = 'center';
     ctx.font = `700 ${w * 0.17}px ${ROUND}`;
-    ctx.fillText('DEPLOY', w / 2, h * 0.32);
-    ctx.fillText('OR DIE', w / 2, h * 0.5);
+    ctx.fillText('SEEK AND', w / 2, h * 0.32);
+    ctx.fillText('DEPLOY!', w / 2, h * 0.5);
     ctx.font = `${w * 0.3}px ${ROUND}`;
     ctx.fillText('🤘', w / 2, h * 0.8);
   });
