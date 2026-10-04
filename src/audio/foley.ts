@@ -73,3 +73,65 @@ export const tick = (bus: AudioNode, when: number) => burst(bus, when, 0.02, 'hi
 
 /** A giant footstep. */
 export const stomp = (bus: AudioNode, when: number) => tone(bus, when, 'sine', 110, 45, 0.3, 0.2);
+
+// ── In a shop ──────────────────────────────────────────────
+
+/** Metal hangers sliding along a rail: a quick run of clacks. */
+export function hangers(bus: AudioNode, when: number, n = 6) {
+  for (let i = 0; i < n; i++) burst(bus, when + i * 0.05, 0.05, 'bandpass', 2400 + (i % 3) * 700, 0.1, 3);
+}
+
+/** A curtain pulled across: a soft swish of filtered noise. */
+export function swish(bus: AudioNode, when: number, len = 0.5) {
+  const src = new AudioBufferSourceNode(ctx, { buffer: noise() });
+  const f = new BiquadFilterNode(ctx, { type: 'bandpass', frequency: 700, Q: 0.8 });
+  f.frequency.setValueAtTime(700, when);
+  f.frequency.exponentialRampToValueAtTime(2600, when + len);
+  const g = new GainNode(ctx, { gain: 0 });
+  g.gain.setValueAtTime(0, when);
+  g.gain.linearRampToValueAtTime(0.1, when + len * 0.4);
+  g.gain.exponentialRampToValueAtTime(0.0001, when + len);
+  src.connect(f).connect(g).connect(bus);
+  src.start(when, (when * 3.1) % 0.5);
+  src.stop(when + len + 0.05);
+}
+
+/** A puff of magic: a little rising run of bell tones. */
+export function sparkle(bus: AudioNode, when: number) {
+  [1318.5, 1568, 1975.5, 2349.3, 2637].forEach((f, i) => tone(bus, when + i * 0.06, 'sine', f, f, 0.5, 0.05));
+  burst(bus, when, 0.25, 'highpass', 5000, 0.06);
+}
+
+/** A cash register: the bell, then the drawer popping out. */
+export function kaching(bus: AudioNode, when: number) {
+  tone(bus, when, 'sine', 2093, 2093, 0.9, 0.12);
+  tone(bus, when, 'sine', 3136, 3136, 0.6, 0.06);
+  burst(bus, when + 0.12, 0.12, 'lowpass', 900, 0.2);
+  burst(bus, when + 0.14, 0.06, 'bandpass', 3500, 0.1, 2);
+}
+
+/** A receipt printer ratcheting out a long strip. */
+export function printer(bus: AudioNode, when: number, len = 0.9) {
+  for (let t = 0; t < len; t += 0.045) burst(bus, when + t, 0.02, 'bandpass', 2800, 0.05, 2);
+}
+
+/** A die clattering across a counter: bounces that get closer together and quieter. */
+export function diceRoll(bus: AudioNode, when: number) {
+  let t = 0;
+  for (let i = 0; i < 9; i++) {
+    burst(bus, when + t, 0.04, 'bandpass', 1800 + (i % 3) * 600, 0.2 * 0.8 ** i, 2.5);
+    tone(bus, when + t, 'triangle', 900, 500, 0.05, 0.05 * 0.8 ** i);
+    t += 0.19 * 0.78 ** i;
+  }
+}
+
+/** Rustling paper (a shopping bag). */
+export function rustle(bus: AudioNode, when: number) {
+  for (let i = 0; i < 5; i++) burst(bus, when + i * 0.07, 0.07, 'bandpass', 3200 + i * 300, 0.07, 0.8);
+}
+
+/** A boot on a hard floor. */
+export const footstep = (bus: AudioNode, when: number) => {
+  burst(bus, when, 0.05, 'lowpass', 500, 0.14);
+  burst(bus, when, 0.02, 'bandpass', 2200, 0.05, 2);
+};

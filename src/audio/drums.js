@@ -172,9 +172,34 @@ function softCurve(k, n = 1024) {
   return c;
 }
 
-/** Schedules a drum part (see drumHits) through the drum bus, starting at t0. */
-export function playDrums(bus, t0, part) {
-  const kit = drumBus(bus);
+// Smooth kit: no square-wave "metal", no saturation or presence lift. Cymbals are soft filtered noise and the
+// whole kit sits under a gentle low-pass, so it reads as brushes and felt mallets rather than a drum machine.
+const SMOOTH_VOICES = {
+  ...VOICES,
+  hat: (b, w, v, ch) =>
+    noiseHit(b, w, { type: 'bandpass', freq: 5500, Q: 0.6, peak: 0.07 * v, decay: ch === 'o' ? 0.25 : 0.06 }),
+  crash: (b, w, v) => {
+    noiseHit(b, w, { type: 'bandpass', freq: 3800, Q: 0.5, peak: 0.16 * v, decay: 1.8 });
+    noiseHit(b, w, { type: 'lowpass', freq: 2500, Q: 0.5, peak: 0.1 * v, decay: 1.2 });
+  },
+  click: (b, w) => noiseHit(b, w, { type: 'bandpass', freq: 2000, Q: 2, peak: 0.2, decay: 0.03 }),
+};
+
+function smoothBus(bus) {
+  const warm = new BiquadFilterNode(ctx, { type: 'lowpass', frequency: 4500, Q: 0.4 });
+  const body = new BiquadFilterNode(ctx, { type: 'lowshelf', frequency: 220, gain: 2 });
+  const comp = new DynamicsCompressorNode(ctx, { threshold: -22, knee: 12, ratio: 2.5, attack: 0.01, release: 0.2 });
+  warm.connect(body).connect(comp).connect(bus);
+  return warm;
+}
+
+/**
+ * Schedules a drum part (see drumHits) through the drum bus, starting at t0. `{ smooth: true }` swaps in the
+ * soft kit for gentle scores.
+ */
+export function playDrums(bus, t0, part, { smooth = false } = {}) {
+  const kit = smooth ? smoothBus(bus) : drumBus(bus);
+  const voices = smooth ? SMOOTH_VOICES : VOICES;
   for (const { name, time, ch } of drumHits(part))
-    atTime(t0 + time, () => VOICES[name](kit, t0 + time, hitVelocity(ch), ch));
+    atTime(t0 + time, () => voices[name](kit, t0 + time, hitVelocity(ch), ch));
 }
