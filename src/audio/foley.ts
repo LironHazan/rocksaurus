@@ -135,3 +135,48 @@ export const footstep = (bus: AudioNode, when: number) => {
   burst(bus, when, 0.05, 'lowpass', 500, 0.14);
   burst(bus, when, 0.02, 'bandpass', 2200, 0.05, 2);
 };
+
+// ── On the pitch ───────────────────────────────────────────
+
+/** A referee's pea whistle: a shrill tone with the pea's fast trill. */
+export function whistle(bus: AudioNode, when: number, len = 0.35) {
+  const o = new OscillatorNode(ctx, { type: 'sine', frequency: 2950 });
+  const trill = new OscillatorNode(ctx, { frequency: 34 });
+  const depth = new GainNode(ctx, { gain: 120 });
+  trill.connect(depth).connect(o.frequency);
+  const g = new GainNode(ctx, { gain: 0 });
+  g.gain.setValueAtTime(0, when);
+  g.gain.linearRampToValueAtTime(0.09, when + 0.02);
+  g.gain.setTargetAtTime(0, when + len, 0.03);
+  o.connect(g).connect(bus);
+  for (const n of [o, trill]) {
+    n.start(when);
+    n.stop(when + len + 0.2);
+  }
+  burst(bus, when, len, 'bandpass', 3000, 0.03, 3); // breath through it
+}
+
+/** A boot on a football: a round thump with a leathery slap. */
+export function kickBall(bus: AudioNode, when: number, vol = 1) {
+  tone(bus, when, 'sine', 210, 70, 0.14, 0.22 * vol);
+  burst(bus, when, 0.05, 'bandpass', 900, 0.18 * vol, 1.2);
+}
+
+/** A small crowd (the touchline) cheering: a swell of filtered noise that rises and fades. */
+export function cheer(bus: AudioNode, when: number, len = 2.5) {
+  const src = new AudioBufferSourceNode(ctx, { buffer: noise(), loop: true });
+  const f = new BiquadFilterNode(ctx, { type: 'bandpass', frequency: 1300, Q: 0.7 });
+  const wobble = new OscillatorNode(ctx, { frequency: 3.1 });
+  const wobbleDepth = new GainNode(ctx, { gain: 0.25 });
+  const voices = new GainNode(ctx, { gain: 0.75 }); // the crowd's ebb and flow…
+  wobble.connect(wobbleDepth).connect(voices.gain);
+  const g = new GainNode(ctx, { gain: 0 }); // …under the swell
+  g.gain.setValueAtTime(0, when);
+  g.gain.linearRampToValueAtTime(0.16, when + 0.25);
+  g.gain.setTargetAtTime(0, when + len * 0.6, len * 0.2);
+  src.connect(f).connect(voices).connect(g).connect(bus);
+  for (const n of [src, wobble]) {
+    n.start(when);
+    n.stop(when + len + 0.5);
+  }
+}
