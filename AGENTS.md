@@ -132,6 +132,8 @@ fight the "pure function of `t`" model, and a wrapper would have to be threaded 
 
 - **Episode**: copy a neighbour folder, change `id`/`title`/`duration`/`update(t)`/`audio(bus, t0)`, then register
   it in a folder in `src/episodes/index.ts`. The first episode in the first folder is the studio default.
+- **End card**: every new Short ends with the channel's subscribe card (Rory with a sign, `src/episodes/outro.ts`):
+  `export default withOutro(episode)`. It adds `OUTRO_LEN` seconds and a sting; keep `duration` the story's length.
 - **Joke variant**: spread an existing episode and replace only `id`, `title`, `captions`
   (see `episodes/rory-friday/index.js`).
 - **Character**: return the same rig shape so `idle()`, `resetPose()` and `reachArm()` keep working.

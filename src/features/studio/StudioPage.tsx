@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { folders, findEpisode } from '../../episodes';
 import { DEFAULT_FORMAT, FORMATS, isFormatId } from '../../engine/formats';
-import { CAPTION_FONT } from '../../engine/captions';
+import { CAPTION_FONT_SPEC } from '../../engine/captions';
 import { recordEpisode } from '../../engine/recorder';
 import { saveSnapshot, snapshotCanvas, snapshotName, type SnapshotCrop } from '../../engine/snapshot';
 import type { FormatId } from '../../engine/types';
@@ -42,7 +42,7 @@ export function StudioPage() {
     setRecording(true);
     setStatus('Recording one full pass with sound — keep this tab visible.');
     try {
-      await document.fonts.load(`700 80px ${CAPTION_FONT}`); // never record fallback fonts
+      await document.fonts.load(CAPTION_FONT_SPEC); // never record fallback fonts
       await document.fonts.ready;
       const file = await recordEpisode(session.player, session.stage.canvas, { name: `${episode.id}-${formatId}` });
       setStatus(`Saved ${file}`);
@@ -56,7 +56,7 @@ export function StudioPage() {
   async function snapshot() {
     if (!session) return;
     try {
-      await document.fonts.load(`700 80px ${CAPTION_FONT}`); // captions must not fall back to another font
+      await document.fonts.load(CAPTION_FONT_SPEC); // captions must not fall back to another font
       const t = session.player.time();
       const canvas = snapshotCanvas(session.player.renderAt(t, snapshotCaptions), crop);
       setStatus(`Saved ${await saveSnapshot(canvas, snapshotName(episode.id, t, crop))}`);

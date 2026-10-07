@@ -7,6 +7,17 @@ import { textTexture } from '../world/text-texture';
 
 const JERSEY_FONT = "'Bungee'";
 
+/** Tiki Taka's T-rex body, as the jersey wraps it (the posture group's space). */
+export const TREX_BODY: Ellipsoid = { center: [0, 1.45, 0], radii: [1, 1.25, 1.05] };
+
+/** The daycare dads' home kit: all white, sponsored by the daycare. Tiki wears it with RONALDO 7 on the back. */
+export const HOME_KIT = {
+  color: 0xffffff,
+  trim: 0x1b1b22,
+  ink: '#1b1b22',
+  style: { sponsor: 'LITTLE ROARS', accent: '#1b1b22', badge: '#d9b44a' },
+};
+
 export interface JerseyOptions {
   color: number;
   /** Collar, cuffs and the shorts' stripe. */

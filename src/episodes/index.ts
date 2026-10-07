@@ -2,6 +2,7 @@ import type { Episode } from '../engine/types';
 
 // Register episodes here, grouped into folders for the studio sidebar. The first episode is the default.
 import bandLive from './band-live';
+import mondayCoffee from './monday-coffee';
 import meetRory from './meet-rory';
 import meetParis from './meet-paris';
 import parisRotHotic from './paris-rot-hotic';
@@ -22,7 +23,7 @@ export interface EpisodeFolder {
 }
 
 export const folders: readonly EpisodeFolder[] = [
-  { id: 'the-band', title: 'The Band', episodes: [bandLive] },
+  { id: 'the-band', title: 'The Band', episodes: [bandLive, mondayCoffee] },
   { id: 'meet-the-band', title: 'Meet the Band', episodes: [meetRory, meetParis, meetSteggy, meetTiki, meetLulu] },
   { id: 'tiki', title: 'Tiki Taka', episodes: [tikiGolazo] },
   { id: 'paris', title: 'Paris', episodes: [parisRotHotic] },

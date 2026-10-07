@@ -3,6 +3,12 @@ import { WebGPURenderer } from 'three/webgpu';
 import { disposeObject } from './dispose';
 import type { Format, Overlay, Stage } from './types';
 
+/** A touch brighter than neutral: ACES filmic tone mapping darkens the mid-tones a little. */
+const EXPOSURE = 1.05;
+/** The camera's clip planes, in scene units: close enough for phone close-ups, far enough for the town. */
+const NEAR = 0.1;
+const FAR = 100;
+
 /**
  * Renderer and camera shared by every episode (lighting comes from the world, e.g. meadow.js).
  * Three.js draws into an offscreen canvas; each frame is composited onto a 2D output canvas together
@@ -20,7 +26,7 @@ export async function createStage(container: HTMLElement, format: Format): Promi
   renderer.setSize(width, height, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = EXPOSURE;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   await renderer.init();
@@ -37,7 +43,7 @@ export async function createStage(container: HTMLElement, format: Format): Promi
     format,
     renderer,
     scene: new THREE.Scene(),
-    camera: new THREE.PerspectiveCamera(format.fov, width / height, 0.1, 100),
+    camera: new THREE.PerspectiveCamera(format.fov, width / height, NEAR, FAR),
     canvas,
     render(overlay?: Overlay) {
       scenes.add(stage.scene);

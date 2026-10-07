@@ -7,6 +7,11 @@ import type { Episode, Stage } from './types';
 const TAIL = 1;
 /** How often subscribers are told about time changes (ms) — keeps React re-renders cheap. */
 const NOTIFY_EVERY = 100;
+/** Seconds for the old bus to fade out on stop (no click), and ms before it's disconnected, well after. */
+const FADE_OUT = 0.05;
+const DISCONNECT_AFTER_MS = 500;
+/** Seconds of headroom before the first note, so it isn't scheduled in the past. */
+const START_LEAD = 0.05;
 
 export interface PlayerSnapshot {
   readonly time: number;
@@ -67,8 +72,8 @@ export function createPlayer(stage: Stage, episode: Episode): Player {
     cancelScheduled();
     if (!bus) return;
     const old = bus;
-    old.gain.setTargetAtTime(0, audio.ctx.currentTime, 0.05);
-    setTimeout(() => old.disconnect(), 500);
+    old.gain.setTargetAtTime(0, audio.ctx.currentTime, FADE_OUT);
+    setTimeout(() => old.disconnect(), DISCONNECT_AFTER_MS);
     bus = null;
   }
 
@@ -76,7 +81,7 @@ export function createPlayer(stage: Stage, episode: Episode): Player {
     stopBus();
     start = performance.now();
     if (soundOn) {
-      t0 = audio.ctx.currentTime + 0.05;
+      t0 = audio.ctx.currentTime + START_LEAD;
       bus = audio.ctx.createGain();
       bus.connect(audio.master);
       episode.audio?.(bus, t0);
