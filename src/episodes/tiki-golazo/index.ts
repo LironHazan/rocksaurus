@@ -7,7 +7,7 @@ import { createTyrannosaurus, TIKI_COLORS } from '../../characters/tyrannosaurus
 import { createRory, idle, resetPose } from '../../characters/rory';
 import { createStegosaurus, STEGGY_COLORS } from '../../characters/stegosaurus';
 import { addCap } from '../../props/cap';
-import { addJersey, createBall } from '../../props/soccer';
+import { addJersey, createBall, HOME_KIT, TREX_BODY } from '../../props/soccer';
 import { sungNotes, mouthOpenAt } from '../../audio/vowels';
 import { CAPTIONS } from './captions';
 import { createPitch, cheerSign, GOAL, SIDELINE_Z } from './sets/pitch';
@@ -72,14 +72,6 @@ interface Player {
   body: THREE.Object3D;
 }
 
-const TREX_BODY: Ellipsoid = { center: [0, 1.45, 0], radii: [1, 1.25, 1.05] };
-/** The home team's kit: all white, sponsored by the daycare. */
-const HOME_KIT = {
-  color: 0xffffff,
-  trim: 0x1b1b22,
-  ink: '#1b1b22',
-  style: { sponsor: 'LITTLE ROARS', accent: '#1b1b22', badge: '#d9b44a' },
-};
 const RORY_BODY: Ellipsoid = { center: [0, 1.2, 0], radii: [1, 1.1, 0.95] };
 
 const episode: Episode = {
