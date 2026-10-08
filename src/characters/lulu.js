@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
+import { taperedTube } from '../props/tube';
 
 export const LULU_COLORS = {
   body: 0xb48ce8, // lavender (saturated enough to stay purple under stage lights)
@@ -86,10 +87,21 @@ export function createLulu(colors = LULU_COLORS) {
 
   const tail = new THREE.Group();
   tail.position.set(0, 0.6, -0.8);
-  const tailCone = new THREE.Mesh(new THREE.ConeGeometry(0.45, 1.8, 24), M.body);
-  tailCone.rotation.x = -Math.PI / 2 + 0.25;
-  tailCone.position.set(0, 0.15, -0.8);
-  tail.add(tailCone);
+  // one smooth taper that starts inside the body, so it grows out of her back instead of being stuck on
+  const spine = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 0.25, 0.55),
+    new THREE.Vector3(0, 0.05, -0.3),
+    new THREE.Vector3(0, -0.22, -1.1),
+    new THREE.Vector3(0, -0.4, -1.8),
+    new THREE.Vector3(0, -0.46, -2.35),
+  ]);
+  tail.add(
+    new THREE.Mesh(
+      taperedTube(spine, s => 0.05 + 0.5 * (1 - s) ** 1.2, { segments: 40, radial: 24 }),
+      M.body,
+    ),
+  );
+  tail.add(ball(0.07, M.body, [0, -0.46, -2.35])); // rounded tip
   body.add(tail);
 
   // tiny arms, each holding a drumstick that points forward and slightly down

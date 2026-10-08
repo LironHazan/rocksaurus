@@ -19,7 +19,7 @@ import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
 import { addMohawk } from '../../props/mohawk';
 import { addTattoo } from '../../props/tattoo';
-import { createPhone, type Phone } from '../../props/phone';
+import { chatView, createPhone, type Phone } from '../../props/phone';
 import { addJersey, HOME_KIT, TREX_BODY } from '../../props/soccer';
 import { createBedroom, BED_TOP } from '../lulu-on-call/sets/bedroom';
 import { CAPTIONS } from './captions';
@@ -37,7 +37,7 @@ import {
   createStreetCafe,
   createTherapy,
 } from './sets';
-import { CHAT, COLOURS, CUE, DURATION, chatAt, type Member } from './timeline';
+import { CHAT, COLOURS, CUE, DURATION, START_CLOCK, chatAt, type Member } from './timeline';
 import { soundtrack } from './sound';
 import { withOutro } from '../outro';
 
@@ -368,19 +368,8 @@ const episode: Episode = {
       camera.up.copy(screenUp);
       return { cam: [cam.x, cam.y, cam.z], look: [look.x, look.y, look.z] };
     }
-    /** The chat on someone's phone: others typing show under the group name, their own typing in the message bar. */
-    function show(owner: Member, t: number) {
-      const { lines, pending, flash, clock } = chatAt(t);
-      const mine = pending?.from === owner;
-      const letters = mine ? Array.from(pending.text) : [];
-      phones[owner].show({
-        lines,
-        flash,
-        clock,
-        typing: pending && !mine ? pending.from : null,
-        draft: letters.slice(0, Math.ceil(letters.length * (pending?.progress ?? 0))).join(''),
-      });
-    }
+    /** The chat on someone's phone. */
+    const show = (owner: Member, t: number) => phones[owner].show(chatView(CHAT, t, owner, START_CLOCK));
     const typingNow = (t: number, who: Member) => chatAt(t).pending?.from === who;
     /** Sitting on a seat: hips on the cushion, feet forward. */
     function sit(a: Posable, spot: { x: number; z: number; yaw: number }, hips: number, feet = 0.5) {

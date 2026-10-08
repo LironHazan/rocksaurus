@@ -403,3 +403,39 @@ export function createPhone(style: ChatStyle, { height = 1.0, colour = 0x2c2c30 
     },
   };
 }
+
+// ── a scripted chat ──────────────────────────────────────────
+
+/** A message in a scripted chat: it lands at `at` (seconds), after its sender has typed it for `TYPING` seconds. */
+export interface TimedChatLine extends ChatLine {
+  at: number;
+}
+
+/** How long someone types before their message lands. */
+export const TYPING = 1.1;
+
+/** The chat at time t: what's been sent, what's being typed (and how much of it), and the arrival flash. */
+export function chatState<L extends TimedChatLine>(chat: readonly L[], t: number, startClock: string) {
+  const lines = chat.filter(m => m.at <= t);
+  const next = chat.find(m => m.at > t);
+  const pending =
+    next && next.at - t <= TYPING
+      ? { from: next.from, text: next.text, progress: Math.min(1, (TYPING - (next.at - t)) / (TYPING - 0.15)) }
+      : null;
+  const last = lines.at(-1);
+  return { lines, pending, flash: last ? Math.max(0, 1 - (t - last.at) / 0.4) : 0, clock: last?.time ?? startClock };
+}
+
+/** What `owner`'s phone shows at t: others typing under the group name, their own typing in the message bar. */
+export function chatView(chat: readonly TimedChatLine[], t: number, owner: string, startClock: string): ChatView {
+  const { lines, pending, flash, clock } = chatState(chat, t, startClock);
+  const mine = pending?.from === owner;
+  const letters = mine ? Array.from(pending.text) : [];
+  return {
+    lines,
+    flash,
+    clock,
+    typing: pending && !mine ? pending.from : null,
+    draft: letters.slice(0, Math.ceil(letters.length * (pending?.progress ?? 0))).join(''),
+  };
+}

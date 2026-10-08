@@ -51,7 +51,8 @@ export const CAFE_CHAIRS = {
   steggy: { x: 2.9, z: 1.8, yaw: -1.2 },
 };
 
-function sky(top: string, mid: string, bottom: string): THREE.Texture {
+/** A vertical sky gradient, for `scene.background`. */
+export function sky(top: string, mid: string, bottom: string): THREE.Texture {
   return textTexture(4, 256, (ctx, w, h) => {
     const gr = ctx.createLinearGradient(0, 0, 0, h);
     gr.addColorStop(0, top);

@@ -221,12 +221,13 @@ export function shutter(bus: AudioNode, when: number) {
 
 // ── Out and about ──────────────────────────────────────────
 
-export type BedKind = 'street' | 'kids' | 'room' | 'cafe';
+export type BedKind = 'street' | 'kids' | 'room' | 'cafe' | 'fountain';
 const BEDS: Record<BedKind, { type: BiquadFilterType; freq: number; Q: number; vol: number; wobble: number }> = {
   street: { type: 'lowpass', freq: 380, Q: 0.5, vol: 0.07, wobble: 0.15 }, // distant traffic rumble
   kids: { type: 'bandpass', freq: 1500, Q: 0.9, vol: 0.05, wobble: 0.45 }, // a playground's chatter
   room: { type: 'lowpass', freq: 220, Q: 0.4, vol: 0.025, wobble: 0 }, // a quiet room's air
   cafe: { type: 'bandpass', freq: 900, Q: 0.6, vol: 0.05, wobble: 0.3 }, // people talking over coffee
+  fountain: { type: 'bandpass', freq: 2400, Q: 0.5, vol: 0.035, wobble: 0.2 }, // splashing water
 };
 
 /** A background bed for a whole shot: looped noise, fading in and out so cuts don't click. */
@@ -318,4 +319,32 @@ export function sigh(bus: AudioNode, when: number, len = 1.3) {
   src.start(when, 0.1);
   src.stop(when + len + 0.05);
   tone(bus, when, 'sawtooth', 210, 140, len * 0.6, 0.012); // a little voice in it
+}
+
+// ── Snacks and gossip ──────────────────────────────────────
+
+/** A wrapper torn open: a quick crackly rip. */
+export function tear(bus: AudioNode, when: number) {
+  for (let i = 0; i < 6; i++) burst(bus, when + i * 0.03, 0.04, 'bandpass', 2600 + i * 400, 0.12, 1.2);
+}
+
+/** A big bite: a crunch with a soft chew under it. */
+export function munch(bus: AudioNode, when: number) {
+  burst(bus, when, 0.06, 'bandpass', 1500, 0.16, 1.5);
+  burst(bus, when + 0.05, 0.08, 'lowpass', 600, 0.14);
+}
+
+/** A sharp gasp: a quick breath in, rising. */
+export function gasp(bus: AudioNode, when: number) {
+  const src = new AudioBufferSourceNode(ctx, { buffer: noise() });
+  const f = new BiquadFilterNode(ctx, { type: 'bandpass', frequency: 800, Q: 1.5 });
+  f.frequency.setValueAtTime(800, when);
+  f.frequency.exponentialRampToValueAtTime(2200, when + 0.3);
+  const g = new GainNode(ctx, { gain: 0 });
+  g.gain.setValueAtTime(0, when);
+  g.gain.linearRampToValueAtTime(0.14, when + 0.12);
+  g.gain.exponentialRampToValueAtTime(0.0001, when + 0.35);
+  src.connect(f).connect(g).connect(bus);
+  src.start(when, 0.2);
+  src.stop(when + 0.4);
 }
