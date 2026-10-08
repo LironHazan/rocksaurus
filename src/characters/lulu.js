@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
-import { taperedTube } from '../props/tube';
+import { growTail } from './tail';
 
 export const LULU_COLORS = {
   body: 0xb48ce8, // lavender (saturated enough to stay purple under stage lights)
@@ -87,21 +87,20 @@ export function createLulu(colors = LULU_COLORS) {
 
   const tail = new THREE.Group();
   tail.position.set(0, 0.6, -0.8);
-  // one smooth taper that starts inside the body, so it grows out of her back instead of being stuck on
-  const spine = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0, 0.25, 0.55),
-    new THREE.Vector3(0, 0.05, -0.3),
-    new THREE.Vector3(0, -0.22, -1.1),
-    new THREE.Vector3(0, -0.4, -1.8),
-    new THREE.Vector3(0, -0.46, -2.35),
-  ]);
   tail.add(
-    new THREE.Mesh(
-      taperedTube(spine, s => 0.05 + 0.5 * (1 - s) ** 1.2, { segments: 40, radial: 24 }),
-      M.body,
-    ),
+    growTail(M.body, {
+      spine: [
+        [0, 0.25, 0.55],
+        [0, 0.05, -0.3],
+        [0, -0.22, -1.1],
+        [0, -0.4, -1.8],
+        [0, -0.46, -2.35],
+      ],
+      base: 0.55,
+      tip: 0.05,
+      taper: 1.2,
+    }),
   );
-  tail.add(ball(0.07, M.body, [0, -0.46, -2.35])); // rounded tip
   body.add(tail);
 
   // tiny arms, each holding a drumstick that points forward and slightly down

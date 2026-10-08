@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
+import { growTail } from './tail';
 import type { CharacterRig, RigFit, Vec3 } from './types';
 import { taperedTube } from '../props/tube';
 
@@ -102,14 +103,24 @@ export function createStegosaurus(colors: StegosaurusColors = STEGGY_COLORS): St
   // tail with the classic four spikes
   const tail = new THREE.Group();
   tail.position.set(0, 0.85, -1.05);
-  const tailCone = new THREE.Mesh(new THREE.ConeGeometry(0.42, 1.5, 24), M.body);
-  tailCone.rotation.x = -Math.PI / 2 + 0.35;
-  tailCone.position.set(0, -0.12, -0.6);
-  tail.add(tailCone);
+  tail.add(
+    growTail(M.body, {
+      spine: [
+        [0, 0.25, 0.55],
+        [0, 0.05, -0.2],
+        [0, -0.12, -0.8],
+        [0, -0.2, -1.3],
+        [0, -0.24, -1.6],
+      ],
+      base: 0.48,
+      tip: 0.05,
+      taper: 1.1,
+    }),
+  );
   for (const s of [-1, 1]) {
     for (const z of [-0.95, -1.2]) {
       const spike = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.38, 12), M.spike);
-      spike.position.set(s * 0.12, -0.15, z);
+      spike.position.set(s * 0.22, -0.1 + (z + 0.95) * 0.3, z); // on the tail's surface, poking out sideways
       spike.rotation.set(0.5, 0, -s * 1.0);
       tail.add(spike);
     }
