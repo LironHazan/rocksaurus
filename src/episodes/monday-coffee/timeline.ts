@@ -1,4 +1,4 @@
-import type { ChatLine } from '../../props/phone';
+import { TYPING, chatState, type TimedChatLine } from '../../props/phone';
 
 // Monday morning: each parent drops their kid at a different school, and the group chat plans coffee. Rory
 // sleeps through it; Lulu reads it on her therapist's couch. Times are video seconds. Paced so every message
@@ -39,10 +39,12 @@ export const COLOURS: Record<Member, string> = {
   Rory: '#7fd1ae',
 };
 
-export interface ChatMessage extends ChatLine {
-  at: number;
+export interface ChatMessage extends TimedChatLine {
   from: Member;
 }
+
+/** The phones' clock before the first message. */
+export const START_CLOCK = '8:11';
 
 /** "The Parliament", the parents' group chat. Each message pops up at `at`, after its sender types it. */
 export const CHAT: readonly ChatMessage[] = [
@@ -63,17 +65,7 @@ export const CHAT: readonly ChatMessage[] = [
   { at: 48.4, time: '9:05', from: 'Tiki Taka', text: 'miss u Lulu 😘' },
 ];
 
-/** How long someone types before their message lands. */
-export const TYPING = 1.1;
+export { TYPING };
 
 /** The chat at time t: what's been sent, what's being typed (and how much of it), and the arrival flash. */
-export function chatAt(t: number) {
-  const lines = CHAT.filter(m => m.at <= t);
-  const next = CHAT.find(m => m.at > t);
-  const pending =
-    next && next.at - t <= TYPING
-      ? { from: next.from, text: next.text, progress: Math.min(1, (TYPING - (next.at - t)) / (TYPING - 0.15)) }
-      : null;
-  const last = lines.at(-1);
-  return { lines, pending, flash: last ? Math.max(0, 1 - (t - last.at) / 0.4) : 0, clock: last?.time ?? '8:11' };
-}
+export const chatAt = (t: number) => chatState(CHAT, t, START_CLOCK);

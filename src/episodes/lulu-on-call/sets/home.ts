@@ -137,5 +137,13 @@ export function createHome() {
   kit.group.scale.setScalar(0.8);
   scene.add(kit.group);
 
-  return { scene, shaker: bottle, counterTop: new THREE.Vector3(-3.6, 1.75, -1.3) };
+  return {
+    scene,
+    shaker: bottle,
+    counterTop: new THREE.Vector3(-3.6, 1.75, -1.3),
+    window: view,
+    kit: kit.group,
+    key,
+    lamp: lampLight,
+  };
 }
