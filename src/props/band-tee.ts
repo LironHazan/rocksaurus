@@ -11,6 +11,10 @@ export interface BandTeeOptions {
   ink?: string;
   /** Print font (CSS family, loaded in index.html). */
   font?: string;
+  /** A picture instead of text: draws the print (on a transparent 1024×256 canvas), e.g. a moon and stars. */
+  print?: (ctx: CanvasRenderingContext2D, w: number, h: number) => void;
+  /** How tall the print is, as a fraction of its width (text prints are wide and short). */
+  aspect?: number;
 }
 
 /**
@@ -19,7 +23,7 @@ export interface BandTeeOptions {
  */
 export function addBandTee(
   rig: FittedRig,
-  { text, color = 0x16161c, ink = '#f2efe6', font = "'Cinzel'" }: BandTeeOptions,
+  { text, color = 0x16161c, ink = '#f2efe6', font = "'Cinzel'", print: picture, aspect = 0.25 }: BandTeeOptions,
 ) {
   const cloth = new THREE.MeshStandardMaterial({ color, roughness: 0.95 });
   // the shirt fits the body the rig publishes, so it follows any change to the shape
@@ -41,28 +45,30 @@ export function addBandTee(
   }
 
   // chest print, projected onto the shirt
+  const PX = 1024;
   const print = textTexture(
-    1024,
-    256,
-    (ctx: CanvasRenderingContext2D, w: number, h: number) => {
-      ctx.fillStyle = ink;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      let size = 150;
-      ctx.font = `700 ${size}px ${font}, Georgia, serif`;
-      const width = ctx.measureText(text).width;
-      if (width > w * 0.94) size *= (w * 0.94) / width;
-      ctx.font = `700 ${size}px ${font}, Georgia, serif`;
-      ctx.fillText(text, w / 2, h / 2);
-    },
+    PX,
+    Math.round(PX * aspect),
+    picture ??
+      ((ctx: CanvasRenderingContext2D, w: number, h: number) => {
+        ctx.fillStyle = ink;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        let size = 150;
+        ctx.font = `700 ${size}px ${font}, Georgia, serif`;
+        const width = ctx.measureText(text).width;
+        if (width > w * 0.94) size *= (w * 0.94) / width;
+        ctx.font = `700 ${size}px ${font}, Georgia, serif`;
+        ctx.fillText(text, w / 2, h / 2);
+      }),
     [`700 150px ${font}`],
   );
   // DecalGeometry works in world space: project at the chest's world position, then bring the result back
   // into torso space — so this works wherever the character already stands.
   rig.root.updateMatrixWorld(true);
-  const chest = rig.torso.localToWorld(new THREE.Vector3(cx, cy + ry * 0.18, cz + rz * 1.02));
+  const chest = rig.torso.localToWorld(new THREE.Vector3(cx, cy + ry * (picture ? 0.08 : 0.18), cz + rz * 1.02));
   const facing = new THREE.Euler().setFromQuaternion(rig.torso.getWorldQuaternion(new THREE.Quaternion()));
-  const geometry = new DecalGeometry(shirt, chest, facing, new THREE.Vector3(rx * 1.3, rx * 0.33, 0.9));
+  const geometry = new DecalGeometry(shirt, chest, facing, new THREE.Vector3(rx * 1.3, rx * 1.3 * aspect * 1.015, 0.9));
   geometry.applyMatrix4(rig.torso.matrixWorld.clone().invert());
   const decal = new THREE.Mesh(
     geometry,

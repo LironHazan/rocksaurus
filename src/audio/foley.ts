@@ -348,3 +348,18 @@ export function gasp(bus: AudioNode, when: number) {
   src.start(when, 0.2);
   src.stop(when + 0.4);
 }
+
+// ── Night shifts ───────────────────────────────────────────
+
+/** A phone ringing: one ring, a warbling two-tone trill. */
+export function ring(bus: AudioNode, when: number) {
+  for (let i = 0; i < 10; i++) {
+    const f = i % 2 ? 1320 : 1760;
+    tone(bus, when + i * 0.08, 'sine', f, f, 0.07, 0.045);
+  }
+}
+
+/** A cricket: three quick, high chirps. */
+export function cricket(bus: AudioNode, when: number) {
+  for (let i = 0; i < 3; i++) tone(bus, when + i * 0.045, 'sine', 4600, 4500, 0.03, 0.02);
+}

@@ -12,6 +12,7 @@ import tikiGolazo from './tiki-golazo';
 import meetLulu from './meet-lulu';
 import luluOnCall from './lulu-on-call';
 import officeBesties from './office-besties';
+import prodCerts from './prod-certs';
 import steggyMatcha from './steggy-matcha';
 import roryPizza from './rory-pizza';
 import roryRocks from './rory-rocks';
@@ -31,6 +32,7 @@ export const folders: readonly EpisodeFolder[] = [
   { id: 'lulu', title: 'Lulu', episodes: [luluOnCall, officeBesties] },
   { id: 'steggy', title: 'Steggy', episodes: [steggyMatcha] },
   { id: 'rory', title: 'Rory', episodes: [roryPizza, roryFriday, roryRocks] },
+  { id: 'papo-pako', title: 'Papo Pako Shapeworks', episodes: [prodCerts] },
 ];
 
 export const episodes: readonly Episode[] = folders.flatMap(f => f.episodes);
