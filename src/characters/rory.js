@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
+import { growTail } from './tail';
 
 export const RORY_COLORS = {
   body: 0xa8e6cf, // mint green
@@ -57,10 +58,20 @@ export function createRory(colors = RORY_COLORS) {
 
   const tail = new THREE.Group();
   tail.position.set(0, 0.85, -0.75);
-  const cone = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.5, 24), M.body);
-  cone.rotation.x = -Math.PI / 2 + 0.35;
-  cone.position.set(0, 0.22, -0.65);
-  tail.add(cone);
+  tail.add(
+    growTail(M.body, {
+      spine: [
+        [0, 0.25, 0.55],
+        [0, 0, -0.25],
+        [0, -0.3, -0.9],
+        [0, -0.5, -1.45],
+        [0, -0.58, -1.75],
+      ],
+      base: 0.55,
+      tip: 0.05,
+      taper: 1.2,
+    }),
+  );
   torso.add(tail);
 
   const arms = []; // pivots at the shoulder; userData.side = -1 (left) / 1 (right)

@@ -1,5 +1,4 @@
-import { rng } from '../../engine/math';
-import type { Vowel } from '../../audio/vowels';
+import { mouthOf, speakerOf, syllables, type SpokenLine, type Voice } from '../../audio/babble';
 import type { TimedChatLine } from '../../props/phone';
 
 // Lulu, on her way out to the office, gets an SOS on the office group chat: Rorit, fresh out of the gym, forgot
@@ -55,12 +54,7 @@ export const CHAT: readonly ChatMessage[] = [
 ];
 
 /** Someone talking on the bench: their line (shown as a caption) and how long they talk. */
-export interface Line {
-  from: number;
-  to: number;
-  who: Member;
-  text: string;
-}
+export type Line = SpokenLine<Member>;
 
 /** The gossip, then the last word. */
 export const LINES: readonly Line[] = [
@@ -72,50 +66,18 @@ export const LINES: readonly Line[] = [
   { from: 49.4, to: 51.8, who: 'Rorit', text: 'So… same time tomorrow? 🥺' },
 ];
 
-/** One syllable of dino gossip: a short sung vowel at a talking pitch. */
-export interface Syllable {
-  at: number;
-  dur: number;
-  note: string;
-  vowel: Vowel;
-  who: Member;
-}
-
 /** Each voice's pitches (low to high): Lulu's low and warm, Silvi's bright, Rorit's quick and high. */
-const VOICES: Record<Member, { notes: readonly string[]; rate: number }> = {
+export const VOICES: Record<Member, Voice> = {
   Lulu: { notes: ['F3', 'G3', 'A3', 'C4'], rate: 0.17 },
   Silvi: { notes: ['C4', 'D4', 'E4', 'G4'], rate: 0.15 },
   Rorit: { notes: ['F4', 'G4', 'A4', 'C5'], rate: 0.12 },
 };
-const VOWELS: readonly Vowel[] = ['a', 'e', 'i', 'o', 'u'];
 
 /** Every syllable of everyone's lines, in order: what the voices sing and what the mouths do. */
-export function syllables(lines: readonly Line[] = LINES): Syllable[] {
-  const r = rng(23);
-  const out: Syllable[] = [];
-  for (const line of lines) {
-    const { notes, rate } = VOICES[line.who];
-    let t = line.from + 0.1;
-    let i = 0;
-    while (t < line.to - 0.25) {
-      // phrases: a few syllables, a little breath; the pitch drifts up toward the end of a question
-      const rising = line.text.includes('?') && t > line.to - 0.9;
-      const step = Math.min(notes.length - 1, Math.floor(r() * 3) + (rising ? 1 : 0));
-      const dur = rate * (0.7 + r() * 0.6);
-      out.push({ at: t, dur, note: notes[step]!, vowel: VOWELS[Math.floor(r() * VOWELS.length)]!, who: line.who });
-      t += dur + 0.02 + (++i % 5 === 0 ? 0.18 : 0);
-    }
-  }
-  return out;
-}
-export const SYLLABLES = syllables();
+export const SYLLABLES = syllables(LINES, VOICES);
 
 /** How open `who`'s mouth is at t (0..1), from their syllables. */
-export function mouthAt(who: Member, t: number): number {
-  for (const s of SYLLABLES)
-    if (s.who === who && t >= s.at && t < s.at + s.dur) return 0.35 + 0.5 * Math.sin(Math.PI * ((t - s.at) / s.dur));
-  return 0;
-}
+export const mouthAt = (who: Member, t: number) => mouthOf(SYLLABLES, who, t);
 
 /** Who is talking at t (or null). */
-export const speakerAt = (t: number): Member | null => LINES.find(l => t >= l.from && t < l.to)?.who ?? null;
+export const speakerAt = (t: number): Member | null => speakerOf(LINES, t);

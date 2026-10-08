@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
-import { taperedTube } from '../props/tube';
+import { growTail } from './tail';
 
 export const TIKI_COLORS = {
   body: 0x6fbbea, // sky blue
@@ -85,21 +85,20 @@ export function createTyrannosaurus(colors = TIKI_COLORS) {
   // long heavy tail, reaching back toward the floor
   const tail = new THREE.Group();
   tail.position.set(0, 0.95, -0.8);
-  // one smooth taper that starts inside the body, so it grows out of the back instead of being stuck on
-  const spine = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0, -0.05, 0.5),
-    new THREE.Vector3(0, -0.3, -0.4),
-    new THREE.Vector3(0, -0.55, -1.3),
-    new THREE.Vector3(0, -0.72, -2.2),
-    new THREE.Vector3(0, -0.78, -2.95),
-  ]);
   tail.add(
-    new THREE.Mesh(
-      taperedTube(spine, s => 0.04 + 0.6 * (1 - s) ** 1.15, { segments: 48, radial: 28 }),
-      M.body,
-    ),
+    growTail(M.body, {
+      spine: [
+        [0, -0.05, 0.5],
+        [0, -0.3, -0.4],
+        [0, -0.55, -1.3],
+        [0, -0.72, -2.2],
+        [0, -0.78, -2.95],
+      ],
+      base: 0.64,
+      tip: 0.04,
+      taper: 1.15,
+    }),
   );
-  tail.add(ball(0.06, M.body, [0, -0.78, -2.95])); // rounded tip
   posture.add(tail);
 
   // tiny arms

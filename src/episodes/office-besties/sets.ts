@@ -184,7 +184,8 @@ export function createCampus() {
   const scene = new THREE.Scene();
   scene.background = sky('#7fbef5', '#cfe6fb', '#fff1dc');
   scene.fog = new THREE.Fog(0xdcebfa, 40, 90);
-  scene.add(new THREE.HemisphereLight(0xeef6ff, 0xb8b0a0, 1.2));
+  const hemi = new THREE.HemisphereLight(0xeef6ff, 0xb8b0a0, 1.2);
+  scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xfff0d8, 2.4);
   sun.position.set(8, 14, 10);
   sun.castShadow = true;
@@ -372,5 +373,5 @@ export function createCampus() {
   board.rotation.set(-0.15, -0.35, 0);
   scene.add(board);
 
-  return { scene };
+  return { scene, hemi, sun, sign, plate };
 }

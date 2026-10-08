@@ -137,5 +137,7 @@ fight the "pure function of `t`" model, and a wrapper would have to be threaded 
 - **Joke variant**: spread an existing episode and replace only `id`, `title`, `captions`
   (see `episodes/rory-friday/index.js`).
 - **Character**: return the same rig shape so `idle()`, `resetPose()` and `reachArm()` keep working.
+  Build the tail with `growTail()` (`characters/tail.ts`): one tapered tube whose first spine point is inside the
+  body. Never a `ConeGeometry` stuck on the back, which shows a seam and looks detached (a bug that kept coming back).
 - **Band member**: return `Performer { root, update(t) }` and take `(part, clock: SongClock)`.
 - **Debug camera**: append `&cam=x,y,z,lookX,lookY,lookZ` to the studio URL to pin the camera for close-ups.

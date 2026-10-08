@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
+import { growTail } from './tail';
 import { taperedTube } from '../props/tube';
 import type { CharacterRig } from './types';
 
@@ -74,10 +75,20 @@ export function createParasaurolophus(colors = PARIS_COLORS): ParasaurolophusRig
 
   const tail = new THREE.Group();
   tail.position.set(0, 0.9, -0.75);
-  const tailCone = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.6, 24), M.body);
-  tailCone.rotation.x = -Math.PI / 2 + 0.35;
-  tailCone.position.set(0, 0.2, -0.7);
-  tail.add(tailCone);
+  tail.add(
+    growTail(M.body, {
+      spine: [
+        [0, 0.3, 0.5],
+        [0, 0.05, -0.3],
+        [0, -0.25, -1.0],
+        [0, -0.48, -1.6],
+        [0, -0.56, -1.95],
+      ],
+      base: 0.55,
+      tip: 0.05,
+      taper: 1.2,
+    }),
+  );
   torso.add(tail);
 
   const arms: THREE.Group[] = [];

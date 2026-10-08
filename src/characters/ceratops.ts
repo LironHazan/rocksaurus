@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
+import { growTail } from './tail';
 import { textTexture } from '../world/text-texture';
 import { ROUND } from '../world/interior';
 import type { CharacterRig } from './types';
@@ -91,10 +92,20 @@ export function createCeratops(
 
   const tail = new THREE.Group();
   tail.position.set(0, 0.85, -0.72);
-  const tailCone = new THREE.Mesh(new THREE.ConeGeometry(0.45, 1.5, 24), M.body);
-  tailCone.rotation.x = -Math.PI / 2 + 0.35;
-  tailCone.position.set(0, 0.18, -0.65);
-  tail.add(tailCone);
+  tail.add(
+    growTail(M.body, {
+      spine: [
+        [0, 0.35, 0.5],
+        [0, 0.1, -0.3],
+        [0, -0.2, -1.0],
+        [0, -0.45, -1.6],
+        [0, -0.55, -1.95],
+      ],
+      base: 0.5,
+      tip: 0.05,
+      taper: 1.2,
+    }),
+  );
   torso.add(tail);
 
   const arms: THREE.Group[] = [];

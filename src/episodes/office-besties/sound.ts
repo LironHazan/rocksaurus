@@ -1,6 +1,7 @@
 import { atTime } from '../../audio/schedule';
 import { boop } from '../../audio/sfx';
 import { sing } from '../../audio/voice';
+import { playSyllables } from '../../audio/babble';
 import * as fx from '../../audio/foley';
 import type { BedKind } from '../../audio/foley';
 import { TYPING } from '../../props/phone';
@@ -112,7 +113,5 @@ export function soundtrack(bus: AudioNode, t0: number): void {
   for (const b of BEDS) atTime(t0 + b.from, () => fx.bed(bus, t0 + b.from, b.to - b.from, b.kind));
   for (const e of EFFECTS) atTime(t0 + e.at, () => PLAYERS[e.kind](bus, t0 + e.at));
   // the gossip: every syllable sung, quietly, at talking pitch
-  const voices = new GainNode(bus.context, { gain: 0.32 });
-  voices.connect(bus);
-  for (const s of SYLLABLES) atTime(t0 + s.at, () => sing(voices, t0 + s.at, s.note, s.vowel, 0.6, s.dur));
+  playSyllables(bus, t0, SYLLABLES, atTime);
 }

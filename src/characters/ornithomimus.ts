@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
+import { growTail } from './tail';
 import { reachArm } from './reach';
 import { taperedTube } from '../props/tube';
 import type { CharacterRig } from './types';
@@ -28,6 +29,11 @@ export interface OrnithomimusRig extends CharacterRig {
   neck: THREE.Group;
   /** Lulu-sized head anchor, scaled to this head, so Lulu's hair props (ponytail) fit. */
   face: THREE.Group;
+  /**
+   * Clothes that fit the body: a shell over it from `from` to `to` (0 = top of the head end, 1 = bottom, as
+   * fractions of the way down), e.g. a shirt `clothe(shirt, 0.15, 0.75)`.
+   */
+  clothe(material: THREE.Material, from: number, to: number): THREE.Mesh;
   /** Leg pivots at the hips; the legs follow the feet when `updateLegs()` is called. */
   legs: THREE.Group[];
   /**
@@ -45,7 +51,7 @@ export interface OrnithomimusRig extends CharacterRig {
  * neck, a small head with a beak and big lashed green eyes, toned arms with a fitness band. Same rig shape as the others, so idle(), resetPose() and reachArm() work;
  * the legs are two-bone, re-aimed to the feet by `updateLegs()`.
  */
-export function createOrnithomimus(colors = RORIT_COLORS): OrnithomimusRig {
+export function createOrnithomimus(colors = RORIT_COLORS, { athleisure = true } = {}): OrnithomimusRig {
   const M = {
     body: plush(colors.body),
     belly: plush(colors.belly),
@@ -81,17 +87,19 @@ export function createOrnithomimus(colors = RORIT_COLORS): OrnithomimusRig {
     m.position.y = BODY_Y;
     return m;
   };
-  torso.add(band(0.2, 0.42, M.top, 1.035)); // sports top
-  torso.add(band(0.62, 1.0, M.leggings, 1.03)); // high waist
-  const waistband = new THREE.Mesh(new THREE.TorusGeometry(1, 0.03, 8, 40), M.leggings);
-  waistband.rotation.x = Math.PI / 2;
-  waistband.scale.set(R.x * 0.95, R.z * 0.95, 1);
-  waistband.position.y = BODY_Y - Math.cos(0.62 * Math.PI) * -R.y;
-  torso.add(waistband);
-  // a hint of abs on the midriff, between the top and the leggings
-  const abs = plush(new THREE.Color(colors.belly).multiplyScalar(0.9).getHex());
-  for (const y of [1.78, 1.92])
-    for (const s of [-1, 1]) torso.add(ball(0.075, abs, [s * 0.08, y, 0.43], [1, 0.8, 0.3], 12));
+  if (athleisure) {
+    torso.add(band(0.2, 0.42, M.top, 1.035)); // sports top
+    torso.add(band(0.62, 1.0, M.leggings, 1.03)); // high waist
+    const waistband = new THREE.Mesh(new THREE.TorusGeometry(1, 0.03, 8, 40), M.leggings);
+    waistband.rotation.x = Math.PI / 2;
+    waistband.scale.set(R.x * 0.95, R.z * 0.95, 1);
+    waistband.position.y = BODY_Y - Math.cos(0.62 * Math.PI) * -R.y;
+    torso.add(waistband);
+    // a hint of abs on the midriff, between the top and the leggings
+    const abs = plush(new THREE.Color(colors.belly).multiplyScalar(0.9).getHex());
+    for (const y of [1.78, 1.92])
+      for (const s of [-1, 1]) torso.add(ball(0.075, abs, [s * 0.08, y, 0.43], [1, 0.8, 0.3], 12));
+  }
   for (const [x, y, z, r] of [
     [0.3, 2.2, -0.42, 0.08],
     [-0.28, 2.0, -0.45, 0.07],
@@ -105,7 +113,7 @@ export function createOrnithomimus(colors = RORIT_COLORS): OrnithomimusRig {
   for (const s of [-1, 1]) {
     const leg = new THREE.Group();
     leg.position.set(s * 0.26, ORNITHO_HIP, 0);
-    const thigh = new THREE.Mesh(new THREE.CapsuleGeometry(0.15, THIGH - 0.3, 8, 16), M.leggings);
+    const thigh = new THREE.Mesh(new THREE.CapsuleGeometry(0.15, THIGH - 0.3, 8, 16), athleisure ? M.leggings : M.body);
     thigh.position.y = -THIGH / 2;
     leg.add(thigh);
     leg.userData.side = s;
@@ -142,10 +150,20 @@ export function createOrnithomimus(colors = RORIT_COLORS): OrnithomimusRig {
   // a long, slim tail
   const tail = new THREE.Group();
   tail.position.set(0, 1.55, -0.35);
-  const tailCone = new THREE.Mesh(new THREE.ConeGeometry(0.26, 1.7, 20), M.body);
-  tailCone.rotation.x = -Math.PI / 2 + 0.45;
-  tailCone.position.set(0, -0.3, -0.75);
-  tail.add(tailCone);
+  tail.add(
+    growTail(M.body, {
+      spine: [
+        [0, 0.25, 0.25],
+        [0, -0.1, -0.5],
+        [0, -0.45, -1.1],
+        [0, -0.7, -1.6],
+        [0, -0.8, -1.9],
+      ],
+      base: 0.3,
+      tip: 0.04,
+      taper: 1.1,
+    }),
+  );
   torso.add(tail);
 
   // long, thin arms; a fitness band on the left wrist
@@ -157,7 +175,7 @@ export function createOrnithomimus(colors = RORIT_COLORS): OrnithomimusRig {
     arm.position.y = -0.29;
     pivot.add(arm);
     pivot.add(ball(0.1, M.body, [0, -0.17, 0.04], [1, 1.3, 1], 16)); // toned
-    if (s < 0) {
+    if (s < 0 && athleisure) {
       const watch = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.03, 8, 20), M.dark);
       watch.rotation.x = Math.PI / 2;
       watch.position.y = -0.45;
@@ -263,6 +281,12 @@ export function createOrnithomimus(colors = RORIT_COLORS): OrnithomimusRig {
     tail,
     updateLegs,
     dangleFeet,
+    clothe(material, from, to) {
+      const m = band(from, to, material, 1.04);
+      m.castShadow = true;
+      torso.add(m);
+      return m;
+    },
     setMouth(k) {
       smile.visible = k < 0.05;
       mouth.visible = k >= 0.05;
