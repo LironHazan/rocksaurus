@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
-import { expectPicture, watchErrors } from './helpers';
+import { PAGE_TEST_TIMEOUT_MS, expectPicture, watchErrors } from './helpers';
 
 test('a phone is sent from the studio to the watch page, keeping the Short', async ({ page }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(PAGE_TEST_TIMEOUT_MS);
   const errors = watchErrors(page);
   await page.goto('/?episode=office-besties&format=landscape');
   await expect(page).toHaveURL(/\/watch\?episode=office-besties$/);

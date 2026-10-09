@@ -1,6 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
+/** `vite preview`'s default port. */
 const PORT = 4173;
+/** One retry on CI, where a slow software-rendered page load can flake; none locally. */
+const CI_RETRIES = 1;
 
 // E2E runs against the production build (`vite preview`), the same bundle Pages serves. Build first:
 // `npm run test:e2e` does it.
@@ -8,7 +11,7 @@ export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  retries: process.env.CI ? CI_RETRIES : 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { FORMATS } from '../engine/formats';
 import type { Stage } from '../engine/types';
 
 // Every registered Short, built and played through its whole timeline in jsdom: no browser, no GPU, no shaders, so it
@@ -32,15 +33,16 @@ Object.defineProperty(document, 'fonts', { value: { load: () => Promise.resolve(
 const { episodes } = await import('./index');
 afterAll(() => vi.unstubAllGlobals());
 
+/** Seconds between the frames played: fine enough to reach every cue in a timeline. */
 const STEP = 0.25;
 
 function createTestStage(): Stage {
-  const format = { label: 'test', width: 1080, height: 1920, fov: 50, safe: { top: 0.17, bottom: 0.745 } };
+  const format = FORMATS.shorts;
   return {
     format,
     renderer: anything as Stage['renderer'],
     scene: new THREE.Scene(),
-    camera: new THREE.PerspectiveCamera(format.fov, format.width / format.height, 0.1, 100),
+    camera: new THREE.PerspectiveCamera(format.fov, format.width / format.height),
     canvas: document.createElement('canvas'),
     render() {},
     dispose() {},

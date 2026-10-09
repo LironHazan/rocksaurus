@@ -33,6 +33,9 @@ The tools are not the usual ones: TypeScript 7 (native compiler), **oxlint** (no
   then `idle(rig, t)`, then the pose. `reachArm(pivot, target, elbow?)` does the arm IK.
 - **Dispose what you create.** `disposeObject` frees geometries, materials and textures. A leaked WebGL context per
   format switch is the easy bug here.
+- **No magic numbers in logic.** A number that means something (a limit, a timeout, a threshold, a stride) is a named
+  constant with its unit and reason (`const RGBA = 4`, `FIRST_PICTURE_TIMEOUT_MS`). Scene data stays literal: geometry
+  coordinates, colours, beat sheets, note tables.
 - **Comment the why, not the what:** intent, units, ranges, beat sheets, what an anonymous shape is
   (`ball(…) // snout`). No comment that repeats a name in the code, and no section banner that repeats what follows.
 - **Tests:** unit-test pure logic (timing, parts, captions, scripts) with Vitest globals. Every registered Short is
