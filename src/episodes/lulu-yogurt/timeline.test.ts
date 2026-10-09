@@ -39,13 +39,18 @@ describe('The Last Yogurt', () => {
     }
   });
 
-  it('the bass walks in alone, then the drums; the band stops for the yuck and the drums sit out the bed', () => {
-    const hits = drumHits(DRUMS).map(h => h.time);
-    expect(Math.min(...BASS.notes.map(n => n[0] * eighth))).toBe(0);
-    expect(Math.min(...hits)).toBeCloseTo(BARS.drumsIn * BAR);
-    const inside = (from: number, to: number) => hits.filter(t => t > from + 0.01 && t < to);
+  it('Lulu’s drums from the start; they stop for the yuck, and in bed they are only ghost notes', () => {
+    const hits = drumHits(DRUMS);
+    expect(Math.min(...hits.map(h => h.time))).toBe(0);
+    const inside = (from: number, to: number) => hits.filter(h => h.time > from + 0.01 && h.time < to);
     expect(inside(CUE.yuck[0], CUE.yuck[1])).toEqual([]);
-    expect(hits.filter(t => t >= CUE.bed[0])).toEqual([]);
+    expect(hits.filter(h => h.time >= CUE.bed[0]).every(h => h.ch === 'g')).toBe(true);
+  });
+
+  it('the bass only plays in Omli’s car, his instrument', () => {
+    const times = BASS.notes.map(n => n[0] * eighth);
+    expect(Math.min(...times)).toBeCloseTo(CUE.ride[0]);
+    expect(Math.max(...times)).toBeLessThan(CUE.ride[1]);
   });
 
   it('the guitar only plays in Omli’s car', () => {

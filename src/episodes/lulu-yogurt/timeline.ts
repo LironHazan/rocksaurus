@@ -5,7 +5,7 @@ import { mouthOf, speakerOf, syllables, type SpokenLine, type Voice } from '../.
 // yogurts are left: vegan protein, peach, caramel. She asks Mirta, the cleaner, which one is the least yuck; Mirta
 // doesn't get it, so Lulu holds up two and Mirta points at the peach. It's unbearable; into the bin it
 // goes. Bye bye: Omli drives her home, and she drinks a protein shake in bed until she falls asleep. Times are video
-// seconds. Under it all, a slow, sad groove on bass and drums.
+// seconds. Under it all, Lulu's drums; Omli's bass (and a guitar) join only in his car.
 
 export const DURATION = 60; // then the end card, see ../outro.ts
 
@@ -13,7 +13,7 @@ export const DURATION = 60; // then the end card, see ../outro.ts
 export const BPM = 80;
 export const BAR = (60 / BPM) * 4;
 /** Where the arrangement changes, in bars. */
-export const BARS = { drumsIn: 3, stop: 14, back: 15, ride: 16, bed: 18, end: 20 } as const;
+export const BARS = { stop: 14, back: 15, ride: 16, bed: 18, end: 20 } as const;
 const bar = (n: number) => n * BAR;
 
 export const CUE = {

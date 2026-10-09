@@ -8,9 +8,9 @@ import * as fx from '../../audio/foley';
 import { BASS, DRUMS, GUITAR } from './music';
 import { CUE, DURATION, SYLLABLES } from './timeline';
 
-// The groove under everything (heavy in Omli's car), quiet so the kitchen is still heard: Lulu's heavy, slow steps, the fridge door,
-// the long sigh, Mirta's mop, the lid, the spoon, the "bleh", the bin; the road on the way home; her sips, and a
-// snore.
+// Lulu's drums under everything (Omli's bass and a guitar join, heavy, in his car), quiet enough that the kitchen
+// is still heard: Lulu's heavy, slow steps, the fridge door, the long sigh, Mirta's mop, the lid, the spoon, the
+// "bleh", the bin; the road on the way home; her sips, and a snore.
 
 type Kind = 'step' | 'fridge' | 'sigh' | 'mop' | 'lid' | 'spoon' | 'bleh' | 'bin' | 'car' | 'sip' | 'snore';
 
