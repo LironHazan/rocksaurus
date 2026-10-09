@@ -17,7 +17,6 @@ export interface Bed {
   kind: BedKind;
 }
 
-/** Background beds, cut with the picture. */
 export const BEDS: readonly Bed[] = [
   { from: 0, to: CUE.arrive[0], kind: 'room' },
   { from: CUE.arrive[0], to: DURATION, kind: 'fountain' },
@@ -51,7 +50,6 @@ const WALKS = [
   [CUE.seat[0], CUE.seat[1] - 0.4],
 ] as const;
 
-/** Every sound effect, in order, as data. */
 export function effects(): Fx[] {
   const out: Fx[] = [
     { at: CUE.buzz, kind: 'vibrate' },

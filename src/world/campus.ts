@@ -5,8 +5,6 @@ import { textTexture } from './text-texture';
 import { createTree } from './school';
 import { sky } from './sky';
 
-// ── Papo Pako Shapeworks: the campus ───────────────────────────
-
 /** The bench outside the HQ (faces +z). */
 export const BENCH = { x: 0, z: 1.2, width: 7.4, top: 1.05 };
 

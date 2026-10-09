@@ -28,8 +28,6 @@ export const PLAN: readonly Chord[] = Array.from({ length: BARS }, (_, b) => LOO
 /** The piano's left hand plays the root on each bar's downbeat, so the chords still have a bottom. */
 const ROOT: Record<Chord, Note> = { Em: 'E2', C: 'C3', D: 'D3', B: 'B2' };
 
-// ── piano chords ─────────────────────────────────
-
 const VOICING: Record<Chord, readonly Note[]> = {
   Em: ['G3', 'B3', 'E4'],
   C: ['G3', 'C4', 'E4'],
@@ -50,8 +48,6 @@ function pianoPart(): KeyboardPart {
   return { bpm: BPM, sound: 'piano', notes, gain: 0.8 };
 }
 
-// ── drums ────────────────────────────────────────────────────
-
 function drumPart(): DrumPart {
   const rows: Record<string, string[]> = { kick: [], snare: [], hat: [], crash: [] };
   const bar = (kick = '', snare = '', hat = '', crash = '') => {
@@ -69,8 +65,6 @@ function drumPart(): DrumPart {
   }
   return { bpm: BPM, tracks: Object.fromEntries(Object.entries(rows).map(([k, v]) => [k, v.join(' ')])) };
 }
-
-// ── voices ───────────────────────────────────────────────────
 
 const eighths = (seconds: number) => at(seconds) / 2;
 /** Tiki's celebration shout. */
@@ -147,15 +141,12 @@ const CROWD: VocalPart = {
 export const PIANO = pianoPart();
 export const DRUMS = drumPart();
 
-// ── effects ──────────────────────────────────────────────────
-
 export type FxKind = 'whistle' | 'longWhistle' | 'kick' | 'shot' | 'net' | 'cheer' | 'thud' | 'boing';
 export interface Fx {
   at: number;
   kind: FxKind;
 }
 
-/** Every sound effect, in order, as data. */
 export function effects(): Fx[] {
   const out: Fx[] = [
     { at: CUE.whistle, kind: 'whistle' },

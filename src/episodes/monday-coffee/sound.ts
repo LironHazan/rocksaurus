@@ -8,8 +8,6 @@ import { CHAT, CUE, DURATION, TYPING } from './timeline';
 // and the playground at drop-off, a quiet room, the café's chatter) with little things happening on top: birds,
 // a car going by, the chat's pops and buzzes, Rory's snores, the therapist's pen, the espresso machine.
 
-// ── beds ─────────────────────────────────────────────────────
-
 export interface Bed {
   from: number;
   to: number;
@@ -26,8 +24,6 @@ export const BEDS: readonly Bed[] = [
   { from: CUE.cafe[0], to: CUE.end, kind: 'cafe' },
   { from: CUE.end, to: DURATION, kind: 'room' },
 ];
-
-// ── effects ──────────────────────────────────────────────────
 
 export type FxKind =
   | 'bell'
@@ -57,7 +53,6 @@ export interface Fx {
 const buzzing = (t: number) => (t >= CUE.rory[0] && t < CUE.rory[1]) || (t >= CUE.therapy[0] && t < CUE.cafe[0]);
 const indoors = (t: number) => t >= CUE.rory[0] && (t < CUE.cafe[0] || t >= CUE.end);
 
-/** Every sound effect, in order, as data. */
 export function effects(): Fx[] {
   const out: Fx[] = [
     // drop-off: the school bell, birds in the trees, the odd car

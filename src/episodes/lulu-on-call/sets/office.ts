@@ -86,7 +86,6 @@ export function createOffice() {
   clock.group.position.set(0.2, 7.1, -3.9);
   scene.add(clock.group);
 
-  // plant
   const plant = new THREE.Group();
   plant.add(cylinder(0.45, 0.35, 0.8, mat(0xe07a5f, 0.8)));
   const leaf = mat(0x5aa469, 0.7);
@@ -117,7 +116,6 @@ export function createOffice() {
       k.position.set(-0.55 + c * 0.1, 1.45, -0.38 + r * 0.12);
       desk.add(k);
     }
-  // mug
   const mug = cylinder(0.16, 0.15, 0.32, mat(0x16121f, 0.5));
   mug.position.set(-1.2, 1.39, 0.1);
   desk.add(mug);

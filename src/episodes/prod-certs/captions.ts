@@ -21,13 +21,11 @@ export const CAPTIONS: Caption[] = [
   punch(18.2, 21.8, 'Rorit, the mighty DinOps manager 💪'),
   said('Sagish', 20.5),
 
-  // ── the seniors ─────────────────────────────────────────────
   said('Taluzarus', 22.2),
   punch(22.2, 23.9, 'Taluzarus: already awake, obviously ⚡'),
   said('Amazaurus', 24.3),
   punch(24.1, 25.9, 'Amazaurus: calm as the moon 🌙'),
 
-  // ── the war room ────────────────────────────────────────────
   title(26.2, 28.3, '🚨 THE WAR ROOM\n3:21 AM'),
   sub(28.5, 33.8, 'Taluzarus tries 12 fixes at once ⚡'),
   said('Amazaurus', 34.0),
@@ -35,7 +33,6 @@ export const CAPTIONS: Caption[] = [
   punch(38.8, 40.8, 'Like any good zombie metal band 🧟🤘'),
   sub(41.2, 43.8, '7:00 AM. Nobody slept 😴'),
 
-  // ── the morning ─────────────────────────────────────────────
   sub(44.4, 47.9, 'Enter Eilon, the tech lead ☀️'),
   punch(45.2, 47.9, 'Always smiling. Always.'),
   said('Eilon', 48.2),

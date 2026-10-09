@@ -108,8 +108,9 @@ adding or splitting a module.
 - **Rigs are plain objects of `THREE.Group` pivots**, documented by `CharacterRig` (`characters/types.ts`).
   `arm.userData.side` is `-1` (left) / `1` (right) — find arms and feet by that, never by index. Each frame: `resetPose(rig)`,
   then `idle(rig, t, {…})`, then your pose. `reachArm(pivot, target, elbow?)` does the arm IK.
-- **Comments explain intent, often with the beat sheet inline** (see `episodes/band-live/index.ts`). Match that
-  density.
+- **Comment the why, not the what**: intent, units, ranges, beat sheets, what an anonymous shape is (`ball(…) // snout`).
+  No comment that repeats a name in the code (`// mug` over `const mug`), a doc that paraphrases the function name,
+  or a section banner that repeats the caption or function below it.
 - **CSS modules + design tokens** from `src/styles/global.css`. No inline styles, no Tailwind; dark only. UI
   primitives wrap Radix and take an explicit `label`/`aria-label`.
 - **Tests use Vitest globals** (no imports) and query by role/text via `renderWithProviders`

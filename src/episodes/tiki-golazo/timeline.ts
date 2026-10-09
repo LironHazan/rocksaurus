@@ -126,7 +126,6 @@ const R = 0.36; // ball radius
 const NET = { x: GOAL.x + 0.6, y: 2.4, z: -2.3 } as const; // where the shot hits the net
 export const NET_HIT = NET;
 
-/** The ball's position at time t: [x, y, z]. */
 export function ballAt(t: number): readonly [number, number, number] {
   const foot = (p: P2, toward: P2, d = 0.95): P2 => {
     const dx = toward[0] - p[0],

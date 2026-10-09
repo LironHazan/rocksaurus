@@ -60,7 +60,6 @@ export function mouthOf<W extends string>(all: readonly Syllable<W>[], who: W, t
   return 0;
 }
 
-/** Who is talking at t (or null). */
 export const speakerOf = <W extends string>(lines: readonly SpokenLine<W>[], t: number): W | null =>
   lines.find(l => t >= l.from && t < l.to)?.who ?? null;
 

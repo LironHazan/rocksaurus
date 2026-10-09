@@ -96,7 +96,6 @@ const episode: Episode = {
       w = new THREE.Vector3(),
       tmp = new THREE.Vector3();
 
-    // ── Arms ────────────────────────────────────────────────────
     /** Puts a paw on a world-space point; bends the elbow outward when the point is out of reach. */
     function paw(rig: CharacterRig, side: -1 | 1, world: THREE.Vector3) {
       rig.root.updateMatrixWorld(true);
@@ -377,7 +376,6 @@ const episode: Episode = {
         cafe.laptop.lid.rotation.x = 0; // work can wait: matcha first
       }
 
-      // Rory serves and sits down
       const serving = roryServes(t, cupS, cupR);
       if (t >= CUE.roryTakesSeat) {
         rory.root.position.copy(RORY_SEAT);

@@ -31,7 +31,6 @@ export const LOOKS: Record<
 };
 
 export interface FantasyGear {
-  /** Shows the pieces of a look and hides the rest. */
   setLook(look: Look): void;
   /** The staff is planted beside her in torso space; its orb glows. */
   staff: THREE.Group;

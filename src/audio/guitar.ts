@@ -86,7 +86,7 @@ function createAmp(bus: AudioNode, pan: number): AudioNode {
     filter('peaking', 2400, 1.0, -6), // tame harsh upper mids (where the 'metal' ring lives)
     filter('lowpass', 2800, 0.6), // speaker rolloff…
     filter('lowpass', 3800, 0.5), // …steeper, like a real 12" cab
-    new GainNode(ctx, { gain: 0.2 }), // level
+    new GainNode(ctx, { gain: 0.2 }),
     new StereoPannerNode(ctx, { pan }),
   ];
   const hp = chain[0]!;

@@ -21,7 +21,6 @@ export const SILVI_COLORS = {
 export interface CeratopsRig extends CharacterRig {
   /** Lulu-sized head anchor, scaled to this head, so Lulu's hair props (ponytail) fit. */
   face: THREE.Group;
-  /** The badge on her lanyard. */
   badge: THREE.Mesh;
 }
 
@@ -215,7 +214,6 @@ export function createCeratops(
     eye.add(ball(0.05, M.shine, [0.05, 0.05, 0.1], [1, 1, 0.4], 12));
     eye.add(ball(0.022, M.shine, [-0.04, -0.05, 0.1], [1, 1, 0.4], 12));
     for (const th of [0.3, 0.65, 1.0, 1.35]) {
-      // long lashes
       const lash = new THREE.Mesh(new THREE.CapsuleGeometry(0.013, 0.1, 4, 6), M.dark);
       lash.position.set(s * Math.cos(th) * 0.2, Math.sin(th) * 0.22, 0.02);
       lash.rotation.z = -s * (Math.PI / 2 - th);

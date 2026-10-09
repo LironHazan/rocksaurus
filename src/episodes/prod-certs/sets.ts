@@ -130,7 +130,6 @@ export function createWarRoom() {
   pizza.position.set(1.85, DESK.top, DESK.z + 0.15);
   pizza.rotation.y = 0.3;
   scene.add(pizza);
-  // Amazaurus's tea
   const tea = createCup(0xf4f1ea, 0xc8915a);
   tea.position.set(AMAZ_SEAT.x - 1.1, DESK.top, DESK.z - 0.3);
   scene.add(tea);

@@ -57,7 +57,6 @@ const episode: Episode = {
   setup(stage) {
     const { camera } = stage;
 
-    // ── Lulu's flat, in the morning ─────────────────────────────
     const home = createHome();
     home.key.color.set(0xfff4e0);
     home.lamp.intensity = 0;
@@ -90,11 +89,9 @@ const episode: Episode = {
     stash.group.position.set(-4.2, 1.75, -1.5);
     home.scene.add(stash.group);
 
-    // ── the campus ─────────────────────────────────────────────
     const campus = createCampus();
     const scenes: Record<Where, THREE.Scene> = { home: home.scene, campus: campus.scene };
 
-    // ── the cast ───────────────────────────────────────────────
     const lulu = createLulu();
     const hair = addPonytail(lulu);
     addFlannel(lulu);
@@ -135,7 +132,6 @@ const episode: Episode = {
       w = new THREE.Vector3();
     const UP = new THREE.Vector3(0, 1, 0);
 
-    // ── posing helpers ─────────────────────────────────────────
     function resetLulu() {
       lulu.root.position.set(0, 0, 0);
       lulu.root.rotation.set(0, 0, 0);
@@ -224,7 +220,6 @@ const episode: Episode = {
       return phonePov(phone, camera);
     }
 
-    // ── Lulu's flat ─────────────────────────────────────────────
     function homeScene(t: number): Shot {
       resetLulu();
       const reading = t >= CUE.door[1] && t < CUE.stash[0];
@@ -297,7 +292,6 @@ const episode: Episode = {
       };
     }
 
-    // ── the campus ─────────────────────────────────────────────
     const SEATED = {
       Rorit: { x: SEATS.rorit },
       Silvi: { x: SEATS.silvi },
@@ -423,7 +417,6 @@ const episode: Episode = {
         rorit.setMouth(0.6);
       }
 
-      // the gossip
       if (t >= CUE.gossip[0]) {
         for (const who of ['Rorit', 'Silvi', 'Lulu'] as const) gossip(who, t);
         const line = LINES.find(l => t >= l.from && t < l.to);
