@@ -26,7 +26,8 @@ import { atPace } from '../../engine/subtitles';
 import { soundtrack, STEPS, GULPS } from './music';
 import { createOffice, DESK_SPOT } from './sets/office';
 import { createTown } from './sets/town';
-import { createHome, SHAKE_SPOT, MAT_SPOT, SHAKER_GRIP, SHAKER_LENGTH, SHAKER_SCALE } from '../../world/lulu-home';
+import { createHome, SHAKE_SPOT, MAT_SPOT } from '../../world/lulu-home';
+import { SHAKER_GRIP, SHAKER_LENGTH, SHAKER_SCALE } from '../../props/shaker';
 import { createBedroom, BED_TOP } from '../../world/bedroom';
 
 // Beat sheet (see timeline.ts for the exact cues and captions.ts for the story text)

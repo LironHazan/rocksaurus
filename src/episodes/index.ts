@@ -12,6 +12,7 @@ import tikiGolazo from './tiki-golazo';
 import omliAudition from './omli-audition';
 import meetLulu from './meet-lulu';
 import luluOnCall from './lulu-on-call';
+import luluYogurt from './lulu-yogurt';
 import officeBesties from './office-besties';
 import prodCerts from './prod-certs';
 import steggyMatcha from './steggy-matcha';
@@ -30,7 +31,7 @@ export const folders: readonly EpisodeFolder[] = [
   { id: 'meet-the-band', title: 'Meet the Band', episodes: [meetRory, meetParis, meetSteggy, meetTiki, meetLulu] },
   { id: 'tiki', title: 'Tiki Taka', episodes: [tikiGolazo, omliAudition] },
   { id: 'paris', title: 'Paris', episodes: [parisRotHotic] },
-  { id: 'lulu', title: 'Lulu', episodes: [luluOnCall, officeBesties] },
+  { id: 'lulu', title: 'Lulu', episodes: [luluOnCall, officeBesties, luluYogurt] },
   { id: 'steggy', title: 'Steggy', episodes: [steggyMatcha] },
   { id: 'rory', title: 'Rory', episodes: [roryPizza, roryFriday, roryRocks] },
   { id: 'papo-pako', title: 'Papo Pako Shapeworks', episodes: [prodCerts] },
