@@ -42,7 +42,7 @@ Other parts were shallow, and no tool checked the boundaries:
   - `world/bedroom.ts` and `world/lulu-home.ts` (from `lulu-on-call/sets/`)
   - `world/campus.ts` (from `office-besties/sets.ts`)
   - `world/sky.ts` and `props/cup.ts` (from `monday-coffee/sets.ts`)
-  - `audio/rory-riff.js` (from `rory-rocks/riff.js`)
+  - `audio/rory-riff.ts` (from `rory-rocks/riff.js`)
 - A wrong import fails at once, with the name of the rule that it breaks.
 - TypeScript 7 has no compiler API yet. Because of this, `dependency-cruiser` parses the code with `swc`
   (`@swc/core`). It prints a `missing-typescript-transpiler` warning. You can ignore this warning: the check reads

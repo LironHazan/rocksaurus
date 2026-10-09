@@ -5,12 +5,10 @@ import { reachArm, armOf } from '../characters/reach';
 import { midi } from '../audio/notes';
 import { beatPulse, recentHit, latestStarted } from './timing';
 import type { Performer, SongClock } from './types';
+import type { Riff } from '../audio/guitar';
 
-export interface GuitarPart {
-  bpm: number;
-  /** [eighth, root, len, 'mute' | 'open', vel] — the same notes the guitar sound plays. */
-  notes: readonly (readonly [number, string, number, string?, number?])[];
-}
+/** The same notes the guitar sound plays (see audio/guitar). */
+export type GuitarPart = Riff;
 
 /** Rory on guitar: headbangs on the beat, paws on the strings and neck, strums every note, big pose at the end. */
 export function createGuitarist(
