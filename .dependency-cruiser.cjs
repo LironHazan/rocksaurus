@@ -39,6 +39,13 @@ module.exports = {
       to: { path: INTERNALS },
     },
     {
+      name: 'typescript-only',
+      comment: 'The app is TypeScript only: no .js/.jsx files in src (allowJs is off, so they would go unchecked).',
+      severity: 'error',
+      from: {},
+      to: { path: '^src/.*\\.jsx?$' },
+    },
+    {
       name: 'no-circular',
       comment: 'No dependency cycles.',
       severity: 'error',

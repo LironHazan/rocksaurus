@@ -37,8 +37,8 @@ src/
   ui/         Radix-based primitives, re-exported from ui/index.ts
   engine/     stage (renderer + 2D compositing), player (loop, audio clock, cleanup), recorder, captions/subtitles, math, types
   band/       One module per instrument → Performer { root, update(t) }; timing.ts has beatPulse, recentHit, latestStarted
-  characters/ Dinosaur rigs + helpers (reach.ts arm IK, rocker.ts). MIXED .js/.ts — see Gotchas
-  props/      Instruments, clothes, hair, scene objects. Also mixed .js/.ts
+  characters/ Dinosaur rigs + helpers (rory.ts base rig, reach.ts arm IK, tail.ts, rocker.ts)
+  props/      Instruments, clothes, hair, scene objects
   world/      Sets and screens (rock-stage, campus, bedroom, lulu-home, interior room kit, screen-script)
   audio/      Synth voices + part schedulers (see below)
   episodes/   One folder per video; index.ts is the registry, grouped into sidebar folders
@@ -68,7 +68,7 @@ locations.
 - **Grids.** Drums: one string per instrument, 16 steps/bar, `x` hit · `X` accent · `g` ghost · `o` open hat ·
   `.` rest (whitespace ignored). Everything else: tuples `[eighth, note, lengthInEighths, …]`, fractional eighths
   allowed. Note names go through `midi()`/`frequency()` in `audio/notes.ts`.
-- **Voices are synthesized, no samples** (`track.js` plays a real recording). `grand-piano.ts` is pre-rendered:
+- **Voices are synthesized, no samples** (`track.ts` plays a real recording). `grand-piano.ts` is pre-rendered:
   call `warmGrand(notes)` in `preload()` so playback doesn't stutter.
 
 ## 3D stack: three.js only — a standing rule
@@ -101,8 +101,10 @@ adding or splitting a module.
   (oxlint). A value import of a type fails `npm run lint`.
 - **`noUncheckedIndexedAccess` is on**, plus `noUnusedLocals`/`noUnusedParameters`. Hence the `episodes[0]!`,
   `clicks.at(-1) ?? -1` and `arms.find(...)!` style — keep it, don't widen types to avoid it.
-- **TS episodes declare `const episode: Episode = {…}` then `export default episode`** so the contract is checked
-  at the definition. JS episodes are only checked where `src/episodes/index.ts` types the registry as `Episode[]`.
+- **TypeScript only.** No `.js`/`.jsx` in `src/`: `allowJs` is off and `npm run lint:boundaries` fails on a JS file
+  (rule `typescript-only`). New code, data and episodes are `.ts`/`.tsx`, fully typed.
+- **Episodes declare `const episode: Episode = {…}` then `export default episode`** so the contract is checked
+  at the definition.
 - **Rigs are plain objects of `THREE.Group` pivots**, documented by `CharacterRig` (`characters/types.ts`).
   `arm.userData.side` is `-1` (left) / `1` (right) — find arms and feet by that, never by index. Each frame: `resetPose(rig)`,
   then `idle(rig, t, {…})`, then your pose. `reachArm(pivot, target, elbow?)` does the arm IK.
@@ -117,10 +119,6 @@ adding or splitting a module.
 
 ## Gotchas
 
-- **`src/characters/` and `src/props/` mix `.ts` and `.js`** (`allowJs: true`, `checkJs: false`), so a typo in a
-  JS file surfaces only at runtime. Notably `rory.js` is the base rig (`createRory`, `resetPose`, `idle`),
-  imported by nearly every TypeScript performer, and it is untyped. Converting a file is a fine standalone change,
-  but expect new strict errors at every call site.
 - **There is no `public/` directory.** `rory-rocks` tries to load `${BASE_URL}audio/riff.wav` and falls back to a
   synthesized riff; to use a real one, create `public/audio/riff.wav`.
 - **Pages deploys under a subpath**, so asset URLs must go through `import.meta.env.BASE_URL` (the router uses it
@@ -141,7 +139,7 @@ adding or splitting a module.
 - **End card**: every new Short ends with the channel's subscribe card (Rory with a sign, `src/episodes/outro.ts`):
   `export default withOutro(episode)`. It adds `OUTRO_LEN` seconds and a sting; keep `duration` the story's length.
 - **Joke variant**: spread an existing episode and replace only `id`, `title`, `captions`
-  (see `episodes/rory-friday/index.js`).
+  (see `episodes/rory-friday/index.ts`).
 - **Character**: return the same rig shape so `idle()`, `resetPose()` and `reachArm()` keep working.
   Build the tail with `growTail()` (`characters/tail.ts`): one tapered tube whose first spine point is inside the
   body. Never a `ConeGeometry` stuck on the back, which shows a seam and looks detached (a bug that kept coming back).

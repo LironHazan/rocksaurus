@@ -52,7 +52,7 @@ CI (GitHub Actions) runs type-check, lint, format check, tests and build on ever
 - **Engine** (`src/engine`, TypeScript): stage (renderer + compositing), player (loop, audio-clock sync, cleanup),
   recorder, captions, formats and the typed `Episode` contract (`engine/types.ts`).
 - **Content** (`src/characters`, `src/props`, `src/world`, `src/episodes`, most of `src/audio`): the 3D models, sets,
-  music and choreography. Still JavaScript; being migrated to TypeScript file by file (`allowJs` keeps both working).
+  music and choreography. All TypeScript.
 
 React owns the page; the engine owns the canvas. `useStudioSession` creates a stage + player when the preview
 mounts and disposes both (WebGL context, animation loop, audio) when the episode/format changes or the page unmounts.
@@ -65,10 +65,10 @@ mounts and disposes both (WebGL context, animation loop, audio) when the episode
 1. Open the episode with **Sound on**. With no riff file yet, you'll hear a **click track** at the episode's BPM
    (accent on beat 1). Record your riff to that click with headphones, so the click doesn't end up in the recording.
 2. Export it as WAV (or MP3/M4A) and save it as `public/audio/riff.wav`.
-3. In `src/episodes/rory-rocks/index.js` set `BPM` to your tempo. If there's silence before your first note,
+3. In `src/episodes/rory-rocks/index.ts` set `BPM` to your tempo. If there's silence before your first note,
    set `RIFF.offset` to skip it (seconds). Rory headbangs and the lights flash on every beat.
 
-Any episode can use `loadTrack()` / `playTrack()` from `src/audio/track.js` the same way (see `preload()` there).
+Any episode can use `loadTrack()` / `playTrack()` from `src/audio/track.ts` the same way (see `preload()` there).
 
 ## Write a drum beat
 
@@ -86,7 +86,7 @@ playDrums(bus, t0, {
 ```
 
 Instruments: `kick`, `snare`, `hat`, `crash`, `tom`, `floorTom`, `click`. `drumHits()` returns the same hits as
-times, so Lulu's sticks and the cymbals move exactly with the sound (see `meet-lulu/index.js`).
+times, so Lulu's sticks and the cymbals move exactly with the sound (see `meet-lulu/index.ts`).
 
 ## Channel art
 
@@ -96,7 +96,7 @@ Open **Channel art** (`/brand`) for the 800×800 profile picture and the 2560×1
 ## Add an episode
 
 1. Copy `src/episodes/rory-hello/` to `src/episodes/my-episode/`.
-2. Change `id`, `title`, `duration`, the beat sheet in `update(t)`, and the notes in `score.js`.
+2. Change `id`, `title`, `duration`, the beat sheet in `update(t)`, and the notes in `score.ts`.
 3. Register it in `src/episodes/index.ts` (it is type-checked against the `Episode` contract).
 
 An episode is just:
@@ -129,8 +129,8 @@ export default {
 
 The cheapest way to test ideas: reuse an episode's animation and music, and change only the captions.
 
-```js
-import roryHello from '../rory-hello/index.js';
+```ts
+import roryHello from '../rory-hello/index';
 export default { ...roryHello, id: 'rory-monday', title: 'Rory: Monday 9 AM', captions: [/* … */] };
 ```
 
@@ -138,5 +138,5 @@ Tip: at 90 BPM in 3/4, one bar = 2 s. Plan actions on bar boundaries and the mus
 
 ## Add a character
 
-Copy `src/characters/rory.js`, change the colors and shapes, and return the same kind of rig
+Copy `src/characters/rory.ts`, change the colors and shapes, and return the same kind of rig
 (`root`, `squash`, `head`, `eyes`, `arms`, …) so `idle()` and existing choreography keep working.

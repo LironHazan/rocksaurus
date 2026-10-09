@@ -9,12 +9,10 @@ import { enableShadows } from '../characters/materials';
 import { midi } from '../audio/notes';
 import { beatPulse, recentHit, latestStarted } from './timing';
 import type { Performer, SongClock } from './types';
+import type { BassPart } from '../audio/bass';
 
-export interface BassPart {
-  bpm: number;
-  /** [eighth, note, len, vel] — the same notes the bass sound plays. */
-  notes: readonly (readonly [number, string, number, number?])[];
-}
+/** The same notes the bass sound plays (see audio/bass). */
+export type { BassPart } from '../audio/bass';
 
 type BassistRig = ReturnType<typeof createTyrannosaurus>;
 
