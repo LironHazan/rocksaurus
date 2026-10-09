@@ -8,7 +8,8 @@ previews a Short and records it to video. GitHub Pages deploys `main`.
 
 - `npm run check` — the gate: typecheck, lint, `lint:boundaries`, format check, tests. Run it before every commit.
 - `npm run build` — `tsc -b && vite build`. CI runs it too.
-- `npm run test:e2e` — builds, then Playwright renders every Short in headless Chromium. CI runs it on every PR.
+- `npm run test:e2e` — builds, then Playwright smoke-tests the studio and the watch page in headless Chromium. CI runs
+  it on every PR.
 - `npm run dev` — the studio at http://localhost:5173. Open a Short with `?episode=<id>`.
 - `npm run format` — Prettier. Formatting is enforced.
 
@@ -34,8 +35,8 @@ The tools are not the usual ones: TypeScript 7 (native compiler), **oxlint** (no
   format switch is the easy bug here.
 - **Comment the why, not the what:** intent, units, ranges, beat sheets, what an anonymous shape is
   (`ball(…) // snout`). No comment that repeats a name in the code, and no section banner that repeats what follows.
-- **Tests:** unit-test pure logic (timing, parts, captions, scripts) with Vitest globals. Do not test three.js scene
-  building or audio graphs.
+- **Tests:** unit-test pure logic (timing, parts, captions, scripts) with Vitest globals. Every registered Short is
+  played through in `src/episodes/episodes.smoke.test.ts` (no browser); do not write per-mesh tests of scene building.
 
 ## Gotchas
 

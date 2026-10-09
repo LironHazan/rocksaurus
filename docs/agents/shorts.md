@@ -37,6 +37,7 @@ Return `Performer { root, update(t) }` and take `(part, clock: SongClock)` (`src
 ## Checking a shot
 
 - Pin the camera: add `&cam=x,y,z,lookX,lookY,lookZ` to the studio URL.
-- Run `npm run test:e2e`: a registered Short gets its own render test. See [browser-testing.md](browser-testing.md).
+- A registered Short is played through by `npm run check` (`src/episodes/episodes.smoke.test.ts`): it fails on an
+  error in `setup()`/`update(t)` or a mesh with `NaN` vertices. See [browser-testing.md](browser-testing.md).
 - A set or prop that two Shorts use goes into `src/world/` or `src/props/`, never imported from another episode
   (`npm run lint:boundaries` fails on that).

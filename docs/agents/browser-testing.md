@@ -5,22 +5,27 @@ page. Unit tests (`npm test`) cover the pure logic; they cannot see a rendered f
 
 ## Three layers
 
-| Layer                      | What it catches                                                                                          | When                                                     |
-| -------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| Vitest (`npm test`)        | timing, parts, captions, scripts, UI components (jsdom)                                                  | every change; part of `npm run check`                    |
-| Playwright (`e2e/`)        | a Short that throws or logs an error at its start, middle or end card; a blank frame; the phone redirect | `npm run test:e2e`; CI runs it on every PR and on `main` |
-| DevTools, by hand or agent | how a shot looks, layout, performance                                                                    | after a visual change, before you open the PR            |
+| Layer                      | What it catches                                                                                                                                                                           | When                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Vitest (`npm test`)        | timing, parts, captions, scripts, UI components; **every Short played through** (`src/episodes/episodes.smoke.test.ts`): an error in `setup()` or `update(t)`, a mesh with `NaN` vertices | every change; part of `npm run check`                    |
+| Playwright (`e2e/`)        | the renderer draws a frame; pause, restart and the format switch; a phone goes to `/watch`                                                                                                | `npm run test:e2e`; CI runs it on every PR and on `main` |
+| DevTools, by hand or agent | how a shot looks, layout, performance                                                                                                                                                     | after a visual change, before you open the PR            |
+
+## Why every Short is checked in Vitest, not in the browser
+
+CI has no GPU. three.js falls back from WebGPU to WebGL2 on SwiftShader (software), where building one Short's scene
+and compiling its shaders takes 30 s or more: 17 Shorts in Playwright ran past CI's 30-minute limit. Rendering at a
+smaller size did not help; the cost is the shaders, not the pixels. In jsdom the same `setup()` + `update(t)` over the
+whole timeline takes about 2 s for all of them. jsdom has no Web Audio or 2D canvas, so the test stubs them; it checks
+the scene graph, not the picture. The first run of these checks found a real bug: `NaN` vertices in the wizard's cloak.
 
 ## Playwright
 
 - `npm run test:e2e` builds the app and runs `e2e/` against `vite preview`: the same bundle GitHub Pages serves.
-- **Every Short in the registry gets its own test** (`e2e/studio.spec.ts`, list from `e2e/episodes.ts`). A new Short is
-  covered as soon as it is registered.
-- **No GPU in CI.** three.js falls back from WebGPU to WebGL2, rendered by SwiftShader. The first frame of a Short can
-  take ~20 s while shaders compile, so the tests wait up to 60 s for a picture.
+- Keep it a smoke test: each page load costs tens of seconds in software rendering. Add a Playwright test only for
+  what needs a real browser (rendering, routing, controls), not for a Short's logic.
 - **No screenshot baselines.** Software rendering differs between machines. The tests check that the frame is not
-  blank and that the console has no errors. A console error fails the test: three.js warnings such as `NaN` geometry
-  are real bugs (the first run found one in the wizard's cloak).
+  blank and that the console has no errors.
 - On a CI failure, download the `playwright-report` artifact; `npx playwright show-trace <trace.zip>` replays the run.
 
 ## DevTools checks

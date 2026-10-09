@@ -33,5 +33,5 @@ export async function canvasVariance(page: Page, scope: string): Promise<number>
 /** Waits until the preview shows a picture (not a blank canvas). Software WebGL compiles shaders slowly, so the first
  * picture of a Short can take a while. */
 export async function expectPicture(page: Page, scope: string): Promise<void> {
-  await expect.poll(() => canvasVariance(page, scope), { timeout: 60_000 }).toBeGreaterThan(50);
+  await expect.poll(() => canvasVariance(page, scope), { timeout: 150_000 }).toBeGreaterThan(50);
 }
