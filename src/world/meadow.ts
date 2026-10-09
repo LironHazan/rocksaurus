@@ -3,11 +3,15 @@ import { rng } from '../engine/math';
 
 const HILL_R = 40;
 
+export interface Meadow {
+  /** Height of the hill surface at (x, z): stand characters on this. */
+  groundY(x: number, z: number): number;
+  /** Drifts the clouds. */
+  update(t: number): void;
+}
+
 /** Pastel sky, rounded grassy hill, flowers and drifting clouds. */
-export function createMeadow(
-  scene: THREE.Scene,
-  { seed = 7 } = {},
-): { groundY(x: number, z: number): number; update(t: number): void } {
+export function createMeadow(scene: THREE.Scene, { seed = 7 } = {}): Meadow {
   {
     // sky gradient
     const c = document.createElement('canvas');

@@ -13,7 +13,7 @@ function display(
   let text = '';
   const draw = (ctx: CanvasRenderingContext2D, cw: number, ch: number) => paint(ctx, cw, ch, text);
   const tex = textTexture(256, Math.round((256 * h) / w), draw);
-  const canvas = tex.image as HTMLCanvasElement;
+  const canvas = tex.image;
   const mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(w, h),
     new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }),

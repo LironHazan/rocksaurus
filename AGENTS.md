@@ -13,8 +13,11 @@ previews a Short and records it to video. GitHub Pages deploys `main`.
 - `npm run dev` — the studio at http://localhost:5173. Open a Short with `?episode=<id>`.
 - `npm run format` — Prettier. Formatting is enforced.
 
-The tools are not the usual ones: TypeScript 7 (native compiler), **oxlint** (not ESLint), and
-**dependency-cruiser** for module boundaries (`.dependency-cruiser.cjs`). Node 24.
+The tools are not the usual ones: TypeScript 7 (native compiler), **oxlint** (not ESLint) with the vendored
+**anti-slop** rules (`tools/oxlint/anti-slop/`), and **dependency-cruiser** for module boundaries
+(`.dependency-cruiser.cjs`). Node 24. anti-slop means: every non-`const` type assertion has a `// SAFETY:` comment
+(prefer `instanceof`, type guards and `satisfies`), and tests never mock modules: jsdom's missing Web Audio and canvas
+are `src/test/browser-stand-in.ts`.
 
 ## Rules
 

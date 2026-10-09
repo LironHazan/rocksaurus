@@ -7,6 +7,7 @@ import { lerp } from '../engine/math';
 import { drumHits, type DrumName, type DrumPart } from '../audio/drum-patterns';
 import { beatPulse, recentHit } from './timing';
 import type { Performer, SongClock } from './types';
+import { sideOf } from '../characters/reach';
 
 const LEFT_HAND: DrumName[] = ['snare', 'tom', 'floorTom', 'click'];
 const RIGHT_HAND: DrumName[] = ['hat', 'ride', 'crash', 'china', 'splash', 'click'];
@@ -53,7 +54,7 @@ export function createDrummer(part: DrumPart, clock: SongClock): Performer & { r
         nod: act === 'play' ? hit * 0.22 : 0,
       });
       for (const arm of lulu.arms) {
-        const s = arm.userData.side as number;
+        const s = sideOf(arm);
         const strike = recentHit(t, s < 0 ? left : right);
         if (counting)
           arm.rotation.set(lerp(-2.1, -1.6, strike), 0, -s * 0.5); // sticks up, clicking

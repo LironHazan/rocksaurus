@@ -2,26 +2,6 @@ import { CAPTIONS } from './captions';
 import { CHAT, CUE, DURATION, MEMBERS, TYPING, chatAt } from './timeline';
 import { BEDS, EFFECTS } from './sound';
 
-// the effects are plain data; stub out everything that would open an AudioContext
-vi.mock('../../audio/foley', () => ({
-  vibrate: vi.fn(),
-  keyTap: vi.fn(),
-  snore: vi.fn(),
-  shutter: vi.fn(),
-  stomp: vi.fn(),
-  bed: vi.fn(),
-  bird: vi.fn(),
-  carPass: vi.fn(),
-  tick: vi.fn(),
-  scribble: vi.fn(),
-  steam: vi.fn(),
-  stir: vi.fn(),
-  saucer: vi.fn(),
-  sigh: vi.fn(),
-}));
-vi.mock('../../audio/sfx', () => ({ boop: vi.fn(), ding: vi.fn() }));
-vi.mock('../../audio/schedule', () => ({ atTime: vi.fn() }));
-
 describe('Monday Coffee', () => {
   it('is a Short: under a minute', () => {
     expect(DURATION).toBeLessThanOrEqual(60);

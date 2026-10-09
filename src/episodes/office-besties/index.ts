@@ -6,7 +6,7 @@ import { createLulu, idleLulu } from '../../characters/lulu';
 import { createOrnithomimus, ORNITHO_SEAT } from '../../characters/ornithomimus';
 import { createCeratops } from '../../characters/ceratops';
 import { idle, resetPose } from '../../characters/rory';
-import { armOf, reachArm, releaseArm } from '../../characters/reach';
+import { armOf, reachArm, releaseArm, sideOf } from '../../characters/reach';
 import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
 import { chatView, createPhone, phonePov } from '../../props/phone';
@@ -207,7 +207,7 @@ const episode: Episode = {
       phone.group.lookAt(lulu.head.getWorldPosition(new THREE.Vector3()));
       phone.group.updateMatrixWorld(true);
       for (const arm of lulu.arms) {
-        const side = arm.userData.side as number;
+        const side = sideOf(arm);
         const tap = typing ? Math.max(0, Math.sin(t * 22 + side * 1.7)) * 0.04 : 0;
         const edge = phone.group.localToWorld(new THREE.Vector3(-side * 0.75 * 0.4, 0.75 * -0.62 + tap, 0.02));
         reachArm(arm, arm.parent!.worldToLocal(edge));

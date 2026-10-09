@@ -8,6 +8,7 @@ import * as fx from '../../audio/foley';
 import type { DrumPart } from '../../audio/drum-patterns';
 import type { VocalPart } from '../../audio/vowels';
 import { BAR, BPM, CUE, DURATION, TRY, TRY_AT } from './timeline';
+import { entriesOf } from '../../lib/object';
 
 // "Rot Hotic Waltz": a spooky waltz in A minor (the kind of tune a goth shop plays on a loop), 3/4 at 120 BPM.
 // An eighth is 0.25 s and a bar is six eighths, so bar n starts at n × 1.5 s. It stays minor while she shops,
@@ -19,17 +20,20 @@ interface Chord {
   bass: string;
   stab: readonly string[];
 }
-const CHORDS: Record<string, Chord> = {
+
+const CHORDS = {
   Am: { bass: 'A2', stab: ['C4', 'E4', 'A4'] },
   E7: { bass: 'E2', stab: ['B3', 'D4', 'G#4'] },
   Dm: { bass: 'D2', stab: ['A3', 'D4', 'F4'] },
   F: { bass: 'F2', stab: ['A3', 'C4', 'F4'] },
   A: { bass: 'A2', stab: ['A3', 'C#4', 'E4'] },
   E: { bass: 'E2', stab: ['B3', 'E4', 'G#4'] },
-};
+} satisfies Record<string, Chord>;
+
+type ChordName = keyof typeof CHORDS;
 
 /** The chord of each bar. */
-export const PLAN: readonly string[] = [
+export const PLAN: readonly ChordName[] = [
   'Am',
   'E7', // 0–1   the door, the bell
   'Am',
@@ -56,104 +60,156 @@ export const PLAN: readonly string[] = [
 ];
 
 /** The tune, by bar: [eighth in the bar, note, length]. */
-const TUNE: Record<number, readonly (readonly [number, string, number])[]> = {
-  2: [
-    [0, 'A4', 2],
-    [2, 'C5', 1],
-    [3, 'E5', 1],
-    [4, 'A5', 2],
+/** A note of the tune: [eighth in the bar, note, length]. */
+type TuneNote = readonly [number, string, number];
+
+/** The tune's notes, by bar (bars without an entry have none). */
+const TUNE = new Map<number, readonly TuneNote[]>([
+  [
+    2,
+    [
+      [0, 'A4', 2],
+      [2, 'C5', 1],
+      [3, 'E5', 1],
+      [4, 'A5', 2],
+    ],
   ],
-  3: [
-    [0, 'G#5', 2],
-    [2, 'E5', 1],
-    [3, 'B4', 1],
-    [4, 'G#4', 2],
+  [
+    3,
+    [
+      [0, 'G#5', 2],
+      [2, 'E5', 1],
+      [3, 'B4', 1],
+      [4, 'G#4', 2],
+    ],
   ],
-  4: [
-    [0, 'A4', 1],
-    [1, 'B4', 1],
-    [2, 'C5', 2],
-    [4, 'E5', 2],
+  [
+    4,
+    [
+      [0, 'A4', 1],
+      [1, 'B4', 1],
+      [2, 'C5', 2],
+      [4, 'E5', 2],
+    ],
   ],
-  5: [
-    [0, 'D5', 2],
-    [2, 'F5', 2],
-    [4, 'A4', 2],
+  [
+    5,
+    [
+      [0, 'D5', 2],
+      [2, 'F5', 2],
+      [4, 'A4', 2],
+    ],
   ],
-  6: [
-    [0, 'G#4', 1],
-    [1, 'B4', 1],
-    [2, 'D5', 1],
-    [3, 'E5', 1],
-    [4, 'G#5', 2],
+  [
+    6,
+    [
+      [0, 'G#4', 1],
+      [1, 'B4', 1],
+      [2, 'D5', 1],
+      [3, 'E5', 1],
+      [4, 'G#5', 2],
+    ],
   ],
-  7: [
-    [0, 'A5', 3],
-    [3, 'E5', 1],
-    [4, 'C5', 2],
+  [
+    7,
+    [
+      [0, 'A5', 3],
+      [3, 'E5', 1],
+      [4, 'C5', 2],
+    ],
   ], // the wizard walks out of the curtain
-  8: [
-    [0, 'C5', 2],
-    [2, 'F5', 2],
-    [4, 'A5', 2],
+  [
+    8,
+    [
+      [0, 'C5', 2],
+      [2, 'F5', 2],
+      [4, 'A5', 2],
+    ],
   ],
-  9: [
-    [0, 'B4', 2],
-    [2, 'G#4', 2],
-    [4, 'E4', 2],
+  [
+    9,
+    [
+      [0, 'B4', 2],
+      [2, 'G#4', 2],
+      [4, 'E4', 2],
+    ],
   ],
-  10: [
-    [0, 'A4', 2],
-    [2, 'C5', 1],
-    [3, 'E5', 1],
-    [4, 'A5', 2],
+  [
+    10,
+    [
+      [0, 'A4', 2],
+      [2, 'C5', 1],
+      [3, 'E5', 1],
+      [4, 'A5', 2],
+    ],
   ], // the ranger
-  11: [
-    [0, 'G#5', 2],
-    [2, 'E5', 1],
-    [3, 'B4', 1],
-    [4, 'G#4', 2],
+  [
+    11,
+    [
+      [0, 'G#5', 2],
+      [2, 'E5', 1],
+      [3, 'B4', 1],
+      [4, 'G#4', 2],
+    ],
   ],
-  12: [
-    [0, 'A4', 1],
-    [1, 'B4', 1],
-    [2, 'C5', 2],
-    [4, 'E5', 2],
+  [
+    12,
+    [
+      [0, 'A4', 1],
+      [1, 'B4', 1],
+      [2, 'C5', 2],
+      [4, 'E5', 2],
+    ],
   ],
-  13: [
-    [0, 'D5', 3],
-    [3, 'C5', 1],
-    [4, 'B4', 2],
+  [
+    13,
+    [
+      [0, 'D5', 3],
+      [3, 'C5', 1],
+      [4, 'B4', 2],
+    ],
   ], // the elf
-  14: [
-    [0, 'G#4', 1],
-    [1, 'B4', 1],
-    [2, 'D5', 1],
-    [3, 'E5', 1],
-    [4, 'G#4', 2],
+  [
+    14,
+    [
+      [0, 'G#4', 1],
+      [1, 'B4', 1],
+      [2, 'D5', 1],
+      [3, 'E5', 1],
+      [4, 'G#4', 2],
+    ],
   ],
-  17: [
-    [0, 'C#5', 2],
-    [2, 'E5', 2],
-    [4, 'A5', 2],
+  [
+    17,
+    [
+      [0, 'C#5', 2],
+      [2, 'E5', 2],
+      [4, 'A5', 2],
+    ],
   ], // major: ka-ching
-  18: [
-    [0, 'B4', 2],
-    [2, 'E5', 2],
-    [4, 'G#5', 2],
+  [
+    18,
+    [
+      [0, 'B4', 2],
+      [2, 'E5', 2],
+      [4, 'G#5', 2],
+    ],
   ],
-  19: [
-    [0, 'A5', 3],
-    [3, 'E5', 3],
+  [
+    19,
+    [
+      [0, 'A5', 3],
+      [3, 'E5', 3],
+    ],
   ],
-  21: [[0, 'A5', 6]], // natural 20
-};
+  [21, [[0, 'A5', 6]]], // natural 20
+]);
 
 function organPart(): KeyboardPart {
   const notes: KeyNote[] = [];
   PLAN.forEach((name, bar) => {
     const a = bar * 6;
-    const chord = CHORDS[name]!;
+    const chord = CHORDS[name];
     if (bar < 2) {
       for (const n of [...chord.stab, chord.bass]) notes.push([a, n, 6, 0.3]); // a held, spooky chord
     } else if (bar === 15 || bar === 16) {
@@ -174,8 +230,7 @@ function organPart(): KeyboardPart {
 
 function leadPart(): KeyboardPart {
   const notes: KeyNote[] = [];
-  for (const [bar, tune] of Object.entries(TUNE))
-    for (const [at, note, len] of tune) notes.push([Number(bar) * 6 + at, note, len, 0.5]);
+  for (const [bar, tune] of TUNE) for (const [at, note, len] of tune) notes.push([bar * 6 + at, note, len, 0.5]);
   // reveal flourishes: a quick run up on each curtain opening
   for (const s of TRY_AT) {
     const a = (s + TRY.open[0]) / 0.25;
@@ -186,9 +241,15 @@ function leadPart(): KeyboardPart {
 
 /** Light brushes: one string per instrument, twelve 16ths to a bar. */
 function drumPart(): DrumPart {
-  const rows: Record<string, string[]> = { kick: [], snare: [], hat: [], tom: [], crash: [] };
+  const rows: Record<'kick' | 'snare' | 'hat' | 'tom' | 'crash', string[]> = {
+    kick: [],
+    snare: [],
+    hat: [],
+    tom: [],
+    crash: [],
+  };
   const bar = (kick = '', snare = '', hat = '', tom = '', crash = '') => {
-    for (const [k, v] of Object.entries({ kick, snare, hat, tom, crash })) rows[k]!.push(v.padEnd(12, '.'));
+    for (const [k, v] of entriesOf({ kick, snare, hat, tom, crash })) rows[k].push(v.padEnd(12, '.'));
   };
   for (let b = 0; b < BARS; b++) {
     if (b < 2) bar();

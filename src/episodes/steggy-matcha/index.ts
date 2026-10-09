@@ -96,13 +96,15 @@ const episode: Episode = {
       w = new THREE.Vector3(),
       tmp = new THREE.Vector3();
 
+    /** How far a paw reaches from the shoulder with a straight arm (torso units); further than this, the elbow bends. */
+    const ARM_REACH = 0.55;
     /** Puts a paw on a world-space point; bends the elbow outward when the point is out of reach. */
     function paw(rig: CharacterRig, side: -1 | 1, world: THREE.Vector3) {
       rig.root.updateMatrixWorld(true);
       const pivot = armOf(rig, side);
       const target = rig.torso.worldToLocal(world.clone());
       const shoulder = pivot.position;
-      const reach = (pivot.userData.reachLen as number | undefined) ?? 0.55;
+      const reach = ARM_REACH;
       const d = target.distanceTo(shoulder);
       if (d <= reach * 1.1) return reachArm(pivot, target);
       const elbow = shoulder.clone().lerp(target, 0.5);

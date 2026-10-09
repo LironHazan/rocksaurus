@@ -16,17 +16,6 @@ import {
 } from './timeline';
 import { STEPS } from './music';
 
-// the score is plain data; stub out everything that would open an AudioContext
-vi.mock('../../audio/drums', () => ({
-  playDrums: vi.fn(),
-  snare: vi.fn(),
-  tom: vi.fn(),
-  crash: vi.fn(),
-  kick: vi.fn(),
-}));
-vi.mock('../../audio/foley', () => ({}));
-vi.mock('../../audio/schedule', () => ({ atTime: vi.fn() }));
-
 describe("Lulu's screens", () => {
   it('finishes typing before the story moves on', () => {
     const typedBy = (s: readonly ScriptLine[]) => Math.max(...keystrokes(s));

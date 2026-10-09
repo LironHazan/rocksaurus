@@ -162,7 +162,7 @@ export function createWarRoom() {
     tea,
     /** 0 = night (the screens light the room), 1 = morning sun through the window. */
     setDay(k: number) {
-      (dayView.material as THREE.MeshBasicMaterial).opacity = k;
+      dayView.material.opacity = k;
       sun.intensity = 2.2 * k;
       hemi.color.set(0xa8b0e0).lerp(new THREE.Color(0xffffff), k);
       hemi.intensity = 1.1 + 0.3 * k;

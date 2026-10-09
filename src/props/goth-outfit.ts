@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ball, enableShadows } from '../characters/materials';
+import { findCapsule } from '../characters/reach';
 import type { ParasaurolophusRig } from '../characters/parasaurolophus';
 
 // Paris's body and neck (see createParasaurolophus)
@@ -116,8 +117,7 @@ export function addGothOutfit(
   const sleeveMat = velvet.clone();
   sleeveMat.side = THREE.FrontSide;
   for (const pivot of rig.arms) {
-    const arm = pivot.children.find(c => (c as THREE.Mesh).geometry?.type === 'CapsuleGeometry') as
-      THREE.Mesh | undefined;
+    const arm = findCapsule(pivot);
     if (!arm) continue;
     const sleeve = new THREE.Mesh(arm.geometry, sleeveMat);
     sleeve.scale.set(1.15, 0.96, 1.15);

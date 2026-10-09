@@ -7,7 +7,7 @@ import { createParasaurolophus, PARIS_COLORS } from '../../characters/parasaurol
 import { createStegosaurus, STEGGY_COLORS } from '../../characters/stegosaurus';
 import { createLulu, idleLulu } from '../../characters/lulu';
 import { createRory, idle, resetPose } from '../../characters/rory';
-import { reachArm, releaseArm } from '../../characters/reach';
+import { reachArm, releaseArm, sideOf } from '../../characters/reach';
 import { ball } from '../../characters/materials';
 import { addCap } from '../../props/cap';
 import { addSunglasses } from '../../props/sunglasses';
@@ -344,7 +344,7 @@ const episode: Episode = {
       const box = new THREE.Box3().setFromObject(phone.group, true);
       const tall = Math.max(box.max.y - box.min.y, 0.3); // roughly the phone's height
       for (const arm of a.rig.arms) {
-        const side = arm.userData.side as number;
+        const side = sideOf(arm);
         const tap = typing ? Math.max(0, Math.sin(t * 22 + side * 1.7)) * 0.04 : 0;
         // paws on the sides, halfway up, so they don't cover the newest message at the bottom (the phone faces
         // its owner, so its +x is on their right: mirror the side)
@@ -481,7 +481,7 @@ const episode: Episode = {
         const p = (((t * 0.6 + i / 3) % 1) + 1) % 1;
         z.position.set(w.x + 0.2 + p * 0.8, w.y + 0.3 + p * 1.5, w.z + 0.4);
         z.scale.setScalar(0.25 + p * 0.35);
-        (z.material as THREE.SpriteMaterial).opacity = Math.sin(p * Math.PI);
+        z.material.opacity = Math.sin(p * Math.PI);
       });
       // his phone on the nightstand, face up, rattling with every message
       const phone = phones.Rory;

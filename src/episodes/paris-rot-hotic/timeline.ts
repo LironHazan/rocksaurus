@@ -1,3 +1,5 @@
+import type { Look } from '../../props/fantasy-gear';
+
 // Paris goes shopping at Rot Hotic for her Lord of the Rings D&D night. Times are video seconds.
 // The music is a waltz at 120 BPM (a bar is 1.5 s), and the big moments land on bar lines.
 
@@ -34,14 +36,20 @@ export type LookName = 'wizard' | 'ranger' | 'elf';
 export const TRY_LOOKS: readonly LookName[] = ['wizard', 'ranger', 'elf'];
 
 /** The look she is wearing at time t, and whether the curtain is open (0 closed … 1 open). */
-export function fitting(t: number): { look: LookName | 'goth' | 'party'; curtain: number } {
+/** What Paris wears at a moment, and how open the fitting-room curtain is (0 closed … 1 open). */
+export interface Fitting {
+  look: Look;
+  curtain: number;
+}
+
+export function fitting(t: number): Fitting {
   if (t >= CUE.poof) return { look: 'party', curtain: 1 };
   let look: LookName | 'goth' = 'goth';
   let curtain = 1;
   TRY_AT.forEach((s, i) => {
     if (t < s) return;
-    const [c0, c1] = TRY.close.map(x => s + x) as [number, number];
-    const [o0, o1] = TRY.open.map(x => s + x) as [number, number];
+    const [c0, c1] = [s + TRY.close[0], s + TRY.close[1]];
+    const [o0, o1] = [s + TRY.open[0], s + TRY.open[1]];
     if (t >= s + TRY.swap) look = TRY_LOOKS[i]!;
     if (t >= c0 && t < o0) curtain = 1 - Math.min(1, (t - c0) / (c1 - c0)); // closes
     if (t >= o0 && t < s + TRY_LEN) curtain = Math.min(1, (t - o0) / (o1 - o0)); // opens

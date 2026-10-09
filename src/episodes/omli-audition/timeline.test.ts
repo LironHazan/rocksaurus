@@ -5,20 +5,6 @@ import { EFFECTS } from './sound';
 import { drumHits } from '../../audio/drum-patterns';
 import { TYPING } from '../../props/phone';
 
-vi.mock('../../audio/foley', () => ({
-  cheer: vi.fn(),
-  vibrate: vi.fn(),
-  keyTap: vi.fn(),
-  stomp: vi.fn(),
-  bed: vi.fn(),
-}));
-vi.mock('../../audio/sfx', () => ({ boop: vi.fn() }));
-vi.mock('../../audio/voice', () => ({ sing: vi.fn() }));
-vi.mock('../../audio/bass', () => ({ playBass: vi.fn() }));
-vi.mock('../../audio/drums', () => ({ playDrums: vi.fn() }));
-vi.mock('../../audio/guitar', () => ({ playRiff: vi.fn() }));
-vi.mock('../../audio/schedule', () => ({ atTime: vi.fn() }));
-
 const eighth = 60 / BASS.bpm / 2;
 
 describe('The Audition', () => {

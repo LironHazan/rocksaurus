@@ -30,7 +30,10 @@ export function SegmentedControl<T extends string>({
       className={styles.segmented}
       value={value}
       disabled={disabled}
-      onValueChange={v => v && onChange(v as T)}
+      onValueChange={v => {
+        const picked = options.find(o => o.value === v);
+        if (picked) onChange(picked.value);
+      }}
     >
       {options.map(o => (
         <ToggleGroup.Item key={o.value} value={o.value} className={styles.segment}>

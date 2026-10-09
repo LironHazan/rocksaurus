@@ -4,13 +4,6 @@ import { ROOM_DOC } from './documents';
 import { CAPTIONS } from './captions';
 import { GROOVE } from './music';
 
-// the score is plain data; stub out everything that would open an AudioContext
-vi.mock('../../audio/grand-piano', () => ({ grand: vi.fn() }));
-vi.mock('../../audio/slap-bass', () => ({ slap: vi.fn(), slapAmp: vi.fn(), mouthPop: vi.fn() }));
-vi.mock('../../audio/sfx', () => ({ boop: vi.fn(), ding: vi.fn() }));
-vi.mock('../../audio/foley', () => ({ keyTap: vi.fn(), rattle: vi.fn(), gulp: vi.fn() }));
-vi.mock('../../audio/schedule', () => ({ atTime: vi.fn() }));
-
 describe('Steggy & the Matcha Theory', () => {
   it('scenes are back to back and the video is about a minute', () => {
     SCENES.forEach((s, i) => expect(s.from).toBe(i === 0 ? 0 : SCENES[i - 1]!.to));

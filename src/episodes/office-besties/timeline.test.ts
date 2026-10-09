@@ -3,24 +3,6 @@ import { CHAT, CUE, DURATION, LINES, MEMBERS, SYLLABLES, mouthAt, speakerAt } fr
 import { BEDS, EFFECTS } from './sound';
 import { TYPING } from '../../props/phone';
 
-// the sound is plain data; stub out everything that would open an AudioContext
-vi.mock('../../audio/foley', () => ({
-  vibrate: vi.fn(),
-  keyTap: vi.fn(),
-  stomp: vi.fn(),
-  rustle: vi.fn(),
-  sparkle: vi.fn(),
-  bird: vi.fn(),
-  tear: vi.fn(),
-  munch: vi.fn(),
-  gulp: vi.fn(),
-  gasp: vi.fn(),
-  bed: vi.fn(),
-}));
-vi.mock('../../audio/sfx', () => ({ boop: vi.fn() }));
-vi.mock('../../audio/voice', () => ({ sing: vi.fn() }));
-vi.mock('../../audio/schedule', () => ({ atTime: vi.fn() }));
-
 describe('Office Besties', () => {
   it('is a Short: under a minute', () => {
     expect(DURATION).toBeLessThanOrEqual(60);

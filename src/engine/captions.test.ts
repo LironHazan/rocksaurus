@@ -1,3 +1,4 @@
+import { browserStandIn } from '../test/browser-stand-in';
 import { drawCaptions, wrapText } from './captions';
 import { FORMATS } from './formats';
 
@@ -21,7 +22,7 @@ describe('drawCaptions', () => {
   function fakeCtx() {
     const calls: { align: string; x: number }[] = [];
     let x = 0;
-    const ctx = {
+    const overrides = {
       font: '',
       globalAlpha: 1,
       textAlign: 'center',
@@ -42,7 +43,11 @@ describe('drawCaptions', () => {
         calls.push({ align: ctx.textAlign, x });
       },
     };
-    return { ctx: ctx as unknown as CanvasRenderingContext2D, calls };
+    // Everything drawCaptions does not use falls through to the browser stand-in. (The overrides are own properties,
+    // set before the prototype: assigning through a Proxy prototype would go to its `set` trap and be dropped.)
+    const base: CanvasRenderingContext2D = browserStandIn;
+    const ctx: CanvasRenderingContext2D = Object.setPrototypeOf(overrides, base);
+    return { ctx, calls };
   }
 
   it('centers captions by default', () => {

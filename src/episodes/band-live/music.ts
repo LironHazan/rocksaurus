@@ -2,6 +2,9 @@ import type { DrumPart } from '../../audio/drum-patterns';
 import type { KeyboardPart, KeyNote } from '../../audio/keyboard-part';
 import type { SungNote, VocalPart } from '../../audio/vowels';
 import type { Activity } from '../../band/types';
+import { mapValues } from '../../lib/object';
+import type { Riff } from '../../audio/guitar';
+import type { BassPart } from '../../audio/bass';
 
 // "Rocksaurus Live" — prog rock in E Dorian (bright minor) with a major-key chorus.
 // 120 BPM: 1 eighth = 0.25 s. Bars mix 4/4 (8 eighths) and 7/8 (7 eighths, grouped 2+2+3).
@@ -20,7 +23,8 @@ const AT = {
   end: 100,
 } as const;
 /** Section start times in seconds (for the camera and the performers). */
-export const T = Object.fromEntries(Object.entries(AT).map(([k, v]) => [k, v * E])) as Record<keyof typeof AT, number>;
+export const T = mapValues(AT, v => v * E);
+
 export const DURATION = T.end;
 export const ENDING_AT = T.ending;
 
@@ -92,7 +96,8 @@ const ACCENTS_332 = [0, 3, 6]; // the prog 3-3-2 push inside a 4/4 bar
 
 // ---------- guitar (Rory): power chords ----------
 type GuitarNote = readonly [number, string, number, string, number];
-export const guitar: { bpm: number; notes: readonly GuitarNote[] } = {
+
+export const guitar: Riff = {
   bpm: BPM,
   notes: [
     ...riff(AT.intro, [RIFF_A, RIFF_B], 2).map(([at, n, len]): GuitarNote => [at, n, len * 0.9, 'open', 0.6]),
@@ -116,7 +121,8 @@ export const guitar: { bpm: number; notes: readonly GuitarNote[] } = {
 
 // ---------- bass (Tiki Taka) ----------
 type BassNote = readonly [number, string, number, number];
-export const bass: { bpm: number; notes: readonly BassNote[] } = {
+
+export const bass: BassPart = {
   bpm: BPM,
   notes: [
     ...riff(AT.intro, [RIFF_A, RIFF_B], 1).map(([at, n, len]): BassNote => [at, n, len * 0.9, 0.75]),
@@ -153,8 +159,8 @@ export const piano: KeyboardPart = {
   notes: [
     // verse: left-hand roots, right-hand arpeggios rippling in 16ths (accents on the 3-3-2)
     ...verseBars.flatMap(([b, c]) => [
-      [b, `${ROOT[c]}3`, 3.8, 0.7, 'L'] as KeyNote,
-      [b + 4, `${ROOT[c]}3`, 3.8, 0.62, 'L'] as KeyNote,
+      [b, `${ROOT[c]}3`, 3.8, 0.7, 'L'] satisfies KeyNote,
+      [b + 4, `${ROOT[c]}3`, 3.8, 0.62, 'L'] satisfies KeyNote,
       ...Array.from({ length: 16 }, (_, i): KeyNote => {
         const accent = ACCENTS_332.includes(i / 2);
         return [b + i * 0.5, ARP[c][RIPPLE[i % RIPPLE.length]!]!, 0.6, accent ? 0.78 : 0.6, 'R'];
@@ -166,7 +172,7 @@ export const piano: KeyboardPart = {
     // chorus: punchy chords on the 3-3-2, octave roots below
     ...chorusBars.flatMap(([b, c]) => [
       ...ACCENTS_332.flatMap(e => PIANO_VOICING[c].map((n): KeyNote => [b + e, n, e === 6 ? 1.8 : 2.6, 0.72, 'R'])),
-      [b, `${ROOT[c]}3`, 7.5, 0.7, 'L'] as KeyNote,
+      [b, `${ROOT[c]}3`, 7.5, 0.7, 'L'] satisfies KeyNote,
     ]),
     // ending: flourish up the keyboard into the final E major chord
     ...FLOURISH.map((n, i): KeyNote => [AT.ending - 2 + i * 0.25, n, 0.5, 0.65, i < 3 ? 'L' : 'R']),

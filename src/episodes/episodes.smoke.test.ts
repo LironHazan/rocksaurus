@@ -1,37 +1,14 @@
 import * as THREE from 'three';
 import { FORMATS } from '../engine/formats';
 import type { Stage } from '../engine/types';
+import { browserStandIn } from '../test/browser-stand-in';
+import { episodes } from './index';
 
 // Every registered Short, built and played through its whole timeline in jsdom: no browser, no GPU, no shaders, so it
 // takes seconds. It catches what typecheck cannot: a Short that throws in setup() or update(t), and geometry with NaN
 // vertices (which three.js only reports while rendering). Rendering itself is checked by Playwright (e2e/).
 
-/** Stands in for any browser object jsdom lacks (Web Audio, a 2D canvas): every call and property returns itself. */
-const anything: unknown = new Proxy(function () {}, {
-  get: (_target, key) => (key === Symbol.toPrimitive ? () => 0 : key === 'then' ? undefined : anything),
-  apply: () => anything,
-  construct: () => anything as object,
-  set: () => true,
-});
-
-// The audio graph is built when src/audio/context.ts is imported, so these must exist before the registry loads.
-for (const name of [
-  'AudioContext',
-  'GainNode',
-  'BiquadFilterNode',
-  'OscillatorNode',
-  'WaveShaperNode',
-  'StereoPannerNode',
-  'DynamicsCompressorNode',
-  'AudioBufferSourceNode',
-  'ConvolverNode',
-  'DelayNode',
-])
-  vi.stubGlobal(name, anything);
-vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(anything as never);
-Object.defineProperty(document, 'fonts', { value: { load: () => Promise.resolve([]) }, configurable: true });
-const { episodes } = await import('./index');
-afterAll(() => vi.unstubAllGlobals());
+// Web Audio and the 2D canvas are stand-ins (src/test/browser-stand-in.ts): this checks the scene graph, not the picture.
 
 /** Seconds between the frames played: fine enough to reach every cue in a timeline. */
 const STEP = 0.25;
@@ -40,7 +17,7 @@ function createTestStage(): Stage {
   const format = FORMATS.shorts;
   return {
     format,
-    renderer: anything as Stage['renderer'],
+    renderer: browserStandIn,
     scene: new THREE.Scene(),
     camera: new THREE.PerspectiveCamera(format.fov, format.width / format.height),
     canvas: document.createElement('canvas'),
@@ -53,9 +30,9 @@ function createTestStage(): Stage {
 function brokenGeometry(scene: THREE.Object3D): string[] {
   const bad: string[] = [];
   scene.traverse(o => {
-    const position = (o as THREE.Mesh).geometry?.attributes?.position;
-    if (position && Array.from(position.array as ArrayLike<number>).some(Number.isNaN))
-      bad.push(o.name || (o as THREE.Mesh).geometry.type);
+    if (!(o instanceof THREE.Mesh)) return;
+    const position = o.geometry.getAttribute('position');
+    if (position && Array.from(position.array).some(Number.isNaN)) bad.push(o.name || o.geometry.type);
   });
   return bad;
 }

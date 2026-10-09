@@ -43,7 +43,11 @@ export const scriptTime = (played: number): number => (played <= WALK_END ? play
 
 /** Captions written in script time, moved to when they are actually shown (those in the skipped stretch are dropped). */
 export const playedCaptions = (captions: readonly Caption[]): Caption[] =>
-  captions.map(c => ({ ...c, from: playedTime(c.from), to: playedTime(c.to) })).filter(c => c.to > c.from);
+  captions.flatMap(c => {
+    const from = playedTime(c.from),
+      to = playedTime(c.to);
+    return to > from ? [{ ...c, from, to }] : [];
+  });
 
 /** Story length in script time (story seconds). */
 export const STORY_END = 76;

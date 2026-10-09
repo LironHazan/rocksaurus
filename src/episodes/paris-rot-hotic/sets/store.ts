@@ -21,7 +21,7 @@ const printTexture = (emoji: string) =>
     ctx.fillText(emoji, w / 2, h / 2 + 4);
   });
 
-function shirtShape(long: boolean): THREE.Shape {
+function shirtOutline(long: boolean): THREE.Shape {
   const s = new THREE.Shape();
   if (long) {
     // a long coat: narrow shoulders, wide hem
@@ -126,8 +126,8 @@ function rack(x0: number, x1: number, z: number, seed: number) {
   }
   const colors = [0x0b0a10, 0x3a1a52, 0x5a0f24, 0x143a40, 0x2a2a3a, 0x6a2a7a, 0x1a1a22, 0x7a1d3a];
   const prints = ['🦇', '💀', '🕷️', '⛓️', '🖤', '🌙'].map(printTexture);
-  const tee = new THREE.ExtrudeGeometry(shirtShape(false), { depth: 0.07, bevelEnabled: false });
-  const coat = new THREE.ExtrudeGeometry(shirtShape(true), { depth: 0.08, bevelEnabled: false });
+  const tee = new THREE.ExtrudeGeometry(shirtOutline(false), { depth: 0.07, bevelEnabled: false });
+  const coat = new THREE.ExtrudeGeometry(shirtOutline(true), { depth: 0.08, bevelEnabled: false });
   const garments: { group: THREE.Group; x: number }[] = [];
   const count = Math.floor((x1 - x0 - 0.4) / 0.27);
   for (let i = 0; i < count; i++) {
@@ -457,8 +457,9 @@ function door() {
 
 /** Swaps the solid left wall for one with a doorway in it, so Paris comes in through the door, not the wall. */
 function cutDoorway(scene: THREE.Scene) {
-  const solid = scene.children.find(o => o.position.x === -9 && (o as THREE.Mesh).isMesh)!;
-  const wallMat = (solid as THREE.Mesh).material;
+  const solid = scene.children.find(o => o.position.x === -9 && o instanceof THREE.Mesh);
+  if (!(solid instanceof THREE.Mesh)) throw new Error('the store has no solid left wall');
+  const wallMat = solid.material;
   scene.remove(solid);
   const z0 = DOOR.z - 1.2,
     z1 = DOOR.z + 1.2,

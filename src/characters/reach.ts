@@ -14,25 +14,37 @@ interface ReachParts {
   forearm: THREE.Mesh;
 }
 
-function capsuleOf(pivot: THREE.Object3D): THREE.Mesh {
-  const arm = pivot.children.find(
-    c => (c as THREE.Mesh).isMesh && (c as THREE.Mesh).geometry.type === 'CapsuleGeometry',
-  );
+type CapsuleArm = THREE.Mesh<THREE.CapsuleGeometry>;
+
+const isCapsule = (o: THREE.Object3D): o is CapsuleArm =>
+  o instanceof THREE.Mesh && o.geometry instanceof THREE.CapsuleGeometry;
+
+/** The capsule mesh of an arm pivot, if it has one. */
+export const findCapsule = (pivot: THREE.Object3D): CapsuleArm | undefined => pivot.children.find(isCapsule);
+
+/** The capsule mesh of an arm pivot (every rig's arms are a shoulder pivot with a capsule child). */
+export function capsuleOf(pivot: THREE.Object3D): CapsuleArm {
+  const arm = findCapsule(pivot);
   if (!arm) throw new Error('reachArm: the pivot has no capsule arm');
-  return arm as THREE.Mesh;
+  return arm;
 }
+
+/** Which side an arm or foot is on: `userData.side`, set by every rig (-1 left, 1 right). */
+export function sideOf(part: THREE.Object3D): -1 | 1 {
+  const side: unknown = part.userData.side;
+  if (side !== -1 && side !== 1) throw new Error(`${part.name || 'part'} has no userData.side`);
+  return side;
+}
+
+/** The extra parts reachArm adds to each pivot, created on first reach. */
+const reachParts = new WeakMap<THREE.Object3D, ReachParts>();
 
 /** Lazily creates the extra parts (paw, elbow joint, forearm) in the pivot's parent space. */
 function parts(pivot: THREE.Object3D): ReachParts {
-  if (pivot.userData.reach) return pivot.userData.reach as ReachParts;
+  const existing = reachParts.get(pivot);
+  if (existing) return existing;
   const arm = capsuleOf(pivot);
-  const params = (arm.geometry as THREE.CapsuleGeometry).parameters as {
-    radius: number;
-    height?: number;
-    length?: number;
-  };
-  const radius = params.radius;
-  const length = params.height ?? params.length ?? 0.2; // renamed in newer Three.js
+  const { radius, height: length } = arm.geometry.parameters;
   const mk = (geo: THREE.BufferGeometry) => {
     const m = new THREE.Mesh(geo, arm.material);
     m.castShadow = m.receiveShadow = true;
@@ -48,7 +60,7 @@ function parts(pivot: THREE.Object3D): ReachParts {
     joint: mk(new THREE.SphereGeometry(radius * 1.02, 16, 12)),
     forearm: mk(new THREE.CapsuleGeometry(radius * 0.95, length, 8, 16)),
   };
-  pivot.userData.reach = created;
+  reachParts.set(pivot, created);
   return created;
 }
 
@@ -86,7 +98,7 @@ export function reachArm(pivot: THREE.Object3D, target: THREE.Vector3, elbow: TH
  * the arm can be posed by rotating the pivot again. Safe to call on an arm that never reached.
  */
 export function releaseArm(pivot: THREE.Object3D): void {
-  const p = pivot.userData.reach as ReachParts | undefined;
+  const p = reachParts.get(pivot);
   if (!p) return;
   p.paw.visible = p.joint.visible = p.forearm.visible = false;
   p.arm.scale.set(1, 1, 1);
@@ -95,7 +107,7 @@ export function releaseArm(pivot: THREE.Object3D): void {
 
 /** A rig's left (−1) or right (1) arm pivot. */
 export function armOf(rig: { arms: readonly THREE.Object3D[] }, side: -1 | 1): THREE.Object3D {
-  const arm = rig.arms.find(a => a.userData.side === side);
+  const arm = rig.arms.find(a => sideOf(a) === side);
   if (!arm) throw new Error(`rig has no arm on side ${side}`);
   return arm;
 }

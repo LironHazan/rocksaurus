@@ -4,7 +4,12 @@ import * as THREE from 'three';
  * Dark concert stage: purple gradient, colored spotlights, haze beams and a round stage.
  * Returns { pulse(k) } — call with 0..1 each frame to flash the lights (e.g. on the beat).
  */
-export function createRockStage(scene: THREE.Scene): { pulse(k: number): void } {
+/** The concert stage's lights; `pulse(k)` flashes them (0..1), e.g. on the beat. */
+export interface RockStage {
+  pulse(k: number): void;
+}
+
+export function createRockStage(scene: THREE.Scene): RockStage {
   const c = document.createElement('canvas');
   c.width = 2;
   c.height = 256;

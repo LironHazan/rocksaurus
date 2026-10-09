@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
 import { growTail } from './tail';
-import { reachArm } from './reach';
+import { reachArm, sideOf } from './reach';
 import { taperedTube } from '../props/tube';
 import type { CharacterRig } from './types';
 
@@ -243,7 +243,7 @@ export function createOrnithomimus(colors = RORIT_COLORS, { athleisure = true } 
     }
     head.add(eye);
     eyes.push(eye);
-    const cheek = ball(0.07, M.cheek, [s * 0.27, -0.1, 0.3], [1, 0.7, 0.35]) as THREE.Mesh;
+    const cheek = ball(0.07, M.cheek, [s * 0.27, -0.1, 0.3], [1, 0.7, 0.35]);
     head.add(cheek);
     cheeks.push(cheek);
   }
@@ -256,7 +256,7 @@ export function createOrnithomimus(colors = RORIT_COLORS, { athleisure = true } 
 
   function dangleFeet(swing = 0) {
     feet.forEach((foot, i) => {
-      const s = foot.userData.side as number;
+      const s = sideOf(foot);
       const kick = Math.sin(swing + i * Math.PI) * 0.12;
       foot.position.set(s * 0.28, ORNITHO_HIP - 0.06 - SHIN - ANKLE + Math.abs(kick) * 0.3, THIGH + 0.02 + kick);
     });

@@ -3,7 +3,7 @@ import { ease, lerp, seg } from '../../engine/math';
 import { disposeObject } from '../../engine/dispose';
 import type { Episode } from '../../engine/types';
 import { idle, resetPose } from '../../characters/rory';
-import { armOf, reachArm, releaseArm } from '../../characters/reach';
+import { armOf, reachArm, releaseArm, sideOf } from '../../characters/reach';
 import { ORNITHO_SEAT, type OrnithomimusRig } from '../../characters/ornithomimus';
 import { SEAT_HEIGHT } from '../../props/furniture';
 import { createPhone, type Phone } from '../../props/phone';
@@ -76,8 +76,7 @@ const episode: Episode = {
     campus.hemi.intensity = 0.45;
     campus.sun.color.set(0x9db4ff); // moonlight
     campus.sun.intensity = 0.35;
-    for (const m of [campus.sign.material, campus.plate.material] as THREE.MeshStandardMaterial[])
-      m.emissiveIntensity = 1.4;
+    for (const m of [campus.sign.material, campus.plate.material]) m.emissiveIntensity = 1.4;
 
     const sagishRoom = createBedroom();
     sagishRoom.clock.set('3:02');
@@ -188,7 +187,7 @@ const episode: Episode = {
         const p = (((t * 0.6 + i / 3) % 1) + 1) % 1;
         z.position.set(v.x + 0.2 + p * 0.8, v.y + 0.5 + p * 1.5, v.z + 0.4);
         z.scale.setScalar(0.25 + p * 0.35);
-        (z.material as THREE.SpriteMaterial).opacity = Math.sin(p * Math.PI);
+        z.material.opacity = Math.sin(p * Math.PI);
       });
     }
     /** Sitting up in bed, legs under the blanket. */
@@ -198,7 +197,7 @@ const episode: Episode = {
       rig.updateLegs(1);
       room.blanket.position.set(0.6, BED_TOP + 0.15, 0.1);
       room.blanket.scale.set(1.5, 0.45, 1.3);
-      for (const z of room.zzz) (z.material as THREE.SpriteMaterial).opacity = 0;
+      for (const z of room.zzz) z.material.opacity = 0;
     }
 
     function campusScene(t: number): Shot {
@@ -216,7 +215,7 @@ const episode: Episode = {
       // the pager: quiet, then screaming
       const alerting = t >= CUE.alert;
       room.pagerScreen.set(alerting ? 'PROD DOWN\nTLS EXPIRED' : '');
-      (room.led.material as THREE.MeshBasicMaterial).color.set(alerting && Math.floor(t * 4) % 2 ? 0xff2020 : 0x330000);
+      room.led.material.color.set(alerting && Math.floor(t * 4) % 2 ? 0xff2020 : 0x330000);
       room.alarm.intensity = alerting && t < CUE.laptop[0] ? 10 * (0.5 + 0.5 * Math.sin(t * 12)) : 0;
       const buzz = alerting && t < CUE.sitUp + 1.2 ? Math.sin(t * 80) * 0.02 : 0;
       room.pager.position.set(-3.75 + buzz, 1.3, 0.45);
@@ -248,7 +247,7 @@ const episode: Episode = {
       if (!calling) {
         // typing: paws on the keys
         for (const arm of sagish.arms) {
-          const side = arm.userData.side as number;
+          const side = sideOf(arm);
           const tap = Math.max(0, Math.sin(t * 20 + side)) * 0.05;
           grip(arm, room.laptop.localToWorld(v.set(side * 0.3, 0.12 + tap, 0.15)));
         }
@@ -378,7 +377,7 @@ const episode: Episode = {
       war.laptop.group.updateMatrixWorld(true);
       if (!fixed) {
         for (const arm of amaz.arms) {
-          const side = arm.userData.side as number;
+          const side = sideOf(arm);
           const tap = Math.max(0, Math.sin(t * 9 + side * 1.4)) * 0.04;
           grip(arm, war.laptop.group.localToWorld(war.laptop.key(-side * 0.4, 0.2).add(v.set(0, tap, 0))));
         }

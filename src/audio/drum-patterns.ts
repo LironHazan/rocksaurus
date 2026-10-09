@@ -1,3 +1,5 @@
+import { entriesOf } from '../lib/object';
+
 export type DrumName = 'kick' | 'snare' | 'hat' | 'crash' | 'china' | 'splash' | 'ride' | 'tom' | 'floorTom' | 'click';
 
 /**
@@ -24,7 +26,7 @@ export const hitVelocity = (ch: string): number => (ch === 'X' ? 1 : ch === 'g' 
 export function drumHits({ bpm, tracks }: DrumPart): DrumHit[] {
   const step = 60 / bpm / 4;
   const hits: DrumHit[] = [];
-  for (const [name, pattern] of Object.entries(tracks) as [DrumName, string][]) {
+  for (const [name, pattern] of entriesOf(tracks)) {
     [...pattern.replace(/\s/g, '')].forEach((ch, i) => {
       if (ch !== '.') hits.push({ name, time: i * step, accent: ch === 'X', ch });
     });
