@@ -3,6 +3,7 @@ import { rng } from '../../engine/math';
 import { ball, enableShadows } from '../../characters/materials';
 import { box, createRoom, createWallClock, cylinder, mat, picture, ROUND } from '../../world/interior';
 import { textTexture } from '../../world/text-texture';
+import { sky } from '../../world/sky';
 import { createSchool, createTree, type SchoolOptions } from '../../world/school';
 import { createSeat } from '../../props/furniture';
 
@@ -50,18 +51,6 @@ export const CAFE_CHAIRS = {
   paris: { x: 0, z: -1.0, yaw: 0 },
   steggy: { x: 2.9, z: 1.8, yaw: -1.2 },
 };
-
-/** A vertical sky gradient, for `scene.background`. */
-export function sky(top: string, mid: string, bottom: string): THREE.Texture {
-  return textTexture(4, 256, (ctx, w, h) => {
-    const gr = ctx.createLinearGradient(0, 0, 0, h);
-    gr.addColorStop(0, top);
-    gr.addColorStop(0.6, mid);
-    gr.addColorStop(1, bottom);
-    ctx.fillStyle = gr;
-    ctx.fillRect(0, 0, w, h);
-  });
-}
 
 /** Monday 8:10 AM outside a school: low warm sun, the pavement, a picket fence with the gate open. */
 export function createSchoolGate(options: SchoolOptions, seed = 31) {
@@ -316,24 +305,6 @@ export function createTherapy() {
 
   enableShadows(scene);
   return { scene };
-}
-
-/** A coffee cup on a saucer; `drink` colours the top. */
-export function createCup(cup: number, drink: number): THREE.Group {
-  const g = new THREE.Group();
-  const saucer = cylinder(0.32, 0.26, 0.05, mat(cup, 0.3), 28);
-  g.add(saucer);
-  const body = cylinder(0.2, 0.15, 0.32, mat(cup, 0.3), 28);
-  body.position.y = 0.05;
-  g.add(body);
-  const top = cylinder(0.185, 0.185, 0.01, mat(drink, 0.4), 28);
-  top.position.y = 0.33;
-  g.add(top);
-  const handle = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.025, 8, 16), mat(cup, 0.3));
-  handle.position.set(0.22, 0.22, 0);
-  g.add(handle);
-  enableShadows(g);
-  return g;
 }
 
 /** A shopfront window: a warm interior glimpsed through glass, with a frame and mullions. */

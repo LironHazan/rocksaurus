@@ -4,7 +4,7 @@ import { createRockerRory } from '../../characters/rocker';
 import { loadTrack, playTrack } from '../../audio/track';
 import { boop } from '../../audio/sfx';
 import { playRiff } from '../../audio/guitar';
-import { riff as synthRiff } from './riff';
+import { riff as synthRiff } from '../../audio/rory-riff';
 
 // ── Your riff ────────────────────────────────────────────────────────────────
 // Drop your recording at public/audio/riff.wav (or .mp3 / .m4a and change the url),

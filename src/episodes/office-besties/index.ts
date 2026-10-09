@@ -13,10 +13,11 @@ import { chatView, createPhone, phonePov } from '../../props/phone';
 import { createProteinBar } from '../../props/protein-bar';
 import { box, mat } from '../../world/interior';
 import { textTexture } from '../../world/text-texture';
-import { createHome } from '../lulu-on-call/sets/home';
+import { createHome } from '../../world/lulu-home';
 import { withOutro } from '../outro';
 import { CAPTIONS } from './captions';
-import { BENCH, LULU_ENTER, LULU_HANDOFF, SEATS, STASH_TOP, UPRIGHT, createCampus, createStash } from './sets';
+import { LULU_ENTER, LULU_HANDOFF, SEATS, STASH_TOP, UPRIGHT, createStash } from './sets';
+import { BENCH, createCampus } from '../../world/campus';
 import { CHAT, COLOURS, CUE, DURATION, LINES, START_CLOCK, mouthAt, speakerAt, type Member } from './timeline';
 import { soundtrack } from './sound';
 

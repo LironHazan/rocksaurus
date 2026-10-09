@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { box, createRoom, cylinder, mat, picture, ROUND } from '../../../world/interior';
-import { textTexture } from '../../../world/text-texture';
-import { createDrumKit } from '../../../props/drums';
+import { box, createRoom, cylinder, mat, picture, ROUND } from './interior';
+import { textTexture } from './text-texture';
+import { createDrumKit } from '../props/drums';
 
 export const SHAKE_SPOT = new THREE.Vector3(-1.6, 0, 0.4);
 export const MAT_SPOT = new THREE.Vector3(2.2, 0.06, 0.9);

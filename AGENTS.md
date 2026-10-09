@@ -5,13 +5,14 @@ video. React 19 + TypeScript 7, Vite, Vitest, oxlint. Deployed to GitHub Pages f
 
 ## Commands
 
-| Command          | Notes                                                         |
-| ---------------- | ------------------------------------------------------------- |
-| `npm run dev`    | Vite dev server (http://localhost:5173)                       |
-| `npm run check`  | The gate: `typecheck && lint && format:check && test`         |
-| `npm test`       | `vitest run` (jsdom). `npm run test:watch` to iterate         |
-| `npm run build`  | `tsc -b && vite build` — CI runs this too, so keep it passing |
-| `npm run format` | Prettier write (formatting is enforced, not advisory)         |
+| Command                   | Notes                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------- |
+| `npm run dev`             | Vite dev server (http://localhost:5173)                                      |
+| `npm run check`           | The gate: `typecheck && lint && lint:boundaries && format:check && test`     |
+| `npm run lint:boundaries` | dependency-cruiser: module boundaries and layers (`.dependency-cruiser.cjs`) |
+| `npm test`                | `vitest run` (jsdom). `npm run test:watch` to iterate                        |
+| `npm run build`           | `tsc -b && vite build` — CI runs this too, so keep it passing                |
+| `npm run format`          | Prettier write (formatting is enforced, not advisory)                        |
 
 The toolchain is TypeScript 7 (the native compiler) and **oxlint**, not ESLint: `.oxlintrc.json` is the lint
 config, and the stricter rule categories are deliberately off. `react-refresh/only-export-components` has no
@@ -38,7 +39,7 @@ src/
   band/       One module per instrument → Performer { root, update(t) }; timing.ts has beatPulse, recentHit, latestStarted
   characters/ Dinosaur rigs + helpers (reach.ts arm IK, rocker.ts). MIXED .js/.ts — see Gotchas
   props/      Instruments, clothes, hair, scene objects. Also mixed .js/.ts
-  world/      Sets and screens (rock-stage, meadow, pizzeria, interior room kit, screen-script)
+  world/      Sets and screens (rock-stage, campus, bedroom, lulu-home, interior room kit, screen-script)
   audio/      Synth voices + part schedulers (see below)
   episodes/   One folder per video; index.ts is the registry, grouped into sidebar folders
 ```
@@ -85,10 +86,15 @@ fight the "pure function of `t`" model, and a wrapper would have to be threaded 
 
 **Pinned skills** (`skills-lock.json`; checkout in the gitignored `.agents/`, absent from a fresh clone): consult
 `three-best-practices` before writing or refactoring three.js (scene graph, materials, disposal), and
-`frontend-design` before UI work in `src/ui/` and `src/app/`.
+`frontend-design` before UI work in `src/ui/` and `src/app/`, and `codebase-design` / `setup-ts-deep-modules` before
+adding or splitting a module.
 
 ## Conventions
 
+- **Modules are deep; episodes are leaves.** Import a module's root files only, never another episode's files:
+  a set or prop that two Shorts share moves to `world/` or `props/`. Layers go
+  `features → episodes → band → characters, props, world → engine → audio`. `npm run lint:boundaries` enforces it;
+  see [docs/adr/0001-deep-modules.md](docs/adr/0001-deep-modules.md).
 - **Imports are extensionless**, including TS importing JS and directory indexes. Only `three/addons/**/*.js`
   carries an extension.
 - **`import type` is mandatory** for types: `verbatimModuleSyntax` + `typescript/consistent-type-imports: error`

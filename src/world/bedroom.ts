@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { box, createRoom, createScreen, mat, picture, MONO, ROUND } from '../../../world/interior';
-import { textTexture } from '../../../world/text-texture';
+import { box, createRoom, createScreen, mat, picture, MONO, ROUND } from './interior';
+import { textTexture } from './text-texture';
 
 export const BED_TOP = 1.05;
 

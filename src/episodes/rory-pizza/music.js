@@ -1,4 +1,4 @@
-import { chug, mainBar } from '../rory-rocks/riff';
+import { chug, mainBar } from '../../audio/rory-riff';
 import * as sfx from '../../audio/sfx';
 
 // 4/4 @ 120 BPM → 1 beat = 0.5 s, 1 eighth = 0.25 s, 1 bar = 2 s. Eighth index = seconds × 4.
