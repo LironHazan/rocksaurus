@@ -89,7 +89,8 @@ function cloak(): { group: THREE.Group; fabric: THREE.MeshPhysicalMaterial } {
     const x = p.getX(i),
       y = p.getY(i),
       z = p.getZ(i);
-    const v = 0.5 - y / 2.45; // 0 at the shoulders, 1 at the hem
+    const v = Math.max(0, 0.5 - y / 2.45); // 0 at the shoulders, 1 at the hem (clamped: float error makes the top row
+    // a hair below 0, and a negative number to the power 0.8 is NaN)
     const r = 0.68 + 0.82 * v ** 0.8;
     const a = Math.atan2(x, z);
     const fold = 1 + 0.06 * Math.sin(a * 11) * v * v;
