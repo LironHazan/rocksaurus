@@ -2,12 +2,13 @@ import { cueSheet, every, quieter, type Cue, type Player } from '../../audio/cue
 import { playSyllables } from '../../audio/babble';
 import { playBass } from '../../audio/bass';
 import { playDrums } from '../../audio/drums';
+import { playRiff } from '../../audio/guitar';
 import { boop, thump } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
-import { BASS, DRUMS } from './music';
+import { BASS, DRUMS, GUITAR } from './music';
 import { CUE, DURATION, SYLLABLES } from './timeline';
 
-// The groove under everything, quiet so the kitchen is still heard: Lulu's heavy, slow steps, the fridge door,
+// The groove under everything (heavy in Omli's car), quiet so the kitchen is still heard: Lulu's heavy, slow steps, the fridge door,
 // the long sigh, Mirta's mop, the lid, the spoon, the "bleh", the bin; the road on the way home; her sips, and a
 // snore.
 
@@ -70,6 +71,8 @@ const SOUND = cueSheet({
 /** The groove sits under the kitchen: loud enough to feel, quiet enough to hear the spoon. */
 const MUSIC_GAIN = 0.55;
 const DRUMS_GAIN = 0.75;
+/** The car's guitar: under the bass, so the groove stays Omli's. */
+const GUITAR_GAIN = 0.5;
 
 export function soundtrack(bus: AudioNode, t0: number): void {
   SOUND.play(bus, t0);
@@ -80,4 +83,7 @@ export function soundtrack(bus: AudioNode, t0: number): void {
   drums.connect(band);
   playBass(band, t0, BASS);
   playDrums(drums, t0, DRUMS, { smooth: true });
+  const guitar = new GainNode(bus.context, { gain: GUITAR_GAIN });
+  guitar.connect(band);
+  playRiff(guitar, t0, GUITAR);
 }

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { box, createRoom, createWallClock, cylinder, mat, picture, ROUND } from '../../world/interior';
 import { textTexture } from '../../world/text-texture';
+import { BED_TOP } from '../../world/bedroom';
 import type { Flavour } from './timeline';
 
 /** The fridge: its middle (x), its back against the wall, and its size. */
@@ -525,4 +526,81 @@ export function createKitchen() {
   scene.add(binWall, binFloor);
 
   return { scene, ...fridge };
+}
+
+/** The bedroom's mattress (world): its top, its far and near edges (z), its foot end (x). Lulu's head is at -x. */
+const MATTRESS = { top: BED_TOP, back: -2.3, front: 1.1, foot: 2.9 } as const;
+/** Where the blanket starts (her shoulders), how far it hangs over the edges, and its grid. */
+const BLANKET = { head: -1.5, overhang: 0.55, segX: 48, segZ: 36, loft: 0.06 } as const;
+
+export interface Blanket {
+  mesh: THREE.Mesh;
+  /**
+   * Drapes it over the bed and over a body (a sphere, world space), no higher than `cap` (her lap, while she sits
+   * up). The flat part lies on the mattress; past the edges it hangs straight down.
+   */
+  drape(body: THREE.Vector3, radius: number, cap: number): void;
+}
+
+/**
+ * A quilted blanket: lavender-blue squares stitched on the diagonal, with the white sheet turned down over its top
+ * edge. A grid whose height is set each frame from where she is, so it lies on her like cloth.
+ */
+export function createBlanket(): Blanket {
+  const { head, overhang, segX, segZ, loft } = BLANKET;
+  const width = MATTRESS.foot + overhang - head;
+  const depth = MATTRESS.front + overhang - MATTRESS.back;
+  const geometry = new THREE.PlaneGeometry(width, depth, segX, segZ).rotateX(-Math.PI / 2);
+  geometry.translate(head + width / 2, 0, MATTRESS.back + depth / 2);
+  const flat = Float32Array.from(geometry.attributes.position!.array);
+  const map = textTexture(512, 512, (ctx, w, h) => {
+    ctx.fillStyle = '#6b7fd8';
+    ctx.fillRect(0, 0, w, h);
+    // quilting: a diamond of stitches every square
+    ctx.strokeStyle = '#9fb0f0';
+    ctx.lineWidth = w * 0.006;
+    ctx.setLineDash([w * 0.012, w * 0.01]);
+    const step = w / 8;
+    for (let i = -8; i <= 16; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * step, 0);
+      ctx.lineTo(i * step + h, h);
+      ctx.moveTo(i * step, h);
+      ctx.lineTo(i * step + h, 0);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    // the sheet, turned down over the top edge (u = 0 is the head end)
+    ctx.fillStyle = '#f4f2fb';
+    ctx.fillRect(0, 0, w * 0.09, h);
+    ctx.fillStyle = '#c9c3e6';
+    ctx.fillRect(w * 0.09, 0, w * 0.008, h);
+  });
+  const mesh = new THREE.Mesh(
+    geometry,
+    new THREE.MeshStandardMaterial({ map, roughness: 0.95, side: THREE.DoubleSide }),
+  );
+  mesh.castShadow = mesh.receiveShadow = true;
+  const position = geometry.attributes.position!;
+  return {
+    mesh,
+    drape(body, radius, cap) {
+      for (let i = 0; i < position.count; i++) {
+        const x = flat[i * 3]!;
+        const z = flat[i * 3 + 2]!;
+        // on the mattress, or hanging over its near edge or its foot
+        const px = Math.min(x, MATTRESS.foot);
+        const pz = Math.min(z, MATTRESS.front);
+        const hang = x - px + (z - pz);
+        let y = MATTRESS.top + loft - hang;
+        // over her: the top of the body sphere, plus the blanket's own thickness, up to the cap
+        const d2 = (px - body.x) ** 2 + (pz - body.z) ** 2;
+        if (hang === 0 && d2 < radius * radius)
+          y = Math.max(y, Math.min(cap, body.y + Math.sqrt(radius * radius - d2) + loft));
+        position.setXYZ(i, px + Math.sign(x - px) * loft, y, pz + Math.sign(z - pz) * loft);
+      }
+      position.needsUpdate = true;
+      geometry.computeVertexNormals();
+    },
+  };
 }

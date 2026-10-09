@@ -8,12 +8,12 @@ import { reachTo, restRig, type TiredLulu } from './pose';
 import { LULU_SEAT, OMLI_SEAT, createRide } from './road';
 import { BPM, CUE } from './timeline';
 
-// The ride home: Omli drives, nodding along to the groove; Lulu takes the back seat, and since she doesn't fit,
+// The ride home: Omli drives, headbanging to the metal; Lulu takes the back seat, and since she doesn't fit,
 // her neck goes up through the sunroof, ponytail in the wind, eyes half shut.
 
 /** Both face the way the car goes (+x). */
 const FORWARD = Math.PI / 2;
-/** One beat of the groove (seconds): Omli's head bobs on it. */
+/** One beat of the groove (seconds): Omli headbangs on it, and Lulu nods along, half asleep. */
 const BEAT = 60 / BPM;
 /** The close-up on Lulu above the roof, then Omli at the wheel (seconds into the ride). */
 const LULU_CLOSE = [2.0, 4.2] as const;
@@ -31,7 +31,7 @@ export function createRideLocation(me: TiredLulu): Location {
     restRig(omli, omliFeet, t);
     omli.root.position.copy(OMLI_SEAT);
     omli.root.rotation.y = FORWARD;
-    omli.head.rotation.x += -Math.abs(Math.sin((Math.PI * t) / BEAT)) * 0.12; // on the beat
+    omli.head.rotation.x += -Math.abs(Math.sin((Math.PI * t) / BEAT)) * 0.3; // headbanging, on the beat
     omli.head.rotation.y = -0.35; // three-quarters to us
     omli.setMouth(0.15); // a little grin
     omli.root.updateMatrixWorld(true);
@@ -47,6 +47,7 @@ export function createRideLocation(me: TiredLulu): Location {
     lulu.root.rotation.y = FORWARD;
     idleLulu(lulu, t * 0.7, { eyesOpen: 0.3, nod: -0.15 });
     lulu.head.rotation.y = -0.6 + Math.sin(s * 0.8) * 0.1; // toward us, swaying with the road
+    lulu.head.rotation.x += Math.abs(Math.sin((Math.PI * t) / BEAT)) * 0.08; // a sleepy nod to the metal
     hair.ponytail.rotation.x = 0.7 + Math.sin(t * 13) * 0.15; // in the wind
     hair.ponytail.rotation.z = Math.sin(t * 9) * 0.12;
     lulu.setMouth(lerp(0, 0.2, ease(seg(s, 2.8, 3.6)))); // a slow yawn

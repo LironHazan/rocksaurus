@@ -1,6 +1,6 @@
 import { drumHits } from '../../audio/drum-patterns';
 import { CAPTIONS } from './captions';
-import { BASS, DRUMS } from './music';
+import { BASS, DRUMS, GUITAR } from './music';
 import { BAR, BARS, CUE, DURATION, LINES } from './timeline';
 
 const eighth = BAR / 8;
@@ -46,5 +46,11 @@ describe('The Last Yogurt', () => {
     const inside = (from: number, to: number) => hits.filter(t => t > from + 0.01 && t < to);
     expect(inside(CUE.yuck[0], CUE.yuck[1])).toEqual([]);
     expect(hits.filter(t => t >= CUE.bed[0])).toEqual([]);
+  });
+
+  it('the guitar only plays in Omli’s car', () => {
+    const times = GUITAR.notes.map(n => n[0] * eighth);
+    expect(Math.min(...times)).toBeCloseTo(CUE.ride[0]);
+    expect(Math.max(...times)).toBeLessThan(CUE.ride[1]);
   });
 });

@@ -5,6 +5,7 @@ import { idleLulu } from '../../characters/lulu';
 import { createBedroom, BED_TOP } from '../../world/bedroom';
 import { createShaker, SHAKER_LENGTH } from '../../props/shaker';
 import type { TiredLulu } from './pose';
+import { createBlanket } from './sets';
 import { CUE } from './timeline';
 
 // Home, 7:30 PM: sitting up in bed in her office flannel, sipping a protein shake. Each sip, her eyes close a
@@ -16,6 +17,11 @@ const LIE = new THREE.Vector3(1.75, BED_TOP + 0.85, -0.5);
 const LIE_ROLL = 1.45;
 /** How far she tips the shaker back to drink (radians: base up). */
 const DRINK_TILT = -1.7;
+/** Her body under the blanket: a sphere this big round her middle (her body ellipsoid is about 1 across). */
+const BODY_UNDER_BLANKET = 1.15;
+/** How high the blanket comes while she sits up (her lap, above the mattress), and no limit once she lies down. */
+const LAP = 0.7;
+const UNCAPPED = 10;
 /** Where the shaker ends up: on its side on the blanket. */
 const DROPPED = new THREE.Vector3(1.6, BED_TOP + 0.75, 1.2);
 /** Grip points on the bottle, in its own (unscaled) space: either side of its middle. */
@@ -32,7 +38,9 @@ export function createBedLocation(me: TiredLulu): Location {
   room.clock.set('7:30');
   room.pagerScreen.set('');
   const shaker = createShaker();
-  room.scene.add(shaker);
+  room.blanket.visible = false; // the set's blob; this Short has a real blanket
+  const blanket = createBlanket();
+  room.scene.add(shaker, blanket.mesh);
   const v = new THREE.Vector3();
   const tilt = new THREE.Vector3();
 
@@ -66,12 +74,10 @@ export function createBedLocation(me: TiredLulu): Location {
     for (const side of [-1, 1] as const) me.grip(side, shaker.localToWorld(v.set(side * GRIP.x, GRIP.y, 0)));
   }
 
+  /** The blanket over her: on her lap while she sits up, all of her once she's lying down. */
   function tuckIn(lying: number) {
-    // over her legs while she sits up, over all of her once she's lying down
-    lulu.body.localToWorld(v.set(0, lerp(0.35, 1.0, lying), lerp(0.75, 0, lying)));
-    room.blanket.position.set(v.x, v.y, v.z + 0.15);
-    room.blanket.scale.set(lerp(1.3, 1.45, lying), lerp(0.4, 0.8, lying), lerp(1.0, 1.25, lying));
-    room.blanket.rotation.set(0, 0, 0);
+    lulu.body.localToWorld(v.set(0, 1.0, 0));
+    blanket.drape(v, BODY_UNDER_BLANKET, BED_TOP + lerp(LAP, UNCAPPED, lying));
   }
 
   function zzz(t: number) {
