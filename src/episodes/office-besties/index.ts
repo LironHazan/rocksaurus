@@ -9,7 +9,7 @@ import { idle, resetPose } from '../../characters/rory';
 import { armOf, reachArm, releaseArm } from '../../characters/reach';
 import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
-import { chatView, createPhone } from '../../props/phone';
+import { chatView, createPhone, phonePov } from '../../props/phone';
 import { createProteinBar } from '../../props/protein-bar';
 import { box, mat } from '../../world/interior';
 import { textTexture } from '../../world/text-texture';
@@ -220,14 +220,7 @@ const episode: Episode = {
     function pov(): Shot {
       lulu.head.visible = false;
       for (const s of lulu.neck) s.visible = false;
-      phone.group.updateMatrixWorld(true);
-      const p = phone.group.getWorldPosition(new THREE.Vector3());
-      const n = new THREE.Vector3(0, 0, 1).transformDirection(phone.group.matrixWorld);
-      const screenUp = new THREE.Vector3(0, 1, 0).transformDirection(phone.group.matrixWorld);
-      const cam = p.clone().addScaledVector(n, phone.height * 1.4);
-      const look = p.clone().addScaledVector(screenUp, -phone.height * 0.15);
-      camera.up.copy(screenUp);
-      return { cam: [cam.x, cam.y, cam.z], look: [look.x, look.y, look.z] };
+      return phonePov(phone, camera);
     }
 
     // ── Lulu's flat ─────────────────────────────────────────────

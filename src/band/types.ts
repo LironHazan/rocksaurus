@@ -4,7 +4,8 @@ import type * as THREE from 'three';
 export type Activity = 'idle' | 'play' | 'pose';
 
 /**
- * A band member with their instrument, ready to place on a stage. Everything is driven by the song's notes,
+ * A band member with their instrument, ready to place on a stage (the performer factories also return the
+ * character as `rig`, so an episode can add reactions on top). Everything is driven by the song's notes,
  * so `update(t)` is a pure function of time like the rest of the engine.
  */
 export interface Performer {

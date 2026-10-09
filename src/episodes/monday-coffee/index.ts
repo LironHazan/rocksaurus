@@ -19,7 +19,7 @@ import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
 import { addMohawk } from '../../props/mohawk';
 import { addTattoo } from '../../props/tattoo';
-import { chatView, createPhone, type Phone } from '../../props/phone';
+import { chatView, createPhone, phonePov, type Phone } from '../../props/phone';
 import { addJersey, HOME_KIT, TREX_BODY } from '../../props/soccer';
 import { createBedroom, BED_TOP } from '../lulu-on-call/sets/bedroom';
 import { CAPTIONS } from './captions';
@@ -330,7 +330,7 @@ const episode: Episode = {
       head: THREE.Object3D,
       phone: Phone,
       t: number,
-      { forward = 0.9, up = 0.1, grip = 0.05, spread = 0.3, typing = false } = {},
+      { forward = 0.9, up = 0.1, grip = 0.05, spread = 0.4, typing = false } = {},
     ) {
       a.holder.updateMatrixWorld(true);
       const [l, r] = a.rig.arms;
@@ -358,15 +358,7 @@ const episode: Episode = {
     const HEADS: THREE.Object3D[] = [tikiRig.head, parisRig.head, steggyRig.head, luluRig.head, ...luluRig.neck];
     function pov(phone: Phone, ...owner: THREE.Object3D[]): Shot {
       for (const o of owner) o.visible = false;
-      phone.group.updateMatrixWorld(true);
-      const p = phone.group.getWorldPosition(new THREE.Vector3());
-      const n = new THREE.Vector3(0, 0, 1).transformDirection(phone.group.matrixWorld);
-      const screenUp = new THREE.Vector3(0, 1, 0).transformDirection(phone.group.matrixWorld);
-      // the phone fills the top three quarters of the frame, leaving the bottom for the captions
-      const cam = p.clone().addScaledVector(n, phone.height * 1.4);
-      const look = p.clone().addScaledVector(screenUp, -phone.height * 0.15);
-      camera.up.copy(screenUp);
-      return { cam: [cam.x, cam.y, cam.z], look: [look.x, look.y, look.z] };
+      return phonePov(phone, camera);
     }
     /** The chat on someone's phone. */
     const show = (owner: Member, t: number) => phones[owner].show(chatView(CHAT, t, owner, START_CLOCK));
