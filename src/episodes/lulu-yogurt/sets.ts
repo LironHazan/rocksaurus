@@ -20,15 +20,17 @@ export const DOOR_OPEN = 1.9;
 export const BIN = new THREE.Vector3(-0.4, 1.3, -1.0);
 const BIN_RADIUS = 0.6;
 
-const LABELS: Record<Flavour, { colour: string; lines: readonly string[] }> = {
-  vegan: { colour: '#5aa469', lines: ['VEGAN', 'PROTEIN 🌱'] },
-  peach: { colour: '#ff9a5a', lines: ['PEACH', '🍑'] },
-  caramel: { colour: '#a8652f', lines: ['CARAMEL', '🍮'] },
+/** Each pot's print: its colour, its name (two lines), and its fruit or icon. */
+const PRINTS: Record<Flavour, { colour: string; name: readonly [string, string]; icon: string }> = {
+  vegan: { colour: '#4f9d5d', name: ['VEGAN', 'PROTEIN'], icon: '🌱' },
+  peach: { colour: '#ff8a4c', name: ['PEACH', 'YOGURT'], icon: '🍑' },
+  caramel: { colour: '#9a5a2a', name: ['CARAMEL', 'YOGURT'], icon: '🍮' },
 };
-/** A yogurt cup for a dinosaur's paw: base to lid. */
+/** A yogurt pot for a dinosaur's paw: base to lid, and its radius at the top (wide) and the base. */
 export const CUP_HEIGHT = 0.36;
 const CUP_TOP = 0.17;
-const CUP_BOTTOM = 0.14;
+const CUP_BOTTOM = 0.13;
+const RIM = 0.014;
 
 export interface Yogurt {
   group: THREE.Group;
@@ -36,41 +38,93 @@ export interface Yogurt {
   lid: THREE.Group;
 }
 
-/** A yogurt cup: a tapered tub with the flavour on its label and a foil lid. Origin at its base. */
+/** The print that wraps all the way round the pot: the fruit on white, then the flavour on a wavy band of colour. */
+function potPrint(colour: string, name: readonly [string, string], icon: string) {
+  return textTexture(
+    1024,
+    256,
+    (ctx, w, h) => {
+      ctx.fillStyle = '#fbfaf6';
+      ctx.fillRect(0, 0, w, h);
+      // the band, with a wavy top edge
+      ctx.fillStyle = colour;
+      ctx.beginPath();
+      ctx.moveTo(0, h);
+      for (let x = 0; x <= w; x += w / 64) ctx.lineTo(x, h * 0.4 + Math.sin((x / w) * Math.PI * 12) * h * 0.04);
+      ctx.lineTo(w, h);
+      ctx.fill();
+      // the front is the middle of the wrap (the seam is at the back)
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `${h * 0.26}px ${ROUND}`;
+      ctx.fillText(icon, w * 0.5, h * 0.2);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `700 ${h * 0.17}px ${ROUND}`;
+      ctx.fillText(name[0], w * 0.5, h * 0.6);
+      ctx.font = `600 ${h * 0.11}px ${ROUND}`;
+      ctx.fillText(name[1], w * 0.5, h * 0.8);
+      // a small icon on each side, so it's a yogurt from any angle
+      ctx.font = `${h * 0.16}px ${ROUND}`;
+      for (const u of [0.2, 0.8]) ctx.fillText(icon, w * u, h * 0.66);
+    },
+    ['700 40px Fredoka'],
+  );
+}
+
+/** The foil lid's top: the colour, a shine, the flavour's name. */
+function lidPrint(colour: string, name: string) {
+  return textTexture(
+    256,
+    256,
+    (ctx, w, h) => {
+      ctx.fillStyle = colour;
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.fillRect(0, h * 0.18, w, h * 0.08);
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `700 ${h * 0.16}px ${ROUND}`;
+      ctx.fillText(name, w / 2, h / 2);
+    },
+    ['700 40px Fredoka'],
+  );
+}
+
+/**
+ * A yogurt pot: a tapered tub printed all the way round, a rolled rim, a white base, and a foil lid with a pull tab
+ * and the flavour on top. Origin at its base; the front of the print faces +z.
+ */
 export function createYogurt(flavour: Flavour): Yogurt {
-  const { colour, lines } = LABELS[flavour];
+  const { colour, name, icon } = PRINTS[flavour];
   const group = new THREE.Group();
-  group.add(cylinder(CUP_TOP, CUP_BOTTOM, CUP_HEIGHT, mat(0xfbfaf6, 0.5)));
-  const label = new THREE.Mesh(
-    new THREE.CylinderGeometry(CUP_TOP + 0.004, CUP_BOTTOM + 0.004, CUP_HEIGHT * 0.7, 32, 1, true, -1.3, 2.6),
-    new THREE.MeshStandardMaterial({
-      roughness: 0.6,
-      map: textTexture(
-        512,
-        256,
-        (ctx, w, h) => {
-          ctx.fillStyle = colour;
-          ctx.fillRect(0, 0, w, h);
-          ctx.fillStyle = '#ffffff';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.font = `700 ${h * 0.24}px ${ROUND}`;
-          lines.forEach((l, i) => ctx.fillText(l, w / 2, h * (0.32 + i * 0.36)));
-        },
-        ['700 40px Fredoka'],
-      ),
-    }),
+  // the tub: open at both ends, the print wrapped round it (turned so the seam is at the back)
+  const tub = new THREE.CylinderGeometry(CUP_TOP, CUP_BOTTOM, CUP_HEIGHT, 48, 1, true).rotateY(Math.PI);
+  tub.translate(0, CUP_HEIGHT / 2, 0);
+  const side = new THREE.Mesh(
+    tub,
+    new THREE.MeshStandardMaterial({ map: potPrint(colour, name, icon), roughness: 0.45, side: THREE.DoubleSide }),
   );
-  label.position.y = CUP_HEIGHT * 0.45;
-  group.add(label);
+  const base = new THREE.Mesh(new THREE.CircleGeometry(CUP_BOTTOM, 32), mat(0xfbfaf6, 0.5));
+  base.rotation.x = Math.PI / 2;
+  base.position.y = 0.002;
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(CUP_TOP, RIM, 8, 48), mat(0xfbfaf6, 0.4));
+  rim.rotation.x = Math.PI / 2;
+  rim.position.y = CUP_HEIGHT;
+  group.add(side, base, rim);
+  // the foil lid, hinged at the back edge, with a little pull tab at the front
   const lid = new THREE.Group();
-  lid.position.set(0, CUP_HEIGHT, -CUP_TOP);
-  const foil = new THREE.Mesh(
-    new THREE.CylinderGeometry(CUP_TOP + 0.02, CUP_TOP + 0.02, 0.02, 32),
-    new THREE.MeshStandardMaterial({ color: colour, roughness: 0.3, metalness: 0.6 }),
-  );
+  lid.position.set(0, CUP_HEIGHT + RIM, -CUP_TOP);
+  const foilMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.6 });
+  const foil = new THREE.Mesh(new THREE.CylinderGeometry(CUP_TOP + RIM, CUP_TOP + RIM, 0.008, 48), [
+    foilMat,
+    new THREE.MeshStandardMaterial({ map: lidPrint(colour, name[0]), roughness: 0.3, metalness: 0.5 }),
+    foilMat,
+  ]);
   foil.position.z = CUP_TOP;
-  lid.add(foil);
+  const tab = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.006, 0.06), foilMat);
+  tab.position.z = CUP_TOP * 2 + RIM + 0.02;
+  lid.add(foil, tab);
   group.add(lid);
   group.traverse(o => (o.castShadow = true));
   return { group, lid };
