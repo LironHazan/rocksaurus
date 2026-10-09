@@ -56,6 +56,7 @@ guards and `satisfies`), and tests never mock modules: jsdom's missing Web Audio
 
 ## Read before the task
 
+- Domain terms (Short, cue sheet, cue, bed, babble): [CONTEXT.md](CONTEXT.md).
 - Adding or changing a Short, a character, a prop or a set: [docs/agents/shorts.md](docs/agents/shorts.md) (also has
   the owner's house rules for every Short).
 - Music, sound effects, voices, or the player clock: [docs/agents/audio.md](docs/agents/audio.md).

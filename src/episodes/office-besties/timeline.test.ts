@@ -1,6 +1,6 @@
 import { CAPTIONS } from './captions';
 import { CHAT, CUE, DURATION, LINES, MEMBERS, SYLLABLES, mouthAt, speakerAt } from './timeline';
-import { BEDS, EFFECTS } from './sound';
+import { SOUND } from './sound';
 import { TYPING } from '../../props/phone';
 
 describe('Office Besties', () => {
@@ -69,12 +69,7 @@ describe('Office Besties', () => {
     }
   });
 
-  it('sound effects are sorted, the beds cover the whole video', () => {
-    EFFECTS.forEach((fx, i) => {
-      expect(fx.at).toBeGreaterThanOrEqual(0);
-      expect(fx.at).toBeLessThanOrEqual(DURATION);
-      if (i > 0) expect(fx.at).toBeGreaterThanOrEqual(EFFECTS[i - 1]!.at);
-    });
-    for (let t = 0; t < DURATION; t += 0.5) expect(BEDS.some(b => t >= b.from && t < b.to)).toBe(true);
+  it('the beds cover the whole video', () => {
+    for (let t = 0; t < DURATION; t += 0.5) expect(SOUND.beds.some(b => t >= b.from && t < b.to)).toBe(true);
   });
 });

@@ -1,6 +1,6 @@
 import { CAPTIONS } from './captions';
 import { BAR, CUE, DURATION, TRY, TRY_AT, TRY_LEN, fitting } from './timeline';
-import { EFFECTS, PLAN } from './music';
+import { PLAN } from './music';
 
 describe('Paris at Rot Hotic', () => {
   it('is a Short: under a minute, and a whole number of waltz bars', () => {
@@ -43,13 +43,5 @@ describe('Paris at Rot Hotic', () => {
       expect(c.to).toBeLessThanOrEqual(DURATION);
       expect(c.from).toBeLessThan(c.to);
     }
-  });
-
-  it('sound effects are sorted and inside the video', () => {
-    EFFECTS.forEach((fx, i) => {
-      expect(fx.at).toBeGreaterThanOrEqual(0);
-      expect(fx.at).toBeLessThanOrEqual(DURATION);
-      if (i > 0) expect(fx.at).toBeGreaterThanOrEqual(EFFECTS[i - 1]!.at);
-    });
   });
 });

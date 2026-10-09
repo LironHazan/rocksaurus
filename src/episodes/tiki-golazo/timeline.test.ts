@@ -1,7 +1,7 @@
 import { CAPTIONS } from './captions';
 import { BAR, CUE, DURATION, PASSES, ballAt, netPush, touches } from './timeline';
 import { GOAL } from './sets/pitch';
-import { BARS, DRUMS, EFFECTS, PLAN } from './music';
+import { BARS, DRUMS, PLAN } from './music';
 import { drumHits } from '../../audio/drum-patterns';
 
 describe('Tiki Taka scores a golazo', () => {
@@ -86,13 +86,5 @@ describe('Tiki Taka scores a golazo', () => {
       expect(c.to).toBeLessThanOrEqual(DURATION);
       expect(c.from).toBeLessThan(c.to);
     }
-  });
-
-  it('sound effects are sorted and inside the video', () => {
-    EFFECTS.forEach((fx, i) => {
-      expect(fx.at).toBeGreaterThanOrEqual(0);
-      expect(fx.at).toBeLessThanOrEqual(DURATION);
-      if (i > 0) expect(fx.at).toBeGreaterThanOrEqual(EFFECTS[i - 1]!.at);
-    });
   });
 });

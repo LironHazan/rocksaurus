@@ -1,31 +1,13 @@
-import { atTime } from '../../audio/schedule';
-import { boop, ding } from '../../audio/sfx';
+import { cueSheet, every, quieter, type Cue, type Player } from '../../audio/cue-sheet';
+import { ding } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
-import type { BedKind } from '../../audio/foley';
 import { CHAT, CUE, DURATION, TYPING } from './timeline';
 
 // Sound only, no music: the scene is carried by its natural sounds. Each location has a bed under it (the street
 // and the playground at drop-off, a quiet room, the café's chatter) with little things happening on top: birds,
 // a car going by, the chat's pops and buzzes, Rory's snores, the therapist's pen, the espresso machine.
 
-export interface Bed {
-  from: number;
-  to: number;
-  kind: BedKind;
-}
-
-/** Background beds, one per location, cut with the picture. */
-export const BEDS: readonly Bed[] = [
-  { from: 0, to: CUE.rory[0], kind: 'street' }, // drop-off, then the debate on the pavement
-  { from: 0, to: CUE.ask[0], kind: 'kids' }, // until the bell's rung and they're all inside
-  { from: CUE.rory[0], to: CUE.therapy[0], kind: 'room' },
-  { from: CUE.therapy[0], to: CUE.cafe[0], kind: 'room' },
-  { from: CUE.cafe[0], to: CUE.end, kind: 'street' },
-  { from: CUE.cafe[0], to: CUE.end, kind: 'cafe' },
-  { from: CUE.end, to: DURATION, kind: 'room' },
-];
-
-type FxKind =
+type Kind =
   | 'bell'
   | 'pop'
   | 'vibrate'
@@ -44,17 +26,13 @@ type FxKind =
   | 'stir'
   | 'saucer'
   | 'sigh';
-interface Fx {
-  at: number;
-  kind: FxKind;
-}
 
 /** Where a phone is when a message arrives: in a paw (a pop) or buzzing somewhere it can't be ignored. */
 const buzzing = (t: number) => (t >= CUE.rory[0] && t < CUE.rory[1]) || (t >= CUE.therapy[0] && t < CUE.cafe[0]);
 const indoors = (t: number) => t >= CUE.rory[0] && (t < CUE.cafe[0] || t >= CUE.end);
 
-function effects(): Fx[] {
-  const out: Fx[] = [
+function cues(): Cue<Kind>[] {
+  const out: Cue<Kind>[] = [
     // drop-off: the school bell, birds in the trees, the odd car
     { at: 0.5, kind: 'bell' },
     { at: 0.85, kind: 'bell' },
@@ -87,7 +65,7 @@ function effects(): Fx[] {
     out.push({ at, kind: 'bird' });
   // a clock ticking in the quiet rooms: Rory's bedroom, the therapist's office
   for (let t = CUE.rory[0] + 0.5; t < DURATION; t += 1) if (indoors(t)) out.push({ at: t, kind: 'tick' });
-  for (let t = CUE.rory[0] + 0.3; t < CUE.rory[1] - 1; t += 1.6) out.push({ at: t, kind: 'snore' });
+  for (const at of every(CUE.rory[0] + 0.3, CUE.rory[1] - 1, 1.6)) out.push({ at, kind: 'snore' });
   // thumbs on glass: a parent typing during the debate; Lulu typing furiously, mid-session
   for (const m of CHAT) {
     const lulu = m.from === 'Lulu';
@@ -95,16 +73,18 @@ function effects(): Fx[] {
     for (let t = m.at - TYPING + 0.05; t < m.at - 0.05; t += lulu ? 0.11 : 0.17)
       out.push({ at: t, kind: lulu ? 'tap' : 'softTap' });
   }
-  return out.sort((a, b) => a.at - b.at);
+  return out;
 }
-export const EFFECTS = effects();
 
-const PLAYERS: Record<FxKind, (bus: AudioNode, when: number) => void> = {
+/** Half volume: for things heard through a window, or thumbs that aren't furious. */
+const HALF = 0.5;
+
+const PLAYERS: Record<Kind, Player> = {
   bell: (b, w) => ding(b, w, 1568),
-  pop: (b, w) => boop(b, w, 620, 980, 0.09, 0.08),
+  pop: fx.chatPop,
   vibrate: fx.vibrate,
   tap: fx.keyTap,
-  softTap: (b, w) => fx.keyTap(soft(b), w),
+  softTap: (b, w) => fx.keyTap(quieter(b, HALF), w),
   snore: fx.snore,
   clink: (b, w) => {
     ding(b, w, 2637);
@@ -113,7 +93,7 @@ const PLAYERS: Record<FxKind, (bus: AudioNode, when: number) => void> = {
   shutter: fx.shutter,
   thud: fx.stomp,
   bird: (b, w) => fx.bird(b, w, 0.9 + ((w * 7.1) % 0.3)),
-  lowBird: (b, w) => fx.bird(soft(b), w, 0.85),
+  lowBird: (b, w) => fx.bird(quieter(b, HALF), w, 0.85),
   car: fx.carPass,
   tick: fx.tick,
   scribble: fx.scribble,
@@ -123,14 +103,22 @@ const PLAYERS: Record<FxKind, (bus: AudioNode, when: number) => void> = {
   sigh: fx.sigh,
 };
 
-/** Half volume: for things heard through a window, or thumbs that aren't furious. */
-function soft(bus: AudioNode): AudioNode {
-  const g = new GainNode(bus.context, { gain: 0.5 });
-  g.connect(bus);
-  return g;
-}
+export const SOUND = cueSheet({
+  duration: DURATION,
+  players: PLAYERS,
+  cues: cues(),
+  /** Background beds, one per location, cut with the picture. */
+  beds: [
+    { from: 0, to: CUE.rory[0], kind: 'street' }, // drop-off, then the debate on the pavement
+    { from: 0, to: CUE.ask[0], kind: 'kids' }, // until the bell's rung and they're all inside
+    { from: CUE.rory[0], to: CUE.therapy[0], kind: 'room' },
+    { from: CUE.therapy[0], to: CUE.cafe[0], kind: 'room' },
+    { from: CUE.cafe[0], to: CUE.end, kind: 'street' },
+    { from: CUE.cafe[0], to: CUE.end, kind: 'cafe' },
+    { from: CUE.end, to: DURATION, kind: 'room' },
+  ],
+});
 
 export function soundtrack(bus: AudioNode, t0: number): void {
-  for (const b of BEDS) atTime(t0 + b.from, () => fx.bed(bus, t0 + b.from, b.to - b.from, b.kind));
-  for (const e of EFFECTS) atTime(t0 + e.at, () => PLAYERS[e.kind](bus, t0 + e.at));
+  SOUND.play(bus, t0);
 }

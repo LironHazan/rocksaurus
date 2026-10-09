@@ -1,4 +1,5 @@
 import { audio } from './context';
+import { boop } from './sfx';
 
 // Everyday foley: keys, a shaker, gulps, a pager, a clock, footsteps.
 const { ctx } = audio;
@@ -195,6 +196,12 @@ export function vibrate(bus: AudioNode, when: number) {
     o.stop(when + dt + 0.3);
   }
 }
+
+/** A chat message arriving on the phone in your paw. */
+export const chatPop = (bus: AudioNode, when: number) => boop(bus, when, 620, 980, 0.09, 0.08);
+
+/** Your own chat message going out: higher and shorter than a pop. */
+export const chatSent = (bus: AudioNode, when: number) => boop(bus, when, 900, 1300, 0.07, 0.06);
 
 /** One snore: a rumbling breath in, then a softer whistle out. */
 export function snore(bus: AudioNode, when: number) {

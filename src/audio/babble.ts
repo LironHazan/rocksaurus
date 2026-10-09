@@ -1,4 +1,5 @@
 import { rng } from '../engine/math';
+import { atTime } from './schedule';
 import { sing } from './voice';
 import type { Vowel } from './vowels';
 
@@ -63,15 +64,9 @@ export function mouthOf<W extends string>(all: readonly Syllable<W>[], who: W, t
 export const speakerOf = <W extends string>(lines: readonly SpokenLine<W>[], t: number): W | null =>
   lines.find(l => t >= l.from && t < l.to)?.who ?? null;
 
-/** Sings every syllable, quietly, from episode start `t0`. Notes are built lazily by the caller's scheduler. */
-export function playSyllables(
-  bus: AudioNode,
-  t0: number,
-  all: readonly Syllable[],
-  schedule: (when: number, make: () => void) => void,
-  gain = 0.32,
-): void {
+/** Sings every syllable, quietly, from episode start `t0`. Each note is built just before it plays (`atTime`). */
+export function playSyllables(bus: AudioNode, t0: number, all: readonly Syllable[], gain = 0.32): void {
   const voices = new GainNode(bus.context, { gain });
   voices.connect(bus);
-  for (const s of all) schedule(t0 + s.at, () => sing(voices, t0 + s.at, s.note, s.vowel, 0.6, s.dur));
+  for (const s of all) atTime(t0 + s.at, () => sing(voices, t0 + s.at, s.note, s.vowel, 0.6, s.dur));
 }

@@ -1,8 +1,7 @@
-import { atTime } from '../../audio/schedule';
+import { cueSheet, every, quieter, type Cue, type Player } from '../../audio/cue-sheet';
 import { ding } from '../../audio/sfx';
 import { playSyllables } from '../../audio/babble';
 import * as fx from '../../audio/foley';
-import type { BedKind } from '../../audio/foley';
 import { keystrokes } from '../../world/screen-script';
 import { CUE, DURATION, FIX_SCRIPT, LAPTOP_SCRIPT, SYLLABLES } from './timeline';
 
@@ -10,16 +9,7 @@ import { CUE, DURATION, FIX_SCRIPT, LAPTOP_SCRIPT, SYLLABLES } from './timeline'
 // feet, the cheer when prod comes back, morning birds, snores, Eilon's footsteps, one big collective sigh. And the
 // voices: dino babble, the same syllables the mouths move to.
 
-interface Bed {
-  from: number;
-  to: number;
-  kind: BedKind;
-}
-
-/** Background beds: a quiet room everywhere indoors. */
-const BEDS: readonly Bed[] = [{ from: CUE.campus[1], to: DURATION, kind: 'room' }];
-
-type FxKind =
+type Kind =
   | 'cricket'
   | 'page'
   | 'thud'
@@ -33,16 +23,12 @@ type FxKind =
   | 'bird'
   | 'snore'
   | 'sigh';
-interface Fx {
-  at: number;
-  kind: FxKind;
-}
 
 /** Taluzarus never stands still: his feet, the whole night in the war room. */
 export const FIDGET_STEP = 0.3;
 
-function effects(): Fx[] {
-  const out: Fx[] = [
+function cues(): Cue<Kind>[] {
+  const out: Cue<Kind>[] = [
     { at: CUE.alert, kind: 'page' },
     { at: CUE.alert + 0.7, kind: 'page' },
     { at: CUE.alert + 1.4, kind: 'page' },
@@ -60,43 +46,42 @@ function effects(): Fx[] {
     // morning: they've all dozed off; then Eilon; then the sigh
     { at: CUE.ask + 3.0, kind: 'sigh' },
   ];
-  for (let t = 0.2; t < CUE.campus[1]; t += 0.55) out.push({ at: t, kind: 'cricket' });
-  for (let t = CUE.bedroom[0] + 0.2; t < CUE.alert; t += 0.8) out.push({ at: t, kind: 'cricket' });
+  for (const at of every(0.2, CUE.campus[1], 0.55)) out.push({ at, kind: 'cricket' });
+  for (const at of every(CUE.bedroom[0] + 0.2, CUE.alert, 0.8)) out.push({ at, kind: 'cricket' });
   for (const at of [...keystrokes(LAPTOP_SCRIPT), ...keystrokes(FIX_SCRIPT)]) out.push({ at, kind: 'key' });
   // Taluzarus's feet, in the war room until it's fixed; Eilon's footsteps in the morning
-  for (let t = CUE.warRoom[0] + 0.3; t < CUE.fixed; t += FIDGET_STEP) out.push({ at: t, kind: 'step' });
-  for (let t = CUE.eilon; t < CUE.eilon + 3.4; t += 0.42) out.push({ at: t, kind: 'step' });
+  for (const at of every(CUE.warRoom[0] + 0.3, CUE.fixed, FIDGET_STEP)) out.push({ at, kind: 'step' });
+  for (const at of every(CUE.eilon, CUE.eilon + 3.4, 0.42)) out.push({ at, kind: 'step' });
   for (const at of [41.9, 42.6, 43.4, 44.8, 46.9]) out.push({ at, kind: 'bird' });
   for (const at of [42.2, 43.9, 45.6]) out.push({ at, kind: 'snore' });
-  return out.sort((a, b) => a.at - b.at);
+  return out;
 }
-export const EFFECTS = effects();
 
-const PLAYERS: Record<FxKind, (bus: AudioNode, when: number) => void> = {
-  cricket: (b, w) => fx.cricket(soft(b, 0.6), w),
+const PLAYERS: Record<Kind, Player> = {
+  cricket: (b, w) => fx.cricket(quieter(b, 0.6), w),
   page: fx.page,
   thud: fx.stomp,
   key: fx.keyTap,
   ring: fx.ring,
-  farRing: (b, w) => fx.ring(soft(b, 0.35), w),
+  farRing: (b, w) => fx.ring(quieter(b, 0.35), w),
   vibrate: fx.vibrate,
-  step: (b, w) => fx.stomp(soft(b, 0.35), w),
+  step: (b, w) => fx.stomp(quieter(b, 0.35), w),
   fixed: (b, w) => [1046.5, 1318.5, 1568].forEach((f, i) => ding(b, w + i * 0.09, f)),
   cheer: (b, w) => fx.cheer(b, w, 1.8),
-  bird: (b, w) => fx.bird(soft(b, 0.6), w, 0.9 + ((w * 7.1) % 0.3)),
+  bird: (b, w) => fx.bird(quieter(b, 0.6), w, 0.9 + ((w * 7.1) % 0.3)),
   snore: fx.snore,
   sigh: fx.sigh,
 };
 
-/** Quieter: far away, or through a window. */
-function soft(bus: AudioNode, gain: number): AudioNode {
-  const g = new GainNode(bus.context, { gain });
-  g.connect(bus);
-  return g;
-}
+const SOUND = cueSheet({
+  duration: DURATION,
+  players: PLAYERS,
+  cues: cues(),
+  /** Background beds: a quiet room everywhere indoors. */
+  beds: [{ from: CUE.campus[1], to: DURATION, kind: 'room' }],
+});
 
 export function soundtrack(bus: AudioNode, t0: number): void {
-  for (const b of BEDS) atTime(t0 + b.from, () => fx.bed(bus, t0 + b.from, b.to - b.from, b.kind));
-  for (const e of EFFECTS) atTime(t0 + e.at, () => PLAYERS[e.kind](bus, t0 + e.at));
-  playSyllables(bus, t0, SYLLABLES, atTime);
+  SOUND.play(bus, t0);
+  playSyllables(bus, t0, SYLLABLES);
 }
