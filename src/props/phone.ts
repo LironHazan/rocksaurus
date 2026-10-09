@@ -11,7 +11,6 @@ export interface ChatLine {
   time: string;
 }
 
-/** What a chat screen shows. */
 export interface ChatView {
   lines: readonly ChatLine[];
   /** Someone else typing (shown under the group name). */
@@ -113,7 +112,6 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, max: number): string[
 
 function paintChat(ctx: CanvasRenderingContext2D, view: ChatView, style: ChatStyle) {
   ctx.setTransform(RES, 0, 0, RES, 0, 0);
-  // wallpaper
   ctx.fillStyle = C.wall;
   ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = ctx.createPattern(doodles(), 'repeat')!;
@@ -408,8 +406,6 @@ export function createPhone(style: ChatStyle, { height = 1.0, colour = 0x2c2c30 
   };
 }
 
-// ── a scripted chat ──────────────────────────────────────────
-
 /** A message in a scripted chat: it lands at `at` (seconds), after its sender has typed it for `TYPING` seconds. */
 export interface TimedChatLine extends ChatLine {
   at: number;
@@ -444,8 +440,6 @@ export function chatView(chat: readonly TimedChatLine[], t: number, owner: strin
   };
 }
 
-// ── holding it ───────────────────────────────────────────────
-
 export interface HoldOptions {
   /** How far out in front of the shoulders, and how far up, the phone is held (world units). */
   forward?: number;
@@ -453,7 +447,6 @@ export interface HoldOptions {
   /** Where the paws grip its sides (fractions of its height from the middle) and how far apart. */
   grip?: number;
   spread?: number;
-  /** Thumbs tapping. */
   typing?: boolean;
 }
 

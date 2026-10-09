@@ -68,7 +68,6 @@ export function page(bus: AudioNode, when: number) {
   buzz.stop(when + 0.7);
 }
 
-/** Bedside clock tick. */
 export const tick = (bus: AudioNode, when: number) => burst(bus, when, 0.02, 'highpass', 6000, 0.05);
 
 /** A giant footstep. */
@@ -130,7 +129,6 @@ export function rustle(bus: AudioNode, when: number) {
   for (let i = 0; i < 5; i++) burst(bus, when + i * 0.07, 0.07, 'bandpass', 3200 + i * 300, 0.07, 0.8);
 }
 
-/** A boot on a hard floor. */
 export const footstep = (bus: AudioNode, when: number) => {
   burst(bus, when, 0.05, 'lowpass', 500, 0.14);
   burst(bus, when, 0.02, 'bandpass', 2200, 0.05, 2);
@@ -213,7 +211,6 @@ export function snore(bus: AudioNode, when: number) {
   tone(bus, when + 1.15, 'sine', 900, 600, 0.6, 0.02); // the whistle out
 }
 
-/** A phone camera's shutter click. */
 export function shutter(bus: AudioNode, when: number) {
   burst(bus, when, 0.03, 'bandpass', 2500, 0.2, 1.5);
   burst(bus, when + 0.07, 0.04, 'bandpass', 1800, 0.16, 1.5);

@@ -13,7 +13,6 @@ export const DOOR = { x: -8.95, z: 1.6 };
 const FONT = "'Metal Mania'";
 const FONT_LOAD = `40px ${FONT}`; // what document.fonts.load needs, so the signs repaint once the font arrives
 
-/** An emoji as a transparent print for a shirt. */
 const printTexture = (emoji: string) =>
   textTexture(128, 128, (ctx, w, h) => {
     ctx.font = `${h * 0.78}px sans-serif`;

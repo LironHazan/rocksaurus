@@ -107,7 +107,6 @@ export function organ(bus: AudioNode, when: number, note: Note, vel = 0.5, dur =
   rotor.start(when);
   rotor.stop(when + dur + 0.2);
 
-  // key click
   const click = new OscillatorNode(ctx, { type: 'square', frequency: f * 8 });
   const cg = ctx.createGain();
   cg.gain.setValueAtTime(0.02 * vel, when);

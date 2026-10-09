@@ -6,7 +6,6 @@ export const CAPTIONS: Caption[] = [
   sub(4.0, 7.9, 'His lucky shirt today:'),
   punch(4.4, 7.9, 'Ronaldo, number 7 🐐'),
 
-  // ── The game ────────────────────────────────────────────────
   sub(8.2, 11.9, 'Kickoff! Pass, pass, pass'),
   punch(8.6, 11.9, 'He plays just like his name'),
   sub(12.1, 15.4, 'Then Tiki Taka goes solo'),
@@ -14,7 +13,6 @@ export const CAPTIONS: Caption[] = [
   sub(15.6, 19.6, 'One stepover…'),
   punch(16.3, 19.6, 'Dad knees weren’t ready 😵'),
 
-  // ── Goal ────────────────────────────────────────────────────
   title(20.0, 21.9, '⚽ GOOOOAL!\nSeason’s first goal'),
   sub(22.0, 24.4, 'He rehearsed this all week'),
   punch(22.5, 24.4, 'SIUUU! 🙌'),

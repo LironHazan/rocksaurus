@@ -68,7 +68,6 @@ const episode: Episode = {
   setup(stage) {
     const { camera } = stage;
 
-    // ── the sets ───────────────────────────────────────────────
     const campus = createCampus();
     campus.scene.background = sky('#03050f', '#0b1233', '#1a2350');
     campus.scene.fog = new THREE.Fog(0x0b1233, 40, 90);
@@ -98,7 +97,6 @@ const episode: Episode = {
       warRoom: war.scene,
     };
 
-    // ── the cast ───────────────────────────────────────────────
     const sagish = createSagish();
     sagish.root.scale.setScalar(SAGISH_SCALE);
     const rorit = createRorit();
@@ -133,7 +131,6 @@ const episode: Episode = {
     let current: Where | null = null;
     const v = new THREE.Vector3();
 
-    // ── posing helpers ─────────────────────────────────────────
     type Rig = Parameters<typeof resetPose>[0] & { root: THREE.Group; arms: THREE.Group[]; feet: THREE.Group[] };
     function reset(rig: Rig) {
       resetPose(rig);
@@ -204,7 +201,6 @@ const episode: Episode = {
       for (const z of room.zzz) (z.material as THREE.SpriteMaterial).opacity = 0;
     }
 
-    // ── 03:00, the campus ──────────────────────────────────────
     function campusScene(t: number): Shot {
       const c = ease(seg(t, CUE.campus[0], CUE.campus[1]));
       return { cam: [lerp(2.5, 1, c), lerp(7, 6.4, c), lerp(33, 30, c)], look: [0, lerp(9.8, 8.6, c), -12] };
@@ -488,7 +484,6 @@ const episode: Episode = {
         if (ask && t < CUE.ask + 3) armOf(eilon, -1).rotation.set(-0.4, 0, -2.4 + Math.sin(t * 10) * 0.3); // hiii
       }
 
-      // ── shots ──
       const headShot = (head: THREE.Object3D, side = 0.6, dist = 4.6, rise = 0.2): Shot => {
         head.getWorldPosition(v);
         return { cam: [v.x + side, v.y + rise, v.z + dist], look: [v.x, v.y - 0.25, v.z] };

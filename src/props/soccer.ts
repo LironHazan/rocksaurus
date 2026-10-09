@@ -22,7 +22,6 @@ export interface JerseyOptions {
   color: number;
   /** Collar, cuffs and the shorts' stripe. */
   trim: number;
-  /** Shorts colour. */
   shorts?: number;
   /** Colour of the printed number and name. */
   ink?: string;

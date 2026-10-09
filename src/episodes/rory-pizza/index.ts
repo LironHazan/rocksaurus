@@ -198,7 +198,6 @@ const episode: Episode = {
         e.scale.z = wide;
       }
 
-      // ── Props ─────────────────────────────────────────────────────
       bubble.scale.setScalar(pop(t, 0.3, 2.8)); // hungry thought, follows him
       bubble.visible = bubble.scale.x > 0.001;
       bubble.position.set(x + 1.2, R.root.position.y + 4.1, 0.6);

@@ -41,7 +41,6 @@ export interface Fx {
 /** Taluzarus never stands still: his feet, the whole night in the war room. */
 export const FIDGET_STEP = 0.3;
 
-/** Every sound effect, in order, as data. */
 export function effects(): Fx[] {
   const out: Fx[] = [
     { at: CUE.alert, kind: 'page' },
@@ -56,7 +55,6 @@ export function effects(): Fx[] {
     // Rorit's calls to the seniors
     { at: CUE.taluzarus - 0.05, kind: 'ring' },
     { at: CUE.amazaurus, kind: 'ring' },
-    // the fix
     { at: CUE.fixed, kind: 'fixed' },
     { at: CUE.fixed + 0.2, kind: 'cheer' },
     // morning: they've all dozed off; then Eilon; then the sigh

@@ -88,7 +88,7 @@ export function createOrnithomimus(colors = RORIT_COLORS, { athleisure = true } 
     return m;
   };
   if (athleisure) {
-    torso.add(band(0.2, 0.42, M.top, 1.035)); // sports top
+    torso.add(band(0.2, 0.42, M.top, 1.035));
     torso.add(band(0.62, 1.0, M.leggings, 1.03)); // high waist
     const waistband = new THREE.Mesh(new THREE.TorusGeometry(1, 0.03, 8, 40), M.leggings);
     waistband.rotation.x = Math.PI / 2;
@@ -147,7 +147,6 @@ export function createOrnithomimus(colors = RORIT_COLORS, { athleisure = true } 
     });
   }
 
-  // a long, slim tail
   const tail = new THREE.Group();
   tail.position.set(0, 1.55, -0.35);
   tail.add(
@@ -206,7 +205,7 @@ export function createOrnithomimus(colors = RORIT_COLORS, { athleisure = true } 
   const head = new THREE.Group();
   head.position.set(0, 3.78, 0.22);
   head.add(ball(0.4, M.body, [0, 0, 0], [1, 0.92, 1.1]));
-  head.add(ball(0.24, M.beak, [0, -0.1, 0.4], [0.85, 0.55, 1.25])); // the beak
+  head.add(ball(0.24, M.beak, [0, -0.1, 0.4], [0.85, 0.55, 1.25]));
   for (const s of [-1, 1]) head.add(ball(0.018, M.dark, [s * 0.07, -0.03, 0.68], [1.2, 0.8, 0.6], 10));
 
   const smile = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.016, 8, 20, Math.PI), M.dark);

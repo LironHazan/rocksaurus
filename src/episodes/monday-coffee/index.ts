@@ -143,7 +143,6 @@ const episode: Episode = {
       return { rig, holder, feet: rig.feet.map(f => f.position.clone()) };
     }
 
-    // ── the cast ───────────────────────────────────────────────
     const tikiRig = createTyrannosaurus();
     const cap = addCap(tikiRig, { position: [0, 0.3, 0.08], tilt: -0.14 });
     cap.scale.set(0.62, 0.66, 0.82);
@@ -275,7 +274,6 @@ const episode: Episode = {
       w = new THREE.Vector3();
     const UP = new THREE.Vector3(0, 1, 0);
 
-    // ── posing helpers ─────────────────────────────────────────
     type Posable = Actor<{ root: THREE.Group; feet: THREE.Object3D[]; arms: THREE.Group[] }>;
     function reset(a: Actor<Parameters<typeof resetPose>[0]>) {
       resetPose(a.rig);
@@ -360,7 +358,6 @@ const episode: Episode = {
       for (const o of owner) o.visible = false;
       return phonePov(phone, camera);
     }
-    /** The chat on someone's phone. */
     const show = (owner: Member, t: number) => phones[owner].show(chatView(CHAT, t, owner, START_CLOCK));
     const typingNow = (t: number, who: Member) => chatAt(t).pending?.from === who;
     /** Sitting on a seat: hips on the cushion, feet forward. */
@@ -461,7 +458,6 @@ const episode: Episode = {
       return { cam: [PARENT_SPOT.x + 1.4, 3.8, PARENT_SPOT.z + 8.5], look: [PARENT_SPOT.x, 2.6, PARENT_SPOT.z - 1] };
     }
 
-    // ── Rory's bedroom ─────────────────────────────────────────
     function bedroomScene(t: number): Shot {
       const r = rory;
       reset(r);

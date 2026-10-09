@@ -26,7 +26,6 @@ export interface Player {
   seek(t: number): void;
   /** Freezes the picture on the current frame (and turns sound off); `seek` still moves the frozen frame. */
   pause(): void;
-  /** Resumes playing from where it was frozen. */
   resume(): void;
   /** The exact current time in seconds (the snapshot's `time` is only updated ~10×/s). */
   time(): number;
