@@ -1,8 +1,6 @@
 import { cueSheet, every, quieter, type Cue, type Player } from '../../audio/cue-sheet';
 import { playSyllables } from '../../audio/babble';
-import { playBass } from '../../audio/bass';
-import { playDrums } from '../../audio/drums';
-import { playRiff } from '../../audio/guitar';
+import { playBand } from '../../audio/band-mix';
 import { chatPop, chatSent } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
 import { TYPING } from '../../props/phone';
@@ -50,17 +48,11 @@ const SOUND = cueSheet({
   ],
 });
 
+/** The audition's levels: the guitar under the bass, it's Omli's audition. */
+const AUDITION = { band: 0.9, drums: 0.7, guitar: 0.6 } as const;
+
 export function soundtrack(bus: AudioNode, t0: number): void {
   SOUND.play(bus, t0);
   playSyllables(bus, t0, SYLLABLES);
-  // the audition
-  const band = new GainNode(bus.context, { gain: 0.9 });
-  band.connect(bus);
-  const guitar = new GainNode(bus.context, { gain: 0.6 }); // under the bass: it's Omli's audition
-  guitar.connect(band);
-  const drums = new GainNode(bus.context, { gain: 0.7 });
-  drums.connect(band);
-  playBass(band, t0 + MUSIC_AT, BASS);
-  playDrums(drums, t0 + MUSIC_AT, DRUMS, { smooth: true });
-  playRiff(guitar, t0 + MUSIC_AT, GUITAR);
+  playBand(bus, t0 + MUSIC_AT, { bass: BASS, drums: DRUMS, guitar: GUITAR }, AUDITION);
 }

@@ -2,8 +2,7 @@ import * as THREE from 'three';
 import { seg, ease, lerp, clamp01 } from '../../engine/math';
 import type { Episode } from '../../engine/types';
 import { direct, overShoulder, type Shot } from '../../engine/director';
-import { createLulu, idleLulu } from '../../characters/lulu';
-import { armOf, reachArm, releaseArm } from '../../characters/reach';
+import { createLulu, idleLulu, reachLulu, resetLulu as resetLuluPose, walkLulu } from '../../characters/lulu';
 import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
 import { recentHit } from '../../band/timing';
@@ -93,22 +92,7 @@ const episode: Episode = {
     const tmp = new THREE.Vector3();
 
     function resetLulu() {
-      lulu.root.position.set(0, 0, 0);
-      lulu.root.rotation.set(0, 0, 0);
-      lulu.squash.rotation.set(0, 0, 0);
-      lulu.squash.scale.set(1, 1, 1);
-      lulu.squash.position.set(0, 0, 0);
-      lulu.head.rotation.set(0, 0, 0);
-      lulu.tail.rotation.set(0, 0, 0);
-      for (const a of lulu.arms) {
-        releaseArm(a); // undo last frame's reaching
-        a.rotation.set(-0.3, 0, a.userData.side * 0.15);
-      }
-      for (const f of lulu.feet) f.position.y = 0;
-      for (const c of lulu.cheeks) c.scale.set(1, 0.7, 0.35);
-      for (const e of lulu.eyes) e.scale.set(1, 1, 1);
-      for (const s of lulu.sticks) s.visible = false;
-      lulu.setMouth(0);
+      resetLuluPose(lulu);
       hair.ponytail.rotation.set(0.1, 0, 0);
     }
 
@@ -121,16 +105,11 @@ const episode: Episode = {
       }
     }
 
-    /** Walk cycle at `phase` (1 = one step), scaled by `amount`. */
+    /** Walk cycle at `phase` (1 = one step), scaled by `amount`: the shared walk, plus swinging arms and a ponytail that sways. */
     function walkCycle(phase: number, amount: number) {
+      walkLulu(lulu, phase, amount, hair.ponytail);
       const p = Math.PI * phase;
-      lulu.root.position.y += Math.abs(Math.sin(p)) * 0.18 * amount;
-      for (const f of lulu.feet)
-        f.position.y = Math.max(0, Math.sin(p + (f.userData.side > 0 ? 0 : Math.PI))) * 0.4 * amount;
-      lulu.squash.rotation.z = Math.sin(p) * 0.06 * amount;
-      lulu.tail.rotation.y = Math.sin(p) * 0.35 * amount;
       for (const a of lulu.arms) a.rotation.x = -0.3 + Math.sin(p + (a.userData.side > 0 ? Math.PI : 0)) * 0.5 * amount;
-      hair.ponytail.rotation.x = 0.1 + Math.abs(Math.sin(p - 0.5)) * 0.35 * amount;
       hair.ponytail.rotation.z = Math.sin(p - 0.5) * 0.25 * amount;
     }
 
@@ -143,16 +122,6 @@ const episode: Episode = {
         const hit = mine ? Math.exp(-(t - hits[i]!) * 18) : 0;
         a.rotation.set(lerp(up, down, hit), 0, a.userData.side * 0.12);
       });
-    }
-
-    /** Reaches a paw out to a world point, elbow bent outward (the arms stretch, so anything is in reach). */
-    function gripAt(side: -1 | 1, world: THREE.Vector3) {
-      const pivot = armOf(lulu, side);
-      const target = lulu.body.worldToLocal(tmp.copy(world));
-      const elbow = pivot.position.clone().lerp(target, 0.5);
-      elbow.x += side * 0.3;
-      elbow.y -= 0.15;
-      reachArm(pivot, target, elbow);
     }
 
     function officeScene(t: number): Shot {
@@ -309,7 +278,8 @@ const episode: Episode = {
         bottle.updateMatrixWorld(true);
         // paws on the left and right of the bottle (in bottle space, turned back by the label's spin)
         for (const side of [-1, 1] as const)
-          gripAt(
+          reachLulu(
+            lulu,
             side,
             bottle.localToWorld(
               new THREE.Vector3(side * GRIP_OUT * Math.cos(spin), GRIP_AT, side * GRIP_OUT * Math.sin(spin)),

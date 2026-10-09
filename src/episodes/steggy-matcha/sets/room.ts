@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { rng } from '../../../engine/math';
-import { box, createRoom, cylinder, mat, picture, ROUND } from '../../../world/interior';
+import { addKeyLight, box, createRoom, cylinder, mat, picture, ROUND } from '../../../world/interior';
 import { createLaptop } from '../../../props/laptop';
 import { createStageKeyboard } from '../../../props/stage-keyboard';
 
@@ -86,13 +86,7 @@ export function createSteggyRoom() {
   createRoom(scene, { wall: 0xd9e8dc, floor: 0xb08a62 });
 
   scene.add(new THREE.HemisphereLight(0xfff6e8, 0x8a7060, 1.1));
-  const key = new THREE.DirectionalLight(0xfff0dc, 2);
-  key.position.set(4, 9, 8);
-  key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
-  key.shadow.radius = 5;
-  Object.assign(key.shadow.camera, { left: -8, right: 8, top: 9, bottom: -2, near: 1, far: 30 });
-  scene.add(key);
+  addKeyLight(scene, 0xfff0dc, 2);
   const lamp = new THREE.PointLight(0xffc98a, 5, 6, 1.6);
   lamp.position.set(-1.2, 2.6, 1.6);
   scene.add(lamp);

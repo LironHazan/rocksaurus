@@ -1,8 +1,6 @@
 import { cueSheet, every, quieter, type Cue, type Player } from '../../audio/cue-sheet';
 import { playSyllables } from '../../audio/babble';
-import { playBass } from '../../audio/bass';
-import { playDrums } from '../../audio/drums';
-import { playRiff } from '../../audio/guitar';
+import { playBand } from '../../audio/band-mix';
 import { boop, thump } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
 import { BASS, DRUMS, GUITAR } from './music';
@@ -121,23 +119,13 @@ const SOUND = cueSheet({
   ],
 });
 
-/** The car stereo, under the road: loud enough to feel, not so loud it's the band playing. */
-const MUSIC_GAIN = 0.55;
-const DRUMS_GAIN = 0.75;
-/** The car's guitar: under the bass, so the groove stays Omli's. */
-const GUITAR_GAIN = 0.5;
+/** The car stereo, under the road: loud enough to feel, not so loud it's the band playing; the guitar under the
+ * bass, so the groove stays Omli's. */
+const STEREO = { band: 0.55, drums: 0.75, guitar: 0.5 } as const;
 
 export function soundtrack(bus: AudioNode, t0: number): void {
   SOUND.play(bus, t0);
   playSyllables(bus, t0, SYLLABLES);
-  const band = new GainNode(bus.context, { gain: MUSIC_GAIN });
-  band.connect(bus);
-  const drums = new GainNode(bus.context, { gain: DRUMS_GAIN });
-  drums.connect(band);
-  const song = t0 + CUE.ride[0]; // the car stereo starts with the ride
-  playBass(band, song, BASS);
-  playDrums(drums, song, DRUMS, { smooth: true });
-  const guitar = new GainNode(bus.context, { gain: GUITAR_GAIN });
-  guitar.connect(band);
-  playRiff(guitar, song, GUITAR);
+  // the car stereo starts with the ride
+  playBand(bus, t0 + CUE.ride[0], { bass: BASS, drums: DRUMS, guitar: GUITAR }, STEREO);
 }

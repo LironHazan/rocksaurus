@@ -71,6 +71,29 @@ export function createRoom(
   scene.add(skirt);
 }
 
+/** The shadow-casting map: square, in texels; soft edges. */
+const KEY_SHADOW = { size: 2048, radius: 5 } as const;
+
+/**
+ * A room's key light: a directional light from high, front and right, casting soft shadows over the room. `reach`
+ * is how far left and right of the middle the shadows go (the room is 16 wide).
+ */
+export function addKeyLight(
+  scene: THREE.Scene,
+  color: THREE.ColorRepresentation,
+  intensity: number,
+  { reach = 8 } = {},
+): THREE.DirectionalLight {
+  const key = new THREE.DirectionalLight(color, intensity);
+  key.position.set(4, 9, 8);
+  key.castShadow = true;
+  key.shadow.mapSize.set(KEY_SHADOW.size, KEY_SHADOW.size);
+  key.shadow.radius = KEY_SHADOW.radius;
+  Object.assign(key.shadow.camera, { left: -reach, right: reach, top: 9, bottom: -2, near: 1, far: 30 });
+  scene.add(key);
+  return key;
+}
+
 /** A flat picture (poster, window view, sign) facing +z. */
 export function picture(
   w: number,

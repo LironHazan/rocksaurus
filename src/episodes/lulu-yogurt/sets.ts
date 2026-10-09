@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { box, createRoom, createWallClock, cylinder, mat, picture, ROUND } from '../../world/interior';
+import { addKeyLight, box, createRoom, createWallClock, cylinder, mat, picture, ROUND } from '../../world/interior';
 import { textTexture } from '../../world/text-texture';
 import { BED_TOP } from '../../world/bedroom';
 import { SPEC_PAGES, type Flavour } from './timeline';
@@ -506,13 +506,7 @@ export function createKitchen() {
   scene.background = new THREE.Color(0xfbf3ea);
   createRoom(scene, { wall: 0xfbf3ea, floor: 0xcfc9bf });
   scene.add(new THREE.HemisphereLight(0xfff6ea, 0x8a7a6a, 1.1));
-  const key = new THREE.DirectionalLight(0xffe6cc, 1.9);
-  key.position.set(4, 9, 8);
-  key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
-  key.shadow.radius = 5;
-  Object.assign(key.shadow.camera, { left: -9, right: 9, top: 9, bottom: -2, near: 1, far: 30 });
-  scene.add(key);
+  addKeyLight(scene, 0xffe6cc, 1.9, { reach: 9 });
 
   const stripe = box(16, 0.35, 0.04, mat(0xff7a1a, 0.6));
   stripe.position.set(0, 2.6, -3.97);
