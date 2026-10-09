@@ -2,13 +2,13 @@ import * as THREE from 'three';
 import { disposeObject } from '../engine/dispose';
 import type { Episode } from '../engine/types';
 import { createRory, idle, resetPose } from '../characters/rory';
-import { reachArm, releaseArm } from '../characters/reach';
+import { reachArm, releaseArm, sideOf } from '../characters/reach';
 import { addMohawk } from '../props/mohawk';
 import { addTattoo } from '../props/tattoo';
 import { createRockStage } from '../world/rock-stage';
 import { textTexture } from '../world/text-texture';
 import { ROUND } from '../world/interior';
-import { playKeyboardPart } from '../audio/keyboard-part';
+import { playKeyboardPart, type KeyboardPart } from '../audio/keyboard-part';
 
 // The channel's end card: Rory on the Rocksaurus stage, bouncing, holding up a cardboard sign that asks you to
 // subscribe. Every new Short ends with it: `export default withOutro(episode)`.
@@ -77,7 +77,7 @@ function createOutro(camera: THREE.PerspectiveCamera) {
       sign.rotation.set(-0.05, 0, Math.sin(k * 5) * 0.06);
       sign.updateMatrixWorld(true);
       for (const arm of rory.arms) {
-        const side = arm.userData.side as number;
+        const side = sideOf(arm);
         reachArm(arm, arm.parent!.worldToLocal(sign.localToWorld(at.set(side * 0.7, -0.45, -0.05))));
       }
       camera.position.set(0, 2.6, 7.8);
@@ -89,21 +89,19 @@ function createOutro(camera: THREE.PerspectiveCamera) {
   };
 }
 
-/** A bright little "ta-da" for the end card: a rolled major chord. */
-function sting(bus: AudioNode, at: number) {
-  playKeyboardPart(bus, at, {
-    bpm: 120,
-    sound: 'piano',
-    gain: 0.8,
-    notes: [
-      [0, 'C3', 4, 0.5, 'L'],
-      [0, 'E4', 4, 0.4],
-      [0.12, 'G4', 4, 0.4],
-      [0.24, 'C5', 4, 0.42],
-      [0.36, 'E5', 4, 0.38],
-    ],
-  });
-}
+/** A bright little "ta-da" for the end card: a rolled major chord, played as the card appears. */
+export const STING: KeyboardPart = {
+  bpm: 120,
+  sound: 'piano',
+  gain: 0.8,
+  notes: [
+    [0, 'C3', 4, 0.5, 'L'],
+    [0, 'E4', 4, 0.4],
+    [0.12, 'G4', 4, 0.4],
+    [0.24, 'C5', 4, 0.42],
+    [0.36, 'E5', 4, 0.38],
+  ],
+};
 
 /** The episode, then the subscribe end card: OUTRO_LEN seconds longer, with a sting as the card appears. */
 export function withOutro(episode: Episode): Episode {
@@ -138,7 +136,7 @@ export function withOutro(episode: Episode): Episode {
     },
     audio(bus, t0) {
       episode.audio?.(bus, t0);
-      sting(bus, t0 + episode.duration);
+      playKeyboardPart(bus, t0 + episode.duration, STING);
     },
   };
 }

@@ -152,14 +152,14 @@ export interface Screen {
 export function createScreen(
   w: number,
   h: number,
-  { px = 1024, header = '', theme = 'terminal' as ScreenTheme } = {},
+  { px = 1024, header = '', theme = 'terminal' }: { px?: number; header?: string; theme?: ScreenTheme } = {},
 ): Screen {
   let lines: readonly ShownLine[] = [];
   let cursor = false;
   const draw = (ctx: CanvasRenderingContext2D, cw: number, ch: number) =>
     drawScreen(ctx, cw, ch, THEMES[theme], header, lines, cursor);
   const tex = textTexture(px, Math.round((px * h) / w), draw);
-  const canvas = tex.image as HTMLCanvasElement;
+  const canvas = tex.image;
   const mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(w, h),
     new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }),
@@ -228,7 +228,13 @@ function drawScreen(
 }
 
 /** Round wall clock; call set(hours, minutes). Faces +z. */
-export function createWallClock(r = 0.6): { group: THREE.Group; set(h: number, m: number): void } {
+/** A round wall clock; `set(hours, minutes)` moves its hands. */
+export interface WallClock {
+  group: THREE.Group;
+  set(h: number, m: number): void;
+}
+
+export function createWallClock(r = 0.6): WallClock {
   const group = new THREE.Group();
   const face = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.08, 48), mat(0xffffff, 0.4));
   face.rotation.x = Math.PI / 2;

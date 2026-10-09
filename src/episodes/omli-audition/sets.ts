@@ -20,7 +20,7 @@ export function createDumbbell(): THREE.Group {
     plate.position.x = s * 0.3;
     g.add(plate);
   }
-  g.traverse(o => ((o as THREE.Mesh).castShadow = true));
+  g.traverse(o => (o.castShadow = true));
   return g;
 }
 

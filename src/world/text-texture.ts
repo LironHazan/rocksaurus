@@ -68,6 +68,6 @@ export function outlinedText(
   ctx.strokeStyle = stroke;
   ctx.strokeText(text, x, y);
   ctx.shadowBlur = 0;
-  ctx.fillStyle = typeof fill === 'function' ? fill(ctx, y, size) : fill;
+  ctx.fillStyle = fill instanceof Function ? fill(ctx, y, size) : fill;
   ctx.fillText(text, x, y);
 }

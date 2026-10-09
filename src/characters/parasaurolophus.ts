@@ -159,7 +159,7 @@ export function createParasaurolophus(colors = PARIS_COLORS): ParasaurolophusRig
     }
     head.add(eye);
     eyes.push(eye);
-    const cheek = ball(0.1, M.cheek, [s * 0.36, -0.14, 0.42], [1, 0.7, 0.35]) as THREE.Mesh;
+    const cheek = ball(0.1, M.cheek, [s * 0.36, -0.14, 0.42], [1, 0.7, 0.35]);
     head.add(cheek);
     cheeks.push(cheek);
   }

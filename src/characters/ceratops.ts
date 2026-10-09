@@ -221,7 +221,7 @@ export function createCeratops(
     }
     head.add(eye);
     eyes.push(eye);
-    const cheek = ball(0.11, M.cheek, [s * 0.36, -0.13, 0.4], [1, 0.7, 0.35]) as THREE.Mesh;
+    const cheek = ball(0.11, M.cheek, [s * 0.36, -0.13, 0.4], [1, 0.7, 0.35]);
     head.add(cheek);
     cheeks.push(cheek);
     // a gold hoop under each ear

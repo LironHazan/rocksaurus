@@ -33,7 +33,7 @@ export function ball(
 
 export function enableShadows(obj: THREE.Object3D): void {
   obj.traverse(o => {
-    if ((o as THREE.Mesh).isMesh) {
+    if (o instanceof THREE.Mesh) {
       o.castShadow = true;
       o.receiveShadow = true;
     }

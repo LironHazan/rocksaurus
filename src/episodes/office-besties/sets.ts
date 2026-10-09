@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { box, mat, picture, ROUND } from '../../world/interior';
-import { createProteinBar, BAR_LENGTH, type ProteinBar } from '../../props/protein-bar';
+import { createProteinBar, BAR_LENGTH } from '../../props/protein-bar';
 
 // ── Lulu's emergency protein stash ─────────────────────────────
 
@@ -26,7 +26,7 @@ export const STASH_TOP = slot(0, 0);
  * flavour per row, labels to the front, and a chalkboard tag: 40 g protein. Origin at the crate's base. `bar` is the one she
  * grabs (a separate prop, so it can leave the crate).
  */
-export function createStash(): { group: THREE.Group; bar: ProteinBar } {
+export function createStash() {
   const group = new THREE.Group();
   const wood = mat(0xd6a86a, 0.8);
   const dark = mat(0xa8784a, 0.85);

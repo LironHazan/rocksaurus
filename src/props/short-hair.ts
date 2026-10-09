@@ -74,7 +74,7 @@ export function addShortHair(
   }
 
   group.traverse(o => {
-    if ((o as THREE.Mesh).isMesh) o.castShadow = o.receiveShadow = true;
+    if (o instanceof THREE.Mesh) o.castShadow = o.receiveShadow = true;
   });
   rig.head.add(group);
   return group;

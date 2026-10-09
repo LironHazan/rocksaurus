@@ -26,9 +26,9 @@ export function visibleChars(line: ScriptLine, t: number): number {
 
 /** The lines on screen at time t (a typed line shows only what's been typed so far). */
 export function linesAt(script: readonly ScriptLine[], t: number): ShownLine[] {
-  return script
-    .filter(l => t >= l.at)
-    .map(l => ({ text: [...l.text].slice(0, visibleChars(l, t)).join(''), kind: l.kind }));
+  return script.flatMap(l =>
+    t >= l.at ? [{ text: [...l.text].slice(0, visibleChars(l, t)).join(''), kind: l.kind }] : [],
+  );
 }
 
 /** Times of each keystroke in typed lines (for typing sounds and paw taps). */

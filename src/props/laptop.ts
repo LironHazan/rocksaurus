@@ -12,7 +12,11 @@ export interface Laptop {
 }
 
 /** A laptop whose screen shows a screen script (see world/screen-script). Opens with `open(k)` via lid.rotation. */
-export function createLaptop({ header = '', theme = 'document' as ScreenTheme, color = 0xb8bcc8 } = {}): Laptop {
+export function createLaptop({
+  header = '',
+  theme = 'document',
+  color = 0xb8bcc8,
+}: { header?: string; theme?: ScreenTheme; color?: number } = {}): Laptop {
   const group = new THREE.Group();
   const shell = mat(color, 0.3, { metalness: 0.5 });
   group.add(box(1.5, 0.06, 1, shell));

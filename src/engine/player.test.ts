@@ -1,9 +1,7 @@
+import * as THREE from 'three';
+import { FORMATS } from './formats';
+import { browserStandIn } from '../test/browser-stand-in';
 import type { Episode, Stage } from './types';
-
-// no Web Audio in tests: the player only needs the audio clock when sound is on
-vi.mock('../audio/context', () => ({ audio: { ctx: { currentTime: 0, resume: vi.fn() }, master: {} } }));
-vi.mock('../audio/schedule', () => ({ cancelScheduled: vi.fn() }));
-vi.mock('./captions', () => ({ drawCaptions: vi.fn() }));
 
 import { createPlayer } from './player';
 
@@ -14,8 +12,16 @@ function setup() {
   const update = vi.fn();
   const episode: Episode = { id: 'ep', title: 'Ep', duration: 10, setup: () => ({ update }) };
   const render = vi.fn();
-  const canvas = {} as HTMLCanvasElement;
-  const stage = { format: {}, render, canvas } as unknown as Stage;
+  const canvas = document.createElement('canvas');
+  const stage: Stage = {
+    format: FORMATS.shorts,
+    renderer: browserStandIn,
+    scene: new THREE.Scene(),
+    camera: new THREE.PerspectiveCamera(),
+    canvas,
+    render,
+    dispose() {},
+  };
   const player = createPlayer(stage, episode);
   /** Runs one animation frame. */
   const tick = () => frames.splice(0).forEach(cb => cb(nowMs));

@@ -16,7 +16,8 @@ interface Scroller {
   speed: number;
 }
 
-function house(r: () => number): THREE.Group {
+/** A little house; `lit` is its window glass, which lights up at dusk. */
+function house(r: () => number) {
   const g = new THREE.Group();
   const w = 1.1 + r() * 0.8,
     h = 0.9 + r() * 0.8,
@@ -34,8 +35,7 @@ function house(r: () => number): THREE.Group {
     win.position.set(x, h * 0.6, d / 2 + 0.01);
     g.add(win);
   }
-  g.userData.lit = lit;
-  return g;
+  return { group: g, lit };
 }
 
 function tree(r: () => number): THREE.Group {
@@ -63,17 +63,13 @@ function car(color: number): THREE.Group {
   return g;
 }
 
-function lamp(): THREE.Group {
+/** A street lamp; `glow` is its bulb's material, which lights up at dusk. */
+function lamp() {
   const g = new THREE.Group();
   g.add(cylinder(0.04, 0.05, 1.7, mat(0x3a3a48, 0.5), 8));
-  const bulb = ball(
-    0.12,
-    new THREE.MeshStandardMaterial({ color: 0xfff1c1, emissive: 0xffd36b, emissiveIntensity: 0.2 }),
-    [0, 1.75, 0],
-  );
-  g.add(bulb);
-  g.userData.bulb = bulb;
-  return g;
+  const glow = new THREE.MeshStandardMaterial({ color: 0xfff1c1, emissive: 0xffd36b, emissiveIntensity: 0.2 });
+  g.add(ball(0.12, glow, [0, 1.75, 0]));
+  return { group: g, glow };
 }
 
 /** Road sign on a post (faces +z). */
@@ -149,9 +145,10 @@ const SKY = {
 export function createTown() {
   const scene = new THREE.Scene();
   const sky = textTexture(2, 256, () => {});
-  const skyCanvas = sky.image as HTMLCanvasElement;
+  const skyCanvas = sky.image;
   scene.background = sky;
-  scene.fog = new THREE.Fog(0xffd7a8, 18, 52);
+  const fog = new THREE.Fog(0xffd7a8, 18, 52);
+  scene.fog = fog;
 
   const hemi = new THREE.HemisphereLight(0xffffff, 0x9fd18b, 1.1);
   const sun = new THREE.DirectionalLight(0xffe2b0, 2.3);
@@ -187,18 +184,18 @@ export function createTown() {
     add(d, 0, z);
   }
   const lits: THREE.MeshStandardMaterial[] = [];
-  const bulbs: THREE.Mesh[] = [];
+  const glows: THREE.MeshStandardMaterial[] = [];
   for (const s of [-1, 1])
     for (let z = 0; z < SPAN; z += 3.2 + r() * 1.2) {
-      const h = house(r);
+      const { group: h, lit } = house(r);
       h.rotation.y = -s * (Math.PI / 2); // front door to the road
-      lits.push(h.userData.lit as THREE.MeshStandardMaterial);
+      lits.push(lit);
       add(h, s * (3.4 + r() * 1.6), z);
       if (r() > 0.4) add(tree(r), s * (2.3 + r() * 0.3), z + 1.6);
     }
   for (let z = 0; z < SPAN; z += 7) {
-    const l = lamp();
-    bulbs.push(l.userData.bulb as THREE.Mesh);
+    const { group: l, glow } = lamp();
+    glows.push(glow);
     add(l, -1.95, z);
   }
   for (const [i, color] of [0xe63946, 0x3a86ff, 0xffbe0b, 0x8338ec].entries()) add(car(color), 1.2, i * 17, 3.5); // the next lane over, slower than her
@@ -231,13 +228,13 @@ export function createTown() {
     g.fillStyle = grad;
     g.fillRect(0, 0, 2, 256);
     sky.needsUpdate = true;
-    (scene.fog as THREE.Fog).color.set(mix('#ffd7a8', '#c97a95', k));
+    fog.color.set(mix('#ffd7a8', '#c97a95', k));
     sun.intensity = lerp(2.3, 1.0, k);
     sun.color.set(mix('#ffe2b0', '#ff9a6b', k));
     sun.position.set(8, lerp(9, 3, k), 4);
     hemi.intensity = lerp(1.1, 0.7, k);
     for (const l of lits) l.emissiveIntensity = lerp(0.3, 1.6, k);
-    for (const b of bulbs) (b.material as THREE.MeshStandardMaterial).emissiveIntensity = lerp(0.1, 2.5, k);
+    for (const bulb of glows) bulb.emissiveIntensity = lerp(0.1, 2.5, k);
   }
 
   return { scene, update };

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
 import { ball, enableShadows } from '../characters/materials';
+import { capsuleOf } from '../characters/reach';
 import { lerp } from '../engine/math';
 import type { CharacterRig, Ellipsoid } from '../characters/types';
 import { textTexture } from '../world/text-texture';
@@ -260,8 +261,7 @@ export function addJersey(
   kit.add(collar);
 
   for (const arm of rig.arms) {
-    const capsule = arm.children.find(c => (c as THREE.Mesh).geometry?.type === 'CapsuleGeometry') as THREE.Mesh;
-    const r = (capsule.geometry as THREE.CapsuleGeometry).parameters.radius;
+    const r = capsuleOf(arm).geometry.parameters.radius;
     const sleeve = new THREE.Mesh(new THREE.CapsuleGeometry(r * 1.55, 0.06, 8, 16), cloth);
     sleeve.position.y = -0.05;
     arm.add(sleeve);
@@ -382,7 +382,7 @@ export function createGoal({ width = 7, height = 3.6, depth = 2.2 } = {}): Goal 
   back.rotation.y = -Math.PI / 2;
   back.position.set(depth, height / 2, 0);
   group.add(back);
-  const rest = Float32Array.from(backGeo.attributes.position!.array as Float32Array);
+  const rest = Float32Array.from(backGeo.attributes.position!.array);
   // roof and sides
   const roof = new THREE.Mesh(new THREE.PlaneGeometry(depth, width), netMat(depth / CELL, width / CELL));
   roof.rotation.x = -Math.PI / 2;

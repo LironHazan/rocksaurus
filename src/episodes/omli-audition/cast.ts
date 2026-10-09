@@ -30,7 +30,7 @@ export function createOmli() {
   rig.posture.scale.set(1.12, 1, 1.06); // broad
   const tee = 0x111114;
   // the tee goes on the leaning upper body (the posture), where the T-Rex's body is
-  const shirted = { ...rig, torso: rig.posture, fit: { torso: TREX_BODY, head: [1, 1, 1] } } as unknown as FittedRig;
+  const shirted: FittedRig = { ...rig, torso: rig.posture, fit: { torso: TREX_BODY, head: [1, 1, 1] } };
   addBandTee(shirted, { text: 'PANTERA', font: "'Metal Mania'", color: tee, ink: '#ece6da' });
   const cloth = new THREE.MeshStandardMaterial({ color: tee, roughness: 0.95 });
   for (const s of [-1, 1]) {
@@ -85,9 +85,7 @@ export function createInjuredTiki() {
   cuff.lookAt(WRIST.clone().add(end));
   rig.posture.add(cuff);
   const skin = new THREE.MeshPhysicalMaterial({ color: TIKI_COLORS.body, roughness: 0.85, sheen: 1 });
-  rig.posture.add(
-    ball(0.14, skin, [...WRIST.clone().addScaledVector(end, 0.13).toArray()] as [number, number, number]),
-  );
+  rig.posture.add(ball(0.14, skin, WRIST.clone().addScaledVector(end, 0.13).toArray()));
   // band signatures: a few dark marker strokes round the forearm
   const marker = new THREE.MeshBasicMaterial({ color: 0x1b1b22 });
   for (const k of [0.68, 0.78, 0.88]) {

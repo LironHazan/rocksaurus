@@ -8,6 +8,7 @@ import { atTime } from '../../audio/schedule';
 import { boop } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
 import { BAR, BPM, CUE, DURATION, touches } from './timeline';
+import { entriesOf } from '../../lib/object';
 
 // A party dance groove at 120 BPM: four on the floor, claps on 2 and 4, off-beat open hats and piano-house
 // chord stabs, and a terrace anthem: a lone dad hums it over the intro, and from the goal (the drop, bar 10)
@@ -49,9 +50,9 @@ function pianoPart(): KeyboardPart {
 }
 
 function drumPart(): DrumPart {
-  const rows: Record<string, string[]> = { kick: [], snare: [], hat: [], crash: [] };
+  const rows: Record<'kick' | 'snare' | 'hat' | 'crash', string[]> = { kick: [], snare: [], hat: [], crash: [] };
   const bar = (kick = '', snare = '', hat = '', crash = '') => {
-    for (const [k, v] of Object.entries({ kick, snare, hat, crash })) rows[k]!.push(v.padEnd(16, '.'));
+    for (const [k, v] of entriesOf({ kick, snare, hat, crash })) rows[k].push(v.padEnd(16, '.'));
   };
   const FLOOR = 'x...x...x...x...';
   const CLAP = '....x.......x...';

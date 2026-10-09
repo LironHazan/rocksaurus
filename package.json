@@ -28,6 +28,7 @@
     "three": "^0.186.1"
   },
   "devDependencies": {
+    "@oxlint/plugins": "1.86.0",
     "@playwright/test": "^1.64.0",
     "@swc/core": "^1.16.13",
     "@testing-library/jest-dom": "^7.0.1",

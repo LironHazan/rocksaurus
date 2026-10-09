@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ball, enableShadows, plush } from '../characters/materials';
+import { capsuleOf } from '../characters/reach';
 import type { ParasaurolophusRig } from '../characters/parasaurolophus';
 import { taperedTube } from './tube';
 
@@ -80,7 +81,7 @@ function wizardHat(): THREE.Group {
 }
 
 /** A cloak draped from her shoulders to the floor behind her, open at the front. */
-function cloak(): { group: THREE.Group; fabric: THREE.MeshPhysicalMaterial } {
+function cloak() {
   const fabric = felt(0x2b2a35);
   fabric.side = THREE.DoubleSide;
   const geo = new THREE.CylinderGeometry(0.7, 1.5, 2.45, 64, 12, true, Math.PI - 2.15, 4.3);
@@ -157,7 +158,7 @@ function circlet(): THREE.Group {
   return g;
 }
 
-function staffProp(): { group: THREE.Group; orb: THREE.Mesh; light: THREE.PointLight } {
+function staffProp() {
   const g = new THREE.Group();
   const wood = std(0x3a2418, 0.8);
   const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.06, 3.6, 12), wood);
@@ -219,7 +220,7 @@ export function addFantasyGear(rig: ParasaurolophusRig): FantasyGear {
   rig.torso.add(cloakGroup);
 
   const bracers = rig.arms.map(pivot => {
-    const arm = pivot.children.find(c => (c as THREE.Mesh).geometry?.type === 'CapsuleGeometry') as THREE.Mesh;
+    const arm = capsuleOf(pivot);
     const b = spikedBracer();
     b.position.y = -0.1;
     arm.add(b);
@@ -262,7 +263,7 @@ export function addFantasyGear(rig: ParasaurolophusRig): FantasyGear {
     sword,
     setStaffGlow(k) {
       light.intensity = 6 * k;
-      (orb.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.5 + 1.6 * k;
+      orb.material.emissiveIntensity = 0.5 + 1.6 * k;
     },
   };
 }

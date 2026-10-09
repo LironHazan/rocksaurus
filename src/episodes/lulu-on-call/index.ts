@@ -449,14 +449,14 @@ const episode: Episode = {
         const p = (((t * 0.6 + i / 3) % 1) + 1) % 1;
         z.position.set(tmp.x + 0.3 + p * 0.8, tmp.y + 0.3 + p * 1.5, tmp.z + 0.3);
         z.scale.setScalar(0.25 + p * 0.35);
-        (z.material as THREE.SpriteMaterial).opacity = lying > 0.5 && !paged ? Math.sin(p * Math.PI) : 0;
+        z.material.opacity = lying > 0.5 && !paged ? Math.sin(p * Math.PI) : 0;
       });
 
       // clock, pager, alarm light
       b.clock.set(t < 63 ? '3:07' : '3:08');
       b.pagerScreen.set(paged ? 'SEV-1\nPROD DOWN' : '');
       const blink = paged && Math.floor((t - CUE.page) * 4) % 2 === 0;
-      (b.led.material as THREE.MeshBasicMaterial).color.set(blink ? 0xff2020 : 0x330000);
+      b.led.material.color.set(blink ? 0xff2020 : 0x330000);
       const buzzing = paged && t < CUE.laptop;
       b.pager.position.set(-3.75 + (buzzing ? Math.sin(t * 90) * 0.025 : 0), 1.3, 0.45);
       b.pager.rotation.y = 0.4 + (buzzing ? Math.sin(t * 70) * 0.08 : 0);

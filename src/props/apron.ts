@@ -29,7 +29,7 @@ export function addApron(
   pocket.rotation.x = 0.25;
   g.add(pocket);
   g.traverse(o => {
-    if ((o as THREE.Mesh).isMesh) o.castShadow = o.receiveShadow = true;
+    if (o instanceof THREE.Mesh) o.castShadow = o.receiveShadow = true;
   });
   torso.add(g);
   return g;

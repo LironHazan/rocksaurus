@@ -4,21 +4,6 @@ import { GOAL } from './sets/pitch';
 import { BARS, DRUMS, EFFECTS, PLAN } from './music';
 import { drumHits } from '../../audio/drum-patterns';
 
-// the score is plain data; stub out everything that would open an AudioContext
-vi.mock('../../audio/foley', () => ({
-  whistle: vi.fn(),
-  kickBall: vi.fn(),
-  swish: vi.fn(),
-  cheer: vi.fn(),
-  stomp: vi.fn(),
-}));
-vi.mock('../../audio/sfx', () => ({ boop: vi.fn() }));
-vi.mock('../../audio/keyboard-part', () => ({ playKeyboardPart: vi.fn() }));
-vi.mock('../../audio/drums', () => ({ playDrums: vi.fn() }));
-vi.mock('../../audio/voice', () => ({ playVocal: vi.fn() }));
-vi.mock('../../audio/schedule', () => ({ atTime: vi.fn() }));
-vi.mock('../../world/text-texture', () => ({ textTexture: vi.fn() }));
-
 describe('Tiki Taka scores a golazo', () => {
   it('is a Short: under a minute, a whole number of bars', () => {
     expect(DURATION).toBeLessThanOrEqual(60);

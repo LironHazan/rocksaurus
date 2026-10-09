@@ -6,6 +6,7 @@ import { textTexture } from '../../world/text-texture';
 import { sky } from '../../world/sky';
 import { createSchool, createTree, type SchoolOptions } from '../../world/school';
 import { createSeat } from '../../props/furniture';
+import { entriesOf } from '../../lib/object';
 
 // Where things are, for the choreography. Every set faces the camera at +z.
 
@@ -574,8 +575,8 @@ export function createStreetCafe() {
   table.position.copy(CAFE_TABLE);
   scene.add(table);
   const chairColours = { tiki: 0xc98f5a, paris: 0x3b2d4a, steggy: 0x5f9a7a };
-  for (const [who, spot] of Object.entries(CAFE_CHAIRS)) {
-    const chair = createSeat({ width: 3.0, colour: chairColours[who as keyof typeof chairColours] });
+  for (const [who, spot] of entriesOf(CAFE_CHAIRS)) {
+    const chair = createSeat({ width: 3.0, colour: chairColours[who] });
     chair.position.set(spot.x, 0, spot.z);
     chair.rotation.y = spot.yaw;
     chair.scale.setScalar(1.15); // BIG chairs

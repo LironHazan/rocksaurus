@@ -26,7 +26,13 @@ const LEFT = byHand('L');
 const RIGHT = byHand('R');
 
 /** The note a hand is on at time t (the latest one started), and how recently it was struck. */
-function current(list: readonly TimedNote[], t: number): { note: TimedNote | null; hit: number } {
+/** The note a hand is on, and how recently it was struck (1 at the strike, fading). */
+interface HandNote {
+  note: TimedNote | null;
+  hit: number;
+}
+
+function current(list: readonly TimedNote[], t: number): HandNote {
   let note: TimedNote | null = null;
   for (const n of list) {
     if (n.start <= t) note = n;

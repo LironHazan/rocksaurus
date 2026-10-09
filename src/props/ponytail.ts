@@ -5,6 +5,12 @@ import { taperedTube, curve3 } from './tube';
 // Lulu's head ellipsoid around the `face` group (see createLulu: head ball 0.6 scaled 1 × 0.9 × 1.1)
 const HEAD = { x: 0.6, y: 0.54, z: 0.66 };
 
+/** The hair, and the ponytail's pivot at the scrunchie: rotate it to make it swing. */
+export interface Ponytail {
+  group: THREE.Group;
+  ponytail: THREE.Group;
+}
+
 /**
  * Loose ponytail: thick smooth locks combed back from the hairline and lifted off the head (not slicked
  * down), two loose face-framing pieces, and a relaxed ponytail at the back of the head with a scrunchie.
@@ -14,7 +20,7 @@ const HEAD = { x: 0.6, y: 0.54, z: 0.66 };
 export function addPonytail(
   rig: { face: THREE.Object3D; flower?: THREE.Object3D },
   { color = 0xe8562a, scrunchie = 0xff3fa4, seed = 7 } = {},
-): { group: THREE.Group; ponytail: THREE.Group } {
+): Ponytail {
   const r = rng(seed);
   const hairMat = new THREE.MeshPhysicalMaterial({
     color,
@@ -154,7 +160,7 @@ export function addPonytail(
   ponytail.add(band);
 
   group.traverse(o => {
-    if ((o as THREE.Mesh).isMesh) {
+    if (o instanceof THREE.Mesh) {
       o.castShadow = true;
       o.receiveShadow = true;
     }

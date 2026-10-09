@@ -1,8 +1,6 @@
 import type { Episode } from '../engine/types';
-import { OUTRO_LEN, withOutro } from './outro';
-import { playKeyboardPart } from '../audio/keyboard-part';
-
-vi.mock('../audio/keyboard-part', () => ({ playKeyboardPart: vi.fn() }));
+import { OUTRO_LEN, STING, withOutro } from './outro';
+import { timedNotes } from '../audio/keyboard-part';
 
 const story: Episode = {
   id: 'story',
@@ -21,14 +19,14 @@ describe('withOutro', () => {
     expect(ep.captions).toBe(story.captions);
   });
 
-  it('plays the episode’s music, then the sting as the card appears', () => {
-    const bus = {} as GainNode;
+  it('plays the episode’s music', () => {
+    const bus = new GainNode(new AudioContext());
     withOutro(story).audio!(bus, 10);
     expect(story.audio).toHaveBeenCalledWith(bus, 10);
-    expect(playKeyboardPart).toHaveBeenCalledWith(
-      bus,
-      10 + story.duration,
-      expect.objectContaining({ sound: 'piano' }),
-    );
+  });
+  it('stings with a rolled chord: the notes start together and roll up within half a second', () => {
+    const starts = timedNotes(STING).map(n => n.start);
+    expect(starts[0]).toBe(0);
+    expect(Math.max(...starts)).toBeLessThan(0.5);
   });
 });

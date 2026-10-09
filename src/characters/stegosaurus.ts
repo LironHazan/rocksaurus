@@ -18,8 +18,10 @@ export const STEGGY_COLORS = {
 
 // Body and head ellipsoids. The meshes below and the `fit` the rig publishes both come from these, so a tweak
 // here moves the shirt and the hair with the shape instead of leaving them fitted to the old one.
-const BODY = { radius: 1, at: [0, 1.15, -0.1] as Vec3, scale: [1.0, 0.95, 1.15] as Vec3 };
-const HEAD = { radius: 0.5, scale: [1.05, 0.9, 1.1] as Vec3 };
+const BODY = { radius: 1, at: [0, 1.15, -0.1] satisfies Vec3, scale: [1.0, 0.95, 1.15] satisfies Vec3 };
+
+const HEAD = { radius: 0.5, scale: [1.05, 0.9, 1.1] satisfies Vec3 };
+
 const radiiOf = (radius: number, scale: Vec3): Vec3 => [radius * scale[0], radius * scale[1], radius * scale[2]];
 
 export interface StegosaurusRig extends CharacterRig {
@@ -202,7 +204,7 @@ export function createStegosaurus(colors: StegosaurusColors = STEGGY_COLORS): St
     eye.add(ball(0.018, M.shine, [-0.03, -0.035, 0.075], [1, 1, 0.4], 12));
     head.add(eye);
     eyes.push(eye);
-    const cheek = ball(0.08, M.cheek, [s * 0.33, -0.1, 0.38], [1, 0.7, 0.35]) as THREE.Mesh;
+    const cheek = ball(0.08, M.cheek, [s * 0.33, -0.1, 0.38], [1, 0.7, 0.35]);
     head.add(cheek);
     cheeks.push(cheek);
   }

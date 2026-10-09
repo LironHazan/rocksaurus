@@ -182,7 +182,8 @@ export function createEilon() {
   const iris = new THREE.MeshPhysicalMaterial({ color: 0x3d8ef0, roughness: 0.15, clearcoat: 1 });
   const pupil = new THREE.MeshPhysicalMaterial({ color: 0x1b1b2e, roughness: 0.15, clearcoat: 1 });
   for (const eye of rig.eyes) {
-    (eye.children[0] as THREE.Mesh).material = iris;
+    const eyeball = eye.children.find(c => c instanceof THREE.Mesh); // the first mesh in each eye is the eyeball
+    if (eyeball instanceof THREE.Mesh) eyeball.material = iris;
     eye.add(ball(0.13, pupil, [0, -0.01, 0.08], [1, 1.1, 0.5]));
   }
   addBandTee(rig, { text: '', color: 0x9aa0a8 }); // plain grey
@@ -197,7 +198,7 @@ export function createEilon() {
   hips.scale.set(rx * 1.03, ry * 1.03, rz * 1.03);
   hips.position.set(cx, cy, cz);
   rig.torso.add(hips);
-  for (const thigh of rig.thighs as THREE.Mesh[]) thigh.material = denim;
+  for (const thigh of rig.thighs) thigh.material = denim;
   for (const foot of rig.feet) {
     const cuff = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.07, 8, 24), denim);
     cuff.rotation.x = Math.PI / 2;

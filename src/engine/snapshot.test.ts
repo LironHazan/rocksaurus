@@ -1,4 +1,3 @@
-vi.mock('./recorder', () => ({ downloadBlob: vi.fn() })); // the recorder pulls in the audio graph
 import { cropRect, snapshotName, PIN_SIZE } from './snapshot';
 
 const PIN = PIN_SIZE.width / PIN_SIZE.height;

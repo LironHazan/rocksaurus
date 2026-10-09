@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ROUND } from '../world/interior';
 import { textTexture } from '../world/text-texture';
-import { reachArm } from '../characters/reach';
+import { reachArm, sideOf } from '../characters/reach';
 
 /** One message in a group chat. */
 export interface ChatLine {
@@ -399,7 +399,7 @@ export function createPhone(style: ChatStyle, { height = 1.0, colour = 0x2c2c30 
       if (next === key) return;
       key = next;
       current = view;
-      const canvas = tex.image as HTMLCanvasElement;
+      const canvas = tex.image;
       draw(canvas.getContext('2d')!);
       tex.needsUpdate = true;
     },
@@ -474,7 +474,7 @@ export function holdPhone(
   phone.group.lookAt(rig.head.getWorldPosition(new THREE.Vector3()));
   phone.group.updateMatrixWorld(true);
   for (const arm of rig.arms) {
-    const side = arm.userData.side as number;
+    const side = sideOf(arm);
     const tap = typing ? Math.max(0, Math.sin(t * 22 + side * 1.7)) * 0.04 : 0;
     // the phone faces its owner, so its +x is on their right: mirror the side
     const edge = phone.group.localToWorld(

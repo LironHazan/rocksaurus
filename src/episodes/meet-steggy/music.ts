@@ -44,26 +44,31 @@ export const piano: KeyboardPart = {
   ],
 };
 
+/** A right-hand phrase whose notes follow each other with no gaps, from eighth `start`: [note, length in eighths]. */
+function legato(start: number, phrase: readonly (readonly [string, number])[]): KeyNote[] {
+  let at = start;
+  return phrase.map(([note, len]) => {
+    const played: KeyNote = [at, note, len, 0.7, 'R'];
+    at += len;
+    return played;
+  });
+}
+
 export const leadSynth: KeyboardPart = {
   bpm: BPM,
   sound: 'lead',
   notes: [
     // bar 3 (Am7): singing melody
-    ...(
-      [
-        ['A4', 1],
-        ['C5', 1],
-        ['E5', 1],
-        ['G5', 1.5],
-        ['E5', 0.5],
-        ['D5', 1],
-        ['C5', 1],
-        ['B4', 1],
-      ] as const
-    ).reduce<KeyNote[]>(
-      (acc, [n, len]) => [...acc, [bar(3) + acc.reduce((s, x) => s + x[2], 0), n, len, 0.7, 'R'] as const],
-      [],
-    ),
+    ...legato(bar(3), [
+      ['A4', 1],
+      ['C5', 1],
+      ['E5', 1],
+      ['G5', 1.5],
+      ['E5', 0.5],
+      ['D5', 1],
+      ['C5', 1],
+      ['B4', 1],
+    ]),
     // bar 4 (B7): fast harmonic-minor run up, then a held, vibrato note
     ...(['B4', 'C5', 'D#5', 'E5', 'F#5', 'G5', 'A5', 'B5'] as const).map(
       (n, i) => [bar(4) + i * 0.5, n, 0.5, 0.65, 'R'] as const,

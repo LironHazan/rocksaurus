@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
 import { textTexture } from '../world/text-texture';
 import type { CharacterRig } from '../characters/types';
+import { sideOf } from '../characters/reach';
 
 const TATTOO_FONT = 'Rye';
 const LETTERING_FONT = "'Metal Mania'";
@@ -113,7 +114,7 @@ function lettering(ctx: CanvasRenderingContext2D, w: number, h: number, text: st
  *          in public/. Overrides `style`. Only use artwork you have the rights to.
  */
 export function addTattoo(
-  rig: Pick<CharacterRig, 'root' | 'torso'> & { thighs: THREE.Object3D[] },
+  rig: Pick<CharacterRig, 'root' | 'torso'> & { thighs: THREE.Mesh[] },
   {
     text = 'OZZY',
     style = 'lettering',
@@ -140,7 +141,8 @@ export function addTattoo(
     tex = textTexture(512, 512, (ctx, w, h) => lettering(ctx, w, h, text), [`200px ${LETTERING_FONT}`]);
   }
 
-  const thigh = rig.thighs.find(t => t.userData.side === -1) as THREE.Mesh;
+  const thigh = rig.thighs.find(t => sideOf(t) === -1);
+  if (!thigh) throw new Error('addTattoo: the rig has no left thigh');
   rig.root.updateMatrixWorld(true); // project while the rig is at rest
   const normal = new THREE.Vector3(-0.85, 0.05, 0.52).normalize();
   const center = thigh.getWorldPosition(new THREE.Vector3()).addScaledVector(normal, 0.5);

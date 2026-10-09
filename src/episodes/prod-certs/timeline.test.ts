@@ -14,24 +14,6 @@ import {
 import { EFFECTS } from './sound';
 import { DESK, FIDGET } from './sets';
 
-// the sound is plain data; stub out everything that would open an AudioContext
-vi.mock('../../audio/foley', () => ({
-  cricket: vi.fn(),
-  page: vi.fn(),
-  stomp: vi.fn(),
-  keyTap: vi.fn(),
-  ring: vi.fn(),
-  vibrate: vi.fn(),
-  cheer: vi.fn(),
-  bird: vi.fn(),
-  snore: vi.fn(),
-  sigh: vi.fn(),
-  bed: vi.fn(),
-}));
-vi.mock('../../audio/sfx', () => ({ ding: vi.fn() }));
-vi.mock('../../audio/voice', () => ({ sing: vi.fn() }));
-vi.mock('../../audio/schedule', () => ({ atTime: vi.fn() }));
-
 describe('Invalid Date', () => {
   it('is a Short: under a minute', () => {
     expect(DURATION).toBeLessThanOrEqual(60);

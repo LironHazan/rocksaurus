@@ -3,6 +3,7 @@ import { Button, SegmentedControl } from '../../../ui';
 import type { Format, FormatId } from '../../../engine/types';
 import { formatTime } from '../../../lib/time';
 import styles from '../Studio.module.css';
+import { entriesOf } from '../../../lib/object';
 
 interface StudioHeaderProps {
   title: string;
@@ -17,7 +18,7 @@ interface StudioHeaderProps {
 
 export function StudioHeader(props: StudioHeaderProps) {
   const { title, duration, formats, formatId, recording, disabled } = props;
-  const options = (Object.entries(formats) as [FormatId, Format][]).map(([value, f]) => ({ value, label: f.label }));
+  const options = entriesOf(formats).map(([value, f]) => ({ value, label: f.label }));
   const size = formats[formatId];
   return (
     <header className={styles.header}>

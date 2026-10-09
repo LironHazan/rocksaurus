@@ -7,22 +7,22 @@ const CROWN = { x: 1.2, y: 0.95, z: 1.12 };
 
 /** A curved baseball-cap bill: D-shaped, rounded edges, drooping at the sides. Lies along -z (worn backwards). */
 function billGeometry(reach = 0.78, spread = 1.15) {
-  const shape = new THREE.Shape();
+  const outline = new THREE.Shape();
   const N = 24;
   // inner edge follows the crown rim at the back; outer edge is a rounded "D"
   for (let i = 0; i <= N; i++) {
     const a = -spread + (2 * spread * i) / N;
     const x = CROWN.x * Math.sin(a),
       y = CROWN.z * Math.cos(a) * 0.98;
-    if (i === 0) shape.moveTo(x, y);
-    else shape.lineTo(x, y);
+    if (i === 0) outline.moveTo(x, y);
+    else outline.lineTo(x, y);
   }
   for (let i = N; i >= 0; i--) {
     const a = -spread + (2 * spread * i) / N;
     const k = Math.cos(((a / spread) * Math.PI) / 2); // 1 in the middle, 0 at the ends
-    shape.lineTo(CROWN.x * Math.sin(a) * 0.98, CROWN.z * Math.cos(a) + reach * Math.pow(k, 0.7));
+    outline.lineTo(CROWN.x * Math.sin(a) * 0.98, CROWN.z * Math.cos(a) + reach * Math.pow(k, 0.7));
   }
-  const g = new THREE.ExtrudeGeometry(shape, {
+  const g = new THREE.ExtrudeGeometry(outline, {
     depth: 0.035,
     bevelEnabled: true,
     bevelThickness: 0.02,
@@ -30,7 +30,7 @@ function billGeometry(reach = 0.78, spread = 1.15) {
     bevelSegments: 3,
     curveSegments: 24,
   });
-  g.rotateX(Math.PI / 2); // shape y → +z, thickness downward
+  g.rotateX(Math.PI / 2); // outline y → +z, thickness downward
   g.scale(1, 1, -1); // point the bill out the back (-z)
   const p = g.attributes.position!;
   for (let i = 0; i < p.count; i++) {

@@ -5,6 +5,7 @@ import { CUE, PACE, SCENES, playedTime, type SceneId } from './timeline';
 import { keystrokes } from '../../world/screen-script';
 import { OFFICE_SCRIPT, NIGHT_SCRIPT } from './terminal';
 import * as fx from '../../audio/foley';
+import { entriesOf } from '../../lib/object';
 
 // The soundtrack is Lulu's own drum kit, played softly, at each scene's tempo (16 steps per bar).
 // Times here are script seconds; the walk is shortened, so they go through playedTime() when scheduled (see timeline.ts).
@@ -18,7 +19,7 @@ const stepOf = (bpm: number) => 60 / bpm / 4;
 function groove(bpm: number, seconds: number, bar: Bar, { endCrash = false } = {}): DrumPart {
   const steps = Math.floor(seconds / stepOf(bpm));
   const tracks: Bar = {};
-  for (const [name, pattern] of Object.entries(bar) as [DrumName, string][])
+  for (const [name, pattern] of entriesOf(bar))
     tracks[name] = pattern.repeat(Math.ceil(steps / pattern.length)).slice(0, steps);
   if (endCrash) {
     tracks.crash = (tracks.crash ?? '').padEnd(steps, '.') + 'X';

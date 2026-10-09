@@ -3,7 +3,7 @@ import { ease, lerp, seg } from '../../engine/math';
 import { disposeObject } from '../../engine/dispose';
 import type { Episode } from '../../engine/types';
 import { idle, resetPose } from '../../characters/rory';
-import { armOf, reachArm, releaseArm } from '../../characters/reach';
+import { armOf, reachArm, releaseArm, sideOf } from '../../characters/reach';
 import { SEAT_HEIGHT } from '../../props/furniture';
 import { chatView, createPhone, holdPhone, phonePov } from '../../props/phone';
 import { createBassist } from '../../band/bassist';
@@ -129,8 +129,7 @@ const episode: Episode = {
           // done typing: the phone goes down, both biceps go up
           phone.group.position.set(BENCH_TOP.x, BENCH_TOP.y + 0.03, BENCH_TOP.z);
           phone.group.rotation.set(-Math.PI / 2, 0, 0.4);
-          for (const arm of lifter.arms)
-            reachArm(arm, arm.position.clone().add(v.set((arm.userData.side as number) * 0.45, 0.45, 0.25)));
+          for (const arm of lifter.arms) reachArm(arm, arm.position.clone().add(v.set(sideOf(arm) * 0.45, 0.45, 0.25)));
           lifter.setMouth(0.6);
         }
       }
@@ -170,7 +169,7 @@ const episode: Episode = {
         // the flex: tiny arms, massive biceps
         omli.rig.root.updateMatrixWorld(true);
         for (const arm of omli.rig.arms) {
-          const side = arm.userData.side as number;
+          const side = sideOf(arm);
           reachArm(arm, arm.position.clone().add(v.set(side * 0.45, 0.45, 0.25)));
         }
         omli.rig.setMouth(0.6);

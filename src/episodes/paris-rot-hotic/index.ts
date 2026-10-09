@@ -12,7 +12,7 @@ import { sungNotes, mouthOpenAt } from '../../audio/vowels';
 import { ROUND } from '../../world/interior';
 import { CAPTIONS } from './captions';
 import { createStore, COUNTER, RACK, BOOTH } from './sets/store';
-import { CUE, DURATION, TRY, TRY_AT, TRY_LEN, fitting } from './timeline';
+import { CUE, DURATION, TRY, TRY_AT, TRY_LEN, fitting, TRY_LOOKS } from './timeline';
 import { soundtrack, vocal } from './music';
 
 // Beat sheet (video seconds; see timeline.ts for the cues and captions.ts for the text)
@@ -32,8 +32,7 @@ const FACING_RIGHT = Math.PI / 2 - 0.25; // facing +x, turned a little toward th
 const NOTES = sungNotes(vocal);
 
 /** Where each look is first shown (the curtain opens), to time its pose. */
-const REVEAL: Record<string, number> = { wizard: 0, ranger: 0, elf: 0 };
-['wizard', 'ranger', 'elf'].forEach((name, i) => (REVEAL[name] = TRY_AT[i]! + TRY.open[1]));
+const REVEAL = new Map<Look, number>(TRY_LOOKS.map((name, i) => [name, TRY_AT[i]! + TRY.open[1]]));
 
 /** A hanger pushed aside by a paw: moves away from it, and leans, the closer it is. */
 const pushFrom = (d: number) => Math.sign(d) * 0.13 * Math.exp(-((d / 0.5) ** 2));
@@ -184,7 +183,7 @@ const episode: Episode = {
 
     // sparkles for the magic moments: a pool of sprites replayed at each event
     const POOF_AT: { t: number; pos: Vec; color: number }[] = [
-      ...TRY_AT.map(s => ({ t: s + TRY.swap, pos: [BOOTH.x, 3.4, BOOTH.front + 0.3] as Vec, color: 0xc9a8ff })),
+      ...TRY_AT.map(s => ({ t: s + TRY.swap, pos: [BOOTH.x, 3.4, BOOTH.front + 0.3] satisfies Vec, color: 0xc9a8ff })),
       { t: CUE.take[1] - 0.2, pos: [COUNTER.x - 1.3, 3.4, 1.5], color: 0xffc83a },
       { t: CUE.bag, pos: [COUNTER.x - 0.4, 2.7, 0.9], color: 0xff6bd0 },
       { t: CUE.poof, pos: [0.4, 2.2, 1.2], color: 0xff6bd0 },
@@ -219,8 +218,8 @@ const episode: Episode = {
         s.position.set(e.pos[0], e.pos[1], e.pos[2]).addScaledVector(dirs[i]!, u * 1.6);
         s.position.y -= u * u * 0.9;
         s.scale.setScalar(0.5 * (1 - u) + 0.08);
-        (s.material as THREE.SpriteMaterial).opacity = 1 - u;
-        (s.material as THREE.SpriteMaterial).color.setHex(i % 3 === 0 ? 0xffffff : e.color);
+        s.material.opacity = 1 - u;
+        s.material.color.setHex(i % 3 === 0 ? 0xffffff : e.color);
       });
     }
 
@@ -366,10 +365,10 @@ const episode: Episode = {
         paris.head.rotation.y = 0;
       } else {
         place(BOOTH.x, -3.1, 0);
-        const look = f.look as Look;
-        const lp = Math.max(0, t - (REVEAL[look] ?? 0));
+        const look = f.look;
+        const lp = Math.max(0, t - (REVEAL.get(look) ?? 0));
         if (look !== 'goth') pose(look, lp);
-        const popK = look === 'goth' ? 1 : pop(t, REVEAL[look] ?? 0, 0.4);
+        const popK = look === 'goth' ? 1 : pop(t, REVEAL.get(look) ?? 0, 0.4);
         paris.root.scale.setScalar(popK > 1 ? 1 + (popK - 1) * 0.35 : 1);
       }
       const shaking = f.curtain < 1 ? Math.sin(t * 38) * 0.05 * (f.curtain < 0.05 ? 1 : 0.3) : 0;
@@ -402,7 +401,7 @@ const episode: Episode = {
       for (const e of paris.eyes) e.scale.set(1 + 0.25 * notice, 1 + 0.25 * notice, 1);
       const glow = ease(seg(t, CUE.notice, CUE.notice + 0.7));
       store.till.glow.intensity = 14 * glow;
-      (store.till.ring.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.6 + 2.2 * glow;
+      store.till.ring.material.emissiveIntensity = 0.6 + 2.2 * glow;
       store.till.ring.visible = t < CUE.total;
 
       // she takes it: the paw stretches to the bowl and lifts it
@@ -572,7 +571,7 @@ const episode: Episode = {
       store.entrance.setOpen(ease(Math.max(0, door)));
 
       const f = fitting(t);
-      const look: Look = t < CUE.counter ? (f.look as Look) : t < CUE.poof ? 'elf' : 'party';
+      const look: Look = t < CUE.counter ? f.look : t < CUE.poof ? 'elf' : 'party';
       gear.setLook(look);
 
       let shot: Shot;

@@ -2,23 +2,6 @@ import { CAPTIONS } from './captions';
 import { BAR, CUE, DURATION, TRY, TRY_AT, TRY_LEN, fitting } from './timeline';
 import { EFFECTS, PLAN } from './music';
 
-// the score is plain data; stub out everything that would open an AudioContext
-vi.mock('../../audio/foley', () => ({
-  footstep: vi.fn(),
-  hangers: vi.fn(),
-  swish: vi.fn(),
-  sparkle: vi.fn(),
-  rustle: vi.fn(),
-  kaching: vi.fn(),
-  printer: vi.fn(),
-  diceRoll: vi.fn(),
-}));
-vi.mock('../../audio/sfx', () => ({ ding: vi.fn(), stretch: vi.fn(), boop: vi.fn() }));
-vi.mock('../../audio/keyboard-part', () => ({ keyboardPart: vi.fn() }));
-vi.mock('../../audio/drums', () => ({ playDrums: vi.fn() }));
-vi.mock('../../audio/voice', () => ({ sungNotes: vi.fn(() => []) }));
-vi.mock('../../audio/schedule', () => ({ atTime: vi.fn() }));
-
 describe('Paris at Rot Hotic', () => {
   it('is a Short: under a minute, and a whole number of waltz bars', () => {
     expect(DURATION).toBeLessThanOrEqual(60);
