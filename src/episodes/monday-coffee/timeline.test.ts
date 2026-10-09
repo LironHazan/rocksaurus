@@ -1,6 +1,6 @@
 import { CAPTIONS } from './captions';
 import { CHAT, CUE, DURATION, MEMBERS, TYPING, chatAt } from './timeline';
-import { BEDS, EFFECTS } from './sound';
+import { SOUND } from './sound';
 
 describe('Monday Coffee', () => {
   it('is a Short: under a minute', () => {
@@ -70,7 +70,7 @@ describe('Monday Coffee', () => {
   });
 
   it('messages buzz on the phones nobody is holding (Rory asleep, Lulu in session)', () => {
-    const at = (t: number) => EFFECTS.find(e => e.at === t && (e.kind === 'pop' || e.kind === 'vibrate'))!.kind;
+    const at = (t: number) => SOUND.cues.find(e => e.at === t && (e.kind === 'pop' || e.kind === 'vibrate'))!.kind;
     expect(at(CHAT[0]!.at)).toBe('pop');
     expect(at(CHAT.find(m => m.at >= CUE.rory[0])!.at)).toBe('vibrate');
   });
@@ -84,25 +84,12 @@ describe('Monday Coffee', () => {
     }
   });
 
-  it('sound effects are sorted and inside the video', () => {
-    EFFECTS.forEach((fx, i) => {
-      expect(fx.at).toBeGreaterThanOrEqual(0);
-      expect(fx.at).toBeLessThanOrEqual(DURATION);
-      if (i > 0) expect(fx.at).toBeGreaterThanOrEqual(EFFECTS[i - 1]!.at);
-    });
-  });
-
-  it('every moment has a background bed under it, inside the video', () => {
-    for (const b of BEDS) {
-      expect(b.from).toBeGreaterThanOrEqual(0);
-      expect(b.to).toBeLessThanOrEqual(DURATION);
-      expect(b.from).toBeLessThan(b.to);
-    }
-    for (let t = 0; t < DURATION; t += 0.5) expect(BEDS.some(b => t >= b.from && t < b.to)).toBe(true);
+  it('every moment has a background bed under it', () => {
+    for (let t = 0; t < DURATION; t += 0.5) expect(SOUND.beds.some(b => t >= b.from && t < b.to)).toBe(true);
   });
 
   it('the clock only ticks indoors, never at the café', () => {
-    for (const e of EFFECTS.filter(e => e.kind === 'tick')) {
+    for (const e of SOUND.cues.filter(e => e.kind === 'tick')) {
       expect(e.at).toBeGreaterThanOrEqual(CUE.rory[0]);
       expect(e.at >= CUE.cafe[0] && e.at < CUE.end).toBe(false);
     }

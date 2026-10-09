@@ -11,7 +11,6 @@ import {
   mouthAt,
   speakerAt,
 } from './timeline';
-import { EFFECTS } from './sound';
 import { DESK, FIDGET } from './sets';
 
 describe('Invalid Date', () => {
@@ -71,14 +70,6 @@ describe('Invalid Date', () => {
       expect(c.to).toBeLessThanOrEqual(DURATION);
       expect(c.from).toBeLessThan(c.to);
     }
-  });
-
-  it('sound effects are sorted and inside the video', () => {
-    EFFECTS.forEach((fx, i) => {
-      expect(fx.at).toBeGreaterThanOrEqual(0);
-      expect(fx.at).toBeLessThanOrEqual(DURATION);
-      if (i > 0) expect(fx.at).toBeGreaterThanOrEqual(EFFECTS[i - 1]!.at);
-    });
   });
 
   it('Taluzarus fidgets all over his spot, but never through the desk', () => {

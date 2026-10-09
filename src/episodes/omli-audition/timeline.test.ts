@@ -1,7 +1,6 @@
 import { CAPTIONS } from './captions';
 import { BAR, BARS, CHAT, CUE, DURATION, LINES, MEMBERS, MUSIC_AT, SYLLABLES, mouthAt } from './timeline';
 import { BASS, DRUMS, GUITAR, luluPlays, omliPlays, roryPlays } from './music';
-import { EFFECTS } from './sound';
 import { drumHits } from '../../audio/drum-patterns';
 import { TYPING } from '../../props/phone';
 
@@ -73,13 +72,5 @@ describe('The Audition', () => {
       expect(c.to).toBeLessThanOrEqual(DURATION);
       expect(c.from).toBeLessThan(c.to);
     }
-  });
-
-  it('sound effects are sorted and inside the video', () => {
-    EFFECTS.forEach((fx, i) => {
-      expect(fx.at).toBeGreaterThanOrEqual(0);
-      expect(fx.at).toBeLessThanOrEqual(DURATION);
-      if (i > 0) expect(fx.at).toBeGreaterThanOrEqual(EFFECTS[i - 1]!.at);
-    });
   });
 });

@@ -13,9 +13,10 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run typecheck && npm run lint && npm run lint:boundaries && npm run lint:dead-code && npm run format:check && npm test",
+    "check": "npm run typecheck && npm run lint && npm run lint:boundaries && npm run lint:dead-code && npm run lint:audit && npm run format:check && npm test",
     "lint:boundaries": "depcruise src",
     "lint:dead-code": "fallow dead-code",
+    "lint:audit": "fallow audit --base origin/main",
     "test:e2e": "vite build && playwright test"
   },
   "dependencies": {

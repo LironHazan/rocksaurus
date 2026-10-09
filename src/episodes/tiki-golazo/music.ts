@@ -4,9 +4,9 @@ import { playKeyboardPart, type KeyboardPart, type KeyNote } from '../../audio/k
 import type { Note } from '../../audio/notes';
 import { playVocal } from '../../audio/voice';
 import type { SungNote, VocalPart, Vowel } from '../../audio/vowels';
-import { atTime } from '../../audio/schedule';
 import { boop } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
+import { cueSheet, quieter, type Cue, type Player } from '../../audio/cue-sheet';
 import { BAR, BPM, CUE, DURATION, touches } from './timeline';
 import { entriesOf } from '../../lib/object';
 
@@ -142,14 +142,10 @@ const CROWD: VocalPart = {
 const PIANO = pianoPart();
 export const DRUMS = drumPart();
 
-type FxKind = 'whistle' | 'longWhistle' | 'kick' | 'shot' | 'net' | 'cheer' | 'thud' | 'boing';
-interface Fx {
-  at: number;
-  kind: FxKind;
-}
+type Kind = 'whistle' | 'longWhistle' | 'kick' | 'shot' | 'net' | 'cheer' | 'thud' | 'boing';
 
-function effects(): Fx[] {
-  const out: Fx[] = [
+function cues(): Cue<Kind>[] {
+  const out: Cue<Kind>[] = [
     { at: CUE.whistle, kind: 'whistle' },
     ...touches()
       .filter(t => t !== CUE.shot)
@@ -166,11 +162,12 @@ function effects(): Fx[] {
     { at: CUE.final + 0.3, kind: 'whistle' },
     { at: CUE.final + 0.6, kind: 'longWhistle' },
   ];
-  return out.sort((a, b) => a.at - b.at);
+  return out;
 }
-export const EFFECTS = effects();
 
-const PLAYERS: Record<FxKind, (bus: AudioNode, when: number) => void> = {
+// Each Short's sound table has the same shape but different sounds; the likeness is accidental.
+// fallow-ignore-next-line code-duplication
+const PLAYERS: Record<Kind, Player> = {
   whistle: (b, w) => fx.whistle(b, w, 0.18),
   longWhistle: (b, w) => fx.whistle(b, w, 0.7),
   kick: (b, w) => fx.kickBall(b, w, 0.6),
@@ -181,12 +178,12 @@ const PLAYERS: Record<FxKind, (bus: AudioNode, when: number) => void> = {
   boing: (b, w) => boop(b, w, 180, 520, 0.35, 0.16),
 };
 
+const SOUND = cueSheet({ duration: DURATION, players: PLAYERS, cues: cues() });
+
 export function soundtrack(bus: AudioNode, t0: number): void {
-  const drums = new GainNode(bus.context, { gain: 0.6 });
-  drums.connect(bus);
+  SOUND.play(bus, t0);
   playKeyboardPart(bus, t0, PIANO);
-  playDrums(drums, t0, DRUMS, { smooth: true });
+  playDrums(quieter(bus, 0.6), t0, DRUMS, { smooth: true });
   playVocal(bus, t0, SIUU);
   playVocal(bus, t0, CROWD);
-  for (const e of EFFECTS) atTime(t0 + e.at, () => PLAYERS[e.kind](bus, t0 + e.at));
 }

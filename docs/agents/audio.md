@@ -18,4 +18,7 @@ Read this before you add music, sound effects or voices, or change `src/audio/` 
   `warmGrand(notes)` in the episode's `preload()`.
 - **Dialogue is babble** (`src/audio/babble.ts`): `syllables(lines, voices, seed)` drives both the sung syllables
   (`playSyllables`) and the mouths (`mouthOf`).
-- **Foley** is in `src/audio/foley.ts`, with `bed()` for a background sound under a whole shot.
+- **Sound effects are a cue sheet** (`src/audio/cue-sheet.ts`): `cueSheet({ duration, players, cues, beds })` sorts
+  the cues, throws on one outside the video, and `play(bus, t0)` schedules everything. An episode declares only its
+  cues and how each kind sounds; use `every(from, to, step)` for repeats and `quieter(bus, gain)` for distant sounds.
+  The sounds themselves are in `src/audio/foley.ts` and `src/audio/sfx.ts` (`stomp`, `chatPop`, …).

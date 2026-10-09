@@ -6,8 +6,8 @@ previews a Short and records it to video. GitHub Pages deploys `main`.
 
 ## Commands
 
-- `npm run check` — the gate: typecheck, lint, `lint:boundaries`, `lint:dead-code`, format check, tests. Run it before
-  every commit.
+- `npm run check` — the gate: typecheck, lint, `lint:boundaries`, `lint:dead-code`, `lint:audit` (the same Fallow audit
+  CI runs on a PR, against `origin/main`), format check, tests. Run it before every commit.
 - `npm run build` — `tsc -b && vite build`. CI runs it too.
 - `npm run test:e2e` — builds, then Playwright smoke-tests the studio and the watch page in headless Chromium. CI runs
   it on every PR.
@@ -56,6 +56,7 @@ guards and `satisfies`), and tests never mock modules: jsdom's missing Web Audio
 
 ## Read before the task
 
+- Domain terms (Short, cue sheet, cue, bed, babble): [CONTEXT.md](CONTEXT.md).
 - Adding or changing a Short, a character, a prop or a set: [docs/agents/shorts.md](docs/agents/shorts.md) (also has
   the owner's house rules for every Short).
 - Music, sound effects, voices, or the player clock: [docs/agents/audio.md](docs/agents/audio.md).

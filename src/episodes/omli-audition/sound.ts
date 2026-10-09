@@ -1,11 +1,10 @@
-import { atTime } from '../../audio/schedule';
-import { boop } from '../../audio/sfx';
+import { cueSheet, every, quieter, type Cue, type Player } from '../../audio/cue-sheet';
 import { playSyllables } from '../../audio/babble';
 import { playBass } from '../../audio/bass';
 import { playDrums } from '../../audio/drums';
 import { playRiff } from '../../audio/guitar';
+import { chatPop, chatSent } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
-import type { BedKind } from '../../audio/foley';
 import { TYPING } from '../../props/phone';
 import { BASS, DRUMS, GUITAR } from './music';
 import { CHAT, CUE, DURATION, MUSIC_AT, SYLLABLES } from './timeline';
@@ -13,24 +12,10 @@ import { CHAT, CUE, DURATION, MUSIC_AT, SYLLABLES } from './timeline';
 // Natural sound in Omli's gym (the dumbbell, the buzz, Lulu's DM, his thumbs), Omli's heavy footsteps; then the
 // audition itself: Omli's bass alone, Lulu's drums (the smooth kit), Rory's guitar, and the band whooping at the end.
 
-interface Bed {
-  from: number;
-  to: number;
-  kind: BedKind;
-}
-const BEDS: readonly Bed[] = [
-  { from: 0, to: CUE.gym[1], kind: 'room' },
-  { from: CUE.audition[0], to: DURATION, kind: 'room' },
-];
+type Kind = 'clank' | 'buzz' | 'pop' | 'sent' | 'tap' | 'step' | 'whoop';
 
-type FxKind = 'clank' | 'buzz' | 'pop' | 'sent' | 'tap' | 'step' | 'whoop';
-interface Fx {
-  at: number;
-  kind: FxKind;
-}
-
-function effects(): Fx[] {
-  const out: Fx[] = [
+function cues(): Cue<Kind>[] {
+  const out: Cue<Kind>[] = [
     // curls: the dumbbell's top and bottom clank, then he sets it down for the phone
     { at: 0.9, kind: 'clank' },
     { at: 1.95, kind: 'clank' },
@@ -40,32 +25,34 @@ function effects(): Fx[] {
     ...CHAT.map(m => ({ at: m.at, kind: m.from === 'Omli' ? ('sent' as const) : ('pop' as const) })),
   ];
   for (const m of CHAT.filter(c => c.from === 'Omli'))
-    for (let t = m.at - TYPING + 0.05; t < m.at - 0.05; t += 0.14) out.push({ at: t, kind: 'tap' });
-  for (let t = CUE.enter + 0.2; t < MUSIC_AT - 0.3; t += 0.45) out.push({ at: t, kind: 'step' });
-  return out.sort((a, b) => a.at - b.at);
+    for (const at of every(m.at - TYPING + 0.05, m.at - 0.05, 0.14)) out.push({ at, kind: 'tap' });
+  for (const at of every(CUE.enter + 0.2, MUSIC_AT - 0.3, 0.45)) out.push({ at, kind: 'step' });
+  return out;
 }
-export const EFFECTS = effects();
 
-const PLAYERS: Record<FxKind, (bus: AudioNode, when: number) => void> = {
-  clank: (b, w) => fx.stomp(soft(b, 0.5), w),
+const PLAYERS: Record<Kind, Player> = {
+  clank: (b, w) => fx.stomp(quieter(b, 0.5), w),
   buzz: fx.vibrate,
-  pop: (b, w) => boop(b, w, 620, 980, 0.09, 0.08),
-  sent: (b, w) => boop(b, w, 900, 1300, 0.07, 0.06),
+  pop: chatPop,
+  sent: chatSent,
   tap: fx.keyTap,
   step: fx.stomp, // a big guy
   whoop: (b, w) => fx.cheer(b, w, 1.6),
 };
 
-function soft(bus: AudioNode, gain: number): AudioNode {
-  const g = new GainNode(bus.context, { gain });
-  g.connect(bus);
-  return g;
-}
+const SOUND = cueSheet({
+  duration: DURATION,
+  players: PLAYERS,
+  cues: cues(),
+  beds: [
+    { from: 0, to: CUE.gym[1], kind: 'room' },
+    { from: CUE.audition[0], to: DURATION, kind: 'room' },
+  ],
+});
 
 export function soundtrack(bus: AudioNode, t0: number): void {
-  for (const b of BEDS) atTime(t0 + b.from, () => fx.bed(bus, t0 + b.from, b.to - b.from, b.kind));
-  for (const e of EFFECTS) atTime(t0 + e.at, () => PLAYERS[e.kind](bus, t0 + e.at));
-  playSyllables(bus, t0, SYLLABLES, atTime);
+  SOUND.play(bus, t0);
+  playSyllables(bus, t0, SYLLABLES);
   // the audition
   const band = new GainNode(bus.context, { gain: 0.9 });
   band.connect(bus);

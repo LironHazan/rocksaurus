@@ -2,9 +2,9 @@ import type { KeyboardPart, KeyNote } from '../../audio/keyboard-part';
 import { playKeyboardPart } from '../../audio/keyboard-part';
 import { playDrums } from '../../audio/drums';
 import { playVocal } from '../../audio/voice';
-import { atTime } from '../../audio/schedule';
 import { ding, stretch } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
+import { cueSheet, every, quieter, type Cue, type Player } from '../../audio/cue-sheet';
 import type { DrumPart } from '../../audio/drum-patterns';
 import type { VocalPart } from '../../audio/vowels';
 import { BAR, BPM, CUE, DURATION, TRY, TRY_AT } from './timeline';
@@ -279,16 +279,12 @@ export const vocal: VocalPart = {
   ],
 };
 
-type FxKind = 'bell' | 'step' | 'hangers' | 'swish' | 'sparkle' | 'rustle' | 'stretch' | 'kaching' | 'printer' | 'dice';
-interface Fx {
-  at: number;
-  kind: FxKind;
-}
+type Kind = 'bell' | 'step' | 'hangers' | 'swish' | 'sparkle' | 'rustle' | 'stretch' | 'kaching' | 'printer' | 'dice';
 
-function effects(): Fx[] {
-  const out: Fx[] = [{ at: CUE.bell, kind: 'bell' }];
-  for (let t = CUE.walkIn[0]; t < CUE.walkIn[1]; t += 0.42) out.push({ at: t, kind: 'step' });
-  for (let t = CUE.browse[0] + 0.3; t < CUE.pick; t += 0.55) out.push({ at: t, kind: 'hangers' });
+function cues(): Cue<Kind>[] {
+  const out: Cue<Kind>[] = [{ at: CUE.bell, kind: 'bell' }];
+  for (const at of every(CUE.walkIn[0], CUE.walkIn[1], 0.42)) out.push({ at, kind: 'step' });
+  for (const at of every(CUE.browse[0] + 0.3, CUE.pick, 0.55)) out.push({ at, kind: 'hangers' });
   out.push({ at: CUE.pick, kind: 'rustle' });
   for (const s of TRY_AT) {
     out.push(
@@ -311,33 +307,34 @@ function effects(): Fx[] {
     { at: CUE.land, kind: 'dice' },
     { at: CUE.nat20, kind: 'sparkle' },
   );
-  return out.sort((a, b) => a.at - b.at);
+  return out;
 }
 
 const ORGAN = organPart();
 const LEAD = leadPart();
 const DRUMS = drumPart();
-export const EFFECTS = effects();
 
-const PLAYERS: Record<FxKind, (bus: AudioNode, when: number) => void> = {
+// Each Short's sound table has the same shape but different sounds; the likeness is accidental.
+// fallow-ignore-next-line code-duplication
+const PLAYERS: Record<Kind, Player> = {
   bell: (b, w) => ding(b, w, 2093),
   step: fx.footstep,
-  hangers: (b, w) => fx.hangers(b, w),
-  swish: (b, w) => fx.swish(b, w),
+  hangers: fx.hangers,
+  swish: fx.swish,
   sparkle: fx.sparkle,
   rustle: fx.rustle,
   stretch: (b, w) => stretch(b, w, 1.2),
   kaching: fx.kaching,
-  printer: (b, w) => fx.printer(b, w),
+  printer: fx.printer,
   dice: fx.diceRoll,
 };
 
+const SOUND = cueSheet({ duration: DURATION, players: PLAYERS, cues: cues() });
+
 export function soundtrack(bus: AudioNode, t0: number): void {
-  const drums = new GainNode(bus.context, { gain: 0.5 }); // brushes: soft
-  drums.connect(bus);
+  SOUND.play(bus, t0);
   playKeyboardPart(bus, t0, ORGAN);
   playKeyboardPart(bus, t0, LEAD);
-  playDrums(drums, t0, DRUMS, { smooth: true });
+  playDrums(quieter(bus, 0.5), t0, DRUMS, { smooth: true }); // brushes: soft
   playVocal(bus, t0, vocal);
-  for (const e of EFFECTS) atTime(t0 + e.at, () => PLAYERS[e.kind](bus, t0 + e.at));
 }
