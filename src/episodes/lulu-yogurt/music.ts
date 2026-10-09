@@ -3,11 +3,12 @@ import type { BassPart } from '../../audio/bass';
 import type { GuitarPart } from '../../band/guitarist';
 import { BARS, BPM } from './timeline';
 
-// Lulu's scenes are Lulu's instrument: drums alone, 80 BPM, a slow, sad groove (laid back, ghost notes on the
-// snare). When the peach hits, the drums stop dead for a bar; they come back for the bye. In Omli's car the bass
-// player is driving, so the bass comes in, and it turns into a heavy metal groove: palm-muted chugs on a low D, a
-// tritone, a chromatic fall, double kicks, a distorted guitar on the riff. In bed it's drums alone again, barely
-// there, thinning out to one soft hit as she falls asleep. Times are SONG seconds; the song starts with the Short.
+// Lulu's scenes are Lulu's instrument: drums alone, 80 BPM, in a slow, sad half time: one soft kick a bar, a quiet
+// snare on beat 3 with ghost notes round it, the hi-hat barely touched on the quarters, soft tom rolls for fills.
+// When the peach hits, the drums stop dead for a bar; they come back for the bye. In Omli's car the bass player is
+// driving, so the bass comes in, and it turns into a heavy metal groove: palm-muted chugs on a low D, a tritone, a
+// chromatic fall, double kicks, a distorted guitar on the riff. In bed it's drums alone again, barely there,
+// thinning out to one soft hit as she falls asleep. Times are SONG seconds; the song starts with the Short.
 
 type Note = readonly [eighth: number, note: string, len: number];
 
@@ -90,25 +91,28 @@ export const DRUMS: DrumPart = {
   bpm: BPM,
   tracks: {
     kick: drumTrack({
-      groove: every('x......x..x.....'),
+      groove: every('x.....g.........'), // half time: one soft kick a bar, and a ghost after it
       stop: 'X...............',
       metal: every('xxxxx.xxxxxxx.xx'), // double kicks under the chugs
       bed: b => (b === LAST ? 'g...............' : 'g.......g.......'), // a heartbeat, slowing
     }),
     snare: drumTrack({
-      groove: b => (FILLS.includes(b) ? '..g.....x...xgxx' : '......g.x.....g.'),
+      groove: b => (FILLS.includes(b) ? '....g...x.......' : '....g...x.....g.'), // beat 3, quiet, ghosts round it
       metal: b => (b === BARS.bed - 1 ? '....X.....XxXXXX' : '....X.......X...'), // a big roll into the bed
     }),
     hat: drumTrack({
-      groove: every('x.x.x.x.x.x.x.o.'),
+      groove: every('g...g...g...g...'), // only the quarters, barely touched
       metal: every('X.x.X.x.X.x.X.x.'),
       bed: b => (b === LAST ? 'g...g...........' : 'g...g...g...g...'),
     }),
     crash: drumTrack({
-      groove: b => (b === 0 || b === BARS.back ? 'X...............' : REST),
+      groove: b => (b === BARS.back ? 'x...............' : REST), // back after the stop, softly
       stop: 'X...............',
       metal: b => (b === BARS.ride ? 'X...............' : REST),
     }),
     china: drumTrack({ groove: silent, metal: every('......X.......X.') }),
+    // a soft roll down the toms instead of a snare fill, into the stop and into the car
+    tom: drumTrack({ groove: b => (FILLS.includes(b) ? '..........g.g.g.' : REST) }),
+    floorTom: drumTrack({ groove: b => (FILLS.includes(b) ? '...............g' : REST) }),
   },
 };
