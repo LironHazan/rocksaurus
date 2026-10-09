@@ -6,12 +6,14 @@ import { playRiff } from '../../audio/guitar';
 import { boop, thump } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
 import { BASS, DRUMS, GUITAR } from './music';
-import { CUE, DURATION, PAGE_AT, SPECS_TURN, SYLLABLES } from './timeline';
+import { CUE, CUP_LANDINGS, DURATION, PAGE_AT, SPECS_TURN, SYLLABLES } from './timeline';
 
 // Natural sound in Lulu's scenes: her heavy, slow steps, the fridge door, the long sigh, Mirta's mop, the lid, the
 // spoon, the "bleh", the bin; her sips and a snore. In Omli's car, the road and his stereo: heavy metal.
 
 type Kind =
+  | 'bloop'
+  | 'firstBloop'
   | 'bubble'
   | 'page'
   | 'evil'
@@ -46,6 +48,11 @@ function cues(): Cue<Kind>[] {
       kind: 'lowBattery' as const,
     })),
     { at: CUE.open, kind: 'fridge' },
+    // the yogurt she's judging hops: a cute bloop each time it lands, a bigger one on its first hop
+    ...CUP_LANDINGS.map(at => ({
+      at,
+      kind: CUE.cups.some(c => at - c < HOP_GAP) ? ('firstBloop' as const) : ('bloop' as const),
+    })),
     { at: CUE.sigh, kind: 'sigh' },
     { at: CUE.lid, kind: 'lid' },
     ...CUE.bites.map(at => ({ at, kind: 'spoon' as const })),
@@ -63,6 +70,9 @@ function cues(): Cue<Kind>[] {
   return out;
 }
 
+/** A landing this soon after she starts looking at a pot is its first hop (seconds: just over one hop). */
+const HOP_GAP = 0.6;
+
 /** Seconds between the low-battery warnings. */
 const LOW_BATTERY_EVERY = 1.0;
 
@@ -75,6 +85,8 @@ function evilSting(bus: AudioNode, when: number) {
 }
 
 const PLAYERS: Record<Kind, Player> = {
+  bloop: (b, w) => boop(b, w, 520, 980, 0.08, 0.035), // a little rising "bloop"
+  firstBloop: (b, w) => boop(b, w, 440, 1100, 0.11, 0.055),
   bubble: (b, w) => boop(b, w, 320, 760, 0.16, 0.06), // a soft pop, rising
   page: fx.rustle,
   evil: evilSting,
@@ -122,9 +134,10 @@ export function soundtrack(bus: AudioNode, t0: number): void {
   band.connect(bus);
   const drums = new GainNode(bus.context, { gain: DRUMS_GAIN });
   drums.connect(band);
-  playBass(band, t0, BASS);
-  playDrums(drums, t0, DRUMS, { smooth: true });
+  const song = t0 + CUE.ride[0]; // the car stereo starts with the ride
+  playBass(band, song, BASS);
+  playDrums(drums, song, DRUMS, { smooth: true });
   const guitar = new GainNode(bus.context, { gain: GUITAR_GAIN });
   guitar.connect(band);
-  playRiff(guitar, t0, GUITAR);
+  playRiff(guitar, song, GUITAR);
 }

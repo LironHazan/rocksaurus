@@ -19,7 +19,7 @@ import {
   createYogurt,
   type Yogurt,
 } from './sets';
-import { CUE, FLAVOURS, LINES, PAGE_AT, SPECS_TURN, mouthAt, speakerAt, type Flavour } from './timeline';
+import { CUE, CUP_HOP_RATE, FLAVOURS, LINES, PAGE_AT, SPECS_TURN, mouthAt, speakerAt, type Flavour } from './timeline';
 
 // The office kitchen, 0 → the ride: Lulu shuffles in, drained by a week of specs for a devilish agent; her protein
 // battery pulses; the fridge (seen from inside), three yogurts and three nopes; Mirta and her mop; "this… or this?";
@@ -173,7 +173,7 @@ export function createKitchenLocation(me: TiredLulu, mirta: CharacterRig): Locat
       cups[f].group.rotation.set(0, Math.PI, 0); // labels to the back of the fridge, where the camera is
       cups[f].group.visible = true;
       cups[f].lid.rotation.x = 0;
-      if (f === looked) cups[f].group.position.y += Math.abs(Math.sin(t * 6)) * 0.05; // the one she's judging
+      if (f === looked) cups[f].group.position.y += Math.abs(Math.sin(t * CUP_HOP_RATE)) * 0.05; // the one she's judging
     }
     if (t < CUE.take || t >= CUE.bye[1]) return;
     if (t < CUE.eat[0]) return showTwo(t);

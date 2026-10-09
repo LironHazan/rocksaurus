@@ -1,12 +1,11 @@
 import type { DrumPart } from '../../audio/drum-patterns';
 import type { BassPart } from '../../audio/bass';
 import type { GuitarPart } from '../../band/guitarist';
-import { BARS, BPM } from './timeline';
+import { BAR, BPM, CUE } from './timeline';
 
 // No music in Lulu's scenes: the kitchen and the bed are natural sound only. The music is Omli's car stereo: a heavy
 // metal groove at 80 BPM (palm-muted chugs on a low D, a tritone, a chromatic fall; double kicks; a distorted guitar
-// on the riff, the bass under it). Times are SONG seconds from the start of the Short; the band plays only on the
-// ride's bars.
+// on the riff, the bass under it). Times are SONG seconds: the song starts with the ride (`CUE.ride[0]`).
 
 type Note = readonly [eighth: number, note: string, len: number];
 
@@ -33,7 +32,9 @@ const METAL: readonly Note[] = [
 const octaveDown = (note: string) => note.replace(/\d$/, d => String(Number(d) - 1));
 const PALM_MUTE = 0.25;
 const EIGHTHS = 8;
-const RIDE_BARS = Array.from({ length: BARS.bed - BARS.ride }, (_, i) => BARS.ride + i);
+/** The car stereo plays the whole ride: its bars, counted from the start of the ride. */
+const RIDE_BARS = Array.from({ length: Math.round((CUE.ride[1] - CUE.ride[0]) / BAR) }, (_, i) => i);
+const LAST_BAR = RIDE_BARS.length - 1;
 
 /** The bass: only in Omli's car, under the guitar, digging in. */
 export const BASS: BassPart = {
@@ -55,9 +56,9 @@ export const GUITAR: GuitarPart = {
 
 const REST = '.'.repeat(16);
 
-/** One drum's part: rests everywhere but the car, where it plays `metal(bar)`. */
+/** One drum's part: `metal(bar)` for each bar of the ride. */
 function drumTrack(metal: (b: number) => string): string {
-  return Array.from({ length: BARS.end }, (_, b) => (RIDE_BARS.includes(b) ? metal(b) : REST)).join(' ');
+  return RIDE_BARS.map(metal).join(' ');
 }
 /** A part that plays the same bar every time. */
 const every = (bar: string) => () => bar;
@@ -66,9 +67,9 @@ export const DRUMS: DrumPart = {
   bpm: BPM,
   tracks: {
     kick: drumTrack(every('xxxxx.xxxxxxx.xx')), // double kicks under the chugs
-    snare: drumTrack(b => (b === BARS.bed - 1 ? '....X.....XxXXXX' : '....X.......X...')), // a big roll into the bed
+    snare: drumTrack(b => (b === LAST_BAR ? '....X.....XxXXXX' : '....X.......X...')), // a big roll into the bed
     hat: drumTrack(every('X.x.X.x.X.x.X.x.')),
-    crash: drumTrack(b => (b === BARS.ride ? 'X...............' : REST)),
+    crash: drumTrack(b => (b === 0 ? 'X...............' : REST)),
     china: drumTrack(every('......X.......X.')),
   },
 };
