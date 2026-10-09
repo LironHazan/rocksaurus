@@ -10,14 +10,12 @@ export const CAPTIONS: Caption[] = [
   punch(13.6, 18.0, 'Steggy is still on matcha 🍵'),
   punch(19.4, 21.2, 'Tiki only cares about chairs 🦖'),
 
-  // ── Lulu ────────────────────────────────────────────────────
   title(26.6, 29.0, '🛋️ MEANWHILE\nLulu’s Monday therapy'),
   sub(29.2, 36.6, 'Lulu LOVES coffee…'),
   punch(29.6, 36.6, 'Mid-session. Phone out 🙈'),
   sub(36.8, 41.4, '“And how do you feel?”'),
   punch(38.0, 41.4, 'Lulu: “FOMO. Severe FOMO.” 😩'),
 
-  // ── The café ────────────────────────────────────────────────
   sub(41.8, 45.6, 'Big chairs, as promised'),
   punch(42.2, 45.6, 'Parliament is in session ☕'),
   sub(45.8, 50.0, 'And a selfie for Lulu 📸'),

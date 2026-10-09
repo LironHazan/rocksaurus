@@ -114,7 +114,6 @@ const episode: Episode = {
       lights.pulse(flash);
       keyboard.glow(flash);
 
-      // camera
       let cam: [number, number, number];
       let look: [number, number, number];
       if (t < ROCK_IN) {

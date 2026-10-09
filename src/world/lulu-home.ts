@@ -125,7 +125,6 @@ export function createHome() {
   const bottle = shaker();
   scene.add(bottle);
 
-  // yoga mat
   const yoga = box(2.4, 0.05, 4.4, mat(0x9b5de5, 0.9));
   yoga.position.set(MAT_SPOT.x, 0, MAT_SPOT.z - 0.6);
   scene.add(yoga);

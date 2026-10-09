@@ -74,7 +74,6 @@ const episode: Episode = {
 
       lights.pulse(belting ? 0.7 + 0.3 * Math.sin(t * 20) : beatHit * 0.7);
 
-      // camera
       let cam: [number, number, number];
       let look: [number, number, number];
       if (t < SING_IN) {

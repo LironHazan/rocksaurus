@@ -102,7 +102,6 @@ const episode: Episode = {
 
       lights.pulse(grooving ? beatHit * 0.8 : 0.15);
 
-      // camera
       let cam: [number, number, number], look: [number, number, number];
       if (t < 2) {
         cam = [0.6, 3.5, 7.4];

@@ -67,7 +67,6 @@ export function createProteinBar({ colour = '#e2582b', flavour = 'Choc Fudge Bro
   ]);
   wrapper.castShadow = true;
   group.add(wrapper);
-  // crimped ends
   const crimps = [-1, 1].map(s => {
     const c = new THREE.Mesh(new THREE.BoxGeometry(0.06, H * 0.35, D * 1.05), plain);
     c.position.x = s * (BAR_LENGTH / 2 + 0.02);

@@ -72,7 +72,6 @@ const episode: Episode = {
     const v = new THREE.Vector3();
     const w = new THREE.Vector3();
 
-    // ── small props that belong to this episode ────────────────
     const coatSource = store.garments.at(-4)!.group; // the one she pulls off the rack
     const heldCoat = coatSource.clone();
     heldCoat.visible = false;
@@ -225,7 +224,6 @@ const episode: Episode = {
       });
     }
 
-    // ── posing ─────────────────────────────────────────────────
     const A_LEFT = armOf(paris, 1); // local +x: her left (toward the rack when she faces +x)
     const A_RIGHT = armOf(paris, -1);
 
@@ -286,7 +284,6 @@ const episode: Episode = {
       }
     }
 
-    // ── the scenes ─────────────────────────────────────────────
     function shopping(t: number): Shot {
       const [w0, w1] = CUE.walkIn;
       const [b0] = CUE.browse;

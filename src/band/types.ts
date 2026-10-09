@@ -14,7 +14,6 @@ export interface Performer {
   update(t: number): void;
 }
 
-/** Shared timing info for a song. */
 export interface SongClock {
   /** Seconds per beat. */
   beat: number;

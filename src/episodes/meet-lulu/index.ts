@@ -60,7 +60,6 @@ const episode: Episode = {
       const ending = t >= ENDING;
       const beatHit = Math.pow(1 - ((t / BEAT) % 1), 3);
 
-      // ── Lulu ────────────────────────────────────────────────
       idleLulu(lulu, t, { eyesOpen: grooving ? 0.35 : ending ? 0.15 : 0.75, nod: grooving ? beatHit * 0.22 : 0 });
       for (const arm of lulu.arms) {
         const s = arm.userData.side;
@@ -84,7 +83,6 @@ const episode: Episode = {
 
       lights.pulse(grooving ? beatHit : ending ? Math.max(0, 1 - (t - ENDING)) : 0);
 
-      // ── Camera ──────────────────────────────────────────────
       let cam: [number, number, number], look: [number, number, number];
       const L = LULU.x;
       if (t < 2) {

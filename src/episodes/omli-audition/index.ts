@@ -48,7 +48,6 @@ const episode: Episode = {
     const venue = createAuditionStage();
     const scenes: Record<Where, THREE.Scene> = { gym: gym.scene, stage: venue.scene };
 
-    // ── the cast ───────────────────────────────────────────────
     const tiki = createInjuredTiki();
     const tikiFeet = tiki.feet.map(f => f.position.clone());
     // Omli at home (a second Omli plays the audition, bass and all)
@@ -151,7 +150,6 @@ const episode: Episode = {
       return { cam: [0.4, 3.6, 8.5], look: [0, 2.8, 0.8] };
     }
 
-    // ── the audition ───────────────────────────────────────────
     function stageScene(t: number): Shot {
       const song = t - MUSIC_AT;
       const playing = t >= MUSIC_AT && t < CUE.lastHit + 0.3;
@@ -210,7 +208,6 @@ const episode: Episode = {
       if (solo) for (const e of tiki.eyes) e.scale.y = 0.6;
       talk(tiki, 'Tiki Taka', t);
 
-      // ── shots ──
       const d = PLOT.drums,
         g = PLOT.rory,
         o = PLOT.omli;

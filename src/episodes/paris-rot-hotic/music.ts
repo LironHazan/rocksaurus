@@ -225,7 +225,6 @@ export interface Fx {
   kind: FxKind;
 }
 
-/** Every sound effect, in order, as data. */
 export function effects(): Fx[] {
   const out: Fx[] = [{ at: CUE.bell, kind: 'bell' }];
   for (let t = CUE.walkIn[0]; t < CUE.walkIn[1]; t += 0.42) out.push({ at: t, kind: 'step' });

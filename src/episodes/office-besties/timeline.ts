@@ -76,8 +76,6 @@ export const VOICES: Record<Member, Voice> = {
 /** Every syllable of everyone's lines, in order: what the voices sing and what the mouths do. */
 export const SYLLABLES = syllables(LINES, VOICES);
 
-/** How open `who`'s mouth is at t (0..1), from their syllables. */
 export const mouthAt = (who: Member, t: number) => mouthOf(SYLLABLES, who, t);
 
-/** Who is talking at t (or null). */
 export const speakerAt = (t: number): Member | null => speakerOf(LINES, t);

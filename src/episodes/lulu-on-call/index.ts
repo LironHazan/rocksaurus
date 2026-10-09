@@ -173,7 +173,6 @@ const episode: Episode = {
       };
     }
 
-    // ── Scenes ──────────────────────────────────────────────────
     function officeScene(t: number): Shot {
       const beat = beatPulse(t, OFFICE);
       lulu.root.position.copy(DESK_SPOT);

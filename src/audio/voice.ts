@@ -74,7 +74,6 @@ export function sing(bus: AudioNode, when: number, note: string, vowel: Vowel = 
   noise.stop(when + 0.15);
 }
 
-/** Schedules a whole vocal part. */
 export function playVocal(bus: AudioNode, t0: number, { bpm, notes }: VocalPart): void {
   const eighth = 60 / bpm / 2;
   for (const [at, note, len, vowel = 'a', vel = 0.7] of notes) {

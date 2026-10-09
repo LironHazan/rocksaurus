@@ -163,7 +163,6 @@ const episode: Episode = {
     const ball = createBall();
     scene.add(ball);
 
-    // ── posing helpers ─────────────────────────────────────────
     function reset(p: Player) {
       resetPose(p.rig);
       p.rig.root.position.set(0, 0, 0);
@@ -223,7 +222,6 @@ const episode: Episode = {
       return best;
     };
 
-    // ── each player's part ─────────────────────────────────────
     function tikiPart(t: number) {
       const p = tiki;
       reset(p);
@@ -467,7 +465,6 @@ const episode: Episode = {
       });
     }
 
-    // ── the camera ──────────────────────────────────────────────
     function shot(t: number): Shot {
       if (t < CUE.shirt[0]) {
         // from the daycare across the road, down onto the pitch as Tiki jogs on

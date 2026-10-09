@@ -36,7 +36,6 @@ export function timedNotes({ bpm, notes }: Pick<KeyboardPart, 'bpm' | 'notes'>):
 
 const VOICES = { piano, grand, organ, lead, pad } as const;
 
-/** Schedules a keyboard part with its sound. */
 export function playKeyboardPart(bus: AudioNode, t0: number, part: KeyboardPart): void {
   const eighth = 60 / part.bpm / 2;
   const voice = VOICES[part.sound];
