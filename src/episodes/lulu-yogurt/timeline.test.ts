@@ -39,16 +39,8 @@ describe('The Last Yogurt', () => {
     }
   });
 
-  it('Lulu’s drums from the start; they stop for the yuck, and in bed they are only ghost notes', () => {
-    const hits = drumHits(DRUMS);
-    expect(Math.min(...hits.map(h => h.time))).toBe(0);
-    const inside = (from: number, to: number) => hits.filter(h => h.time > from + 0.01 && h.time < to);
-    expect(inside(CUE.yuck[0], CUE.yuck[1])).toEqual([]);
-    expect(hits.filter(h => h.time >= CUE.bed[0]).every(h => h.ch === 'g')).toBe(true);
-  });
-
-  it('the bass only plays in Omli’s car, his instrument', () => {
-    const times = BASS.notes.map(n => n[0] * eighth);
+  it('the music only plays in Omli’s car: Lulu’s scenes are natural sound', () => {
+    const times = [...BASS.notes.map(n => n[0] * eighth), ...drumHits(DRUMS).map(h => h.time)];
     expect(Math.min(...times)).toBeCloseTo(CUE.ride[0]);
     expect(Math.max(...times)).toBeLessThan(CUE.ride[1]);
   });

@@ -6,13 +6,27 @@ import { playRiff } from '../../audio/guitar';
 import { boop, thump } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
 import { BASS, DRUMS, GUITAR } from './music';
-import { CUE, DURATION, SYLLABLES } from './timeline';
+import { CUE, DURATION, PAGE_AT, SPECS_TURN, SYLLABLES } from './timeline';
 
-// Lulu's drums under everything (Omli's bass and a guitar join, heavy, in his car), quiet enough that the kitchen
-// is still heard: Lulu's heavy, slow steps, the fridge door, the long sigh, Mirta's mop, the lid, the spoon, the
-// "bleh", the bin; the road on the way home; her sips, and a snore.
+// Natural sound in Lulu's scenes: her heavy, slow steps, the fridge door, the long sigh, Mirta's mop, the lid, the
+// spoon, the "bleh", the bin; her sips and a snore. In Omli's car, the road and his stereo: heavy metal.
 
-type Kind = 'step' | 'fridge' | 'sigh' | 'mop' | 'lid' | 'spoon' | 'bleh' | 'bin' | 'car' | 'sip' | 'snore';
+type Kind =
+  | 'bubble'
+  | 'page'
+  | 'evil'
+  | 'lowBattery'
+  | 'step'
+  | 'fridge'
+  | 'sigh'
+  | 'mop'
+  | 'lid'
+  | 'spoon'
+  | 'bleh'
+  | 'bin'
+  | 'car'
+  | 'sip'
+  | 'snore';
 
 /** Lulu shuffles in, tired: one heavy step every 0.6 s. Out again after the bye, a little quicker. */
 const WALKS = [
@@ -22,6 +36,15 @@ const WALKS = [
 
 function cues(): Cue<Kind>[] {
   const out: Cue<Kind>[] = [
+    // the specs: the thought bubble pops up, the pages land on the pile, the agent turns evil
+    { at: CUE.specs[0], kind: 'bubble' },
+    ...PAGE_AT.slice(1).map(at => ({ at, kind: 'page' as const })),
+    { at: SPECS_TURN, kind: 'evil' },
+    // her protein battery: the low-battery warning
+    ...every(CUE.battery[0] + 0.2, CUE.battery[1] - 0.3, LOW_BATTERY_EVERY).map(at => ({
+      at,
+      kind: 'lowBattery' as const,
+    })),
     { at: CUE.open, kind: 'fridge' },
     { at: CUE.sigh, kind: 'sigh' },
     { at: CUE.lid, kind: 'lid' },
@@ -40,7 +63,25 @@ function cues(): Cue<Kind>[] {
   return out;
 }
 
+/** Seconds between the low-battery warnings. */
+const LOW_BATTERY_EVERY = 1.0;
+
+/** The agent turns evil: a low "dun-dun" (the second a semitone down), and a robot bleep on top. */
+function evilSting(bus: AudioNode, when: number) {
+  boop(bus, when, 110, 98, 0.5, 0.14);
+  boop(bus, when + 0.4, 104, 82, 0.9, 0.14);
+  boop(bus, when + 0.15, 1900, 2400, 0.06, 0.04);
+  boop(bus, when + 0.25, 1500, 1200, 0.06, 0.04);
+}
+
 const PLAYERS: Record<Kind, Player> = {
+  bubble: (b, w) => boop(b, w, 320, 760, 0.16, 0.06), // a soft pop, rising
+  page: fx.rustle,
+  evil: evilSting,
+  lowBattery: (b, w) => {
+    boop(b, w, 1180, 1180, 0.1, 0.045); // beep…
+    boop(b, w + 0.16, 880, 880, 0.14, 0.045); // …boop, lower: low battery
+  },
   step: (b, w) => fx.stomp(quieter(b, 0.5), w),
   fridge: (b, w) => {
     thump(quieter(b, 0.4), w); // the seal lets go
@@ -68,7 +109,7 @@ const SOUND = cueSheet({
   ],
 });
 
-/** The groove sits under the kitchen: loud enough to feel, quiet enough to hear the spoon. */
+/** The car stereo, under the road: loud enough to feel, not so loud it's the band playing. */
 const MUSIC_GAIN = 0.55;
 const DRUMS_GAIN = 0.75;
 /** The car's guitar: under the bass, so the groove stays Omli's. */

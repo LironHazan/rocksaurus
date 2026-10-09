@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { box, createRoom, createWallClock, cylinder, mat, picture, ROUND } from '../../world/interior';
 import { textTexture } from '../../world/text-texture';
 import { BED_TOP } from '../../world/bedroom';
-import type { Flavour } from './timeline';
+import { SPEC_PAGES, type Flavour } from './timeline';
 
 /** The fridge: its middle (x), its back against the wall, and its size. */
 export const FRIDGE = { x: -3.2, back: -4, w: 2.6, h: 4.8, d: 1.8 } as const;
@@ -88,7 +88,7 @@ export function createSpoon(): THREE.Group {
   return g;
 }
 
-/** Mirta's mop: a long handle with a shaggy head, and her yellow bucket. Origin at the mop head, on the floor. */
+/** Mirta's mop: a long handle with a shaggy head, and her yellow mop bucket with its wringer. Origin at the mop head, on the floor. */
 export function createMop() {
   const mop = new THREE.Group();
   const handle = cylinder(0.05, 0.05, 3.4, mat(0x3a7bd5, 0.4), 10);
@@ -105,6 +105,9 @@ export function createMop() {
   water.rotation.x = -Math.PI / 2;
   water.position.y = 0.7;
   bucket.add(water);
+  const wringer = box(0.7, 0.3, 0.45, mat(0x8a8f99, 0.4, { metalness: 0.5 })); // so it reads as a mop bucket
+  wringer.position.set(0, 0.8, -0.2);
+  bucket.add(wringer);
   return { mop, bucket };
 }
 
@@ -202,9 +205,6 @@ function drawDevilBot(ctx: CanvasRenderingContext2D, x: number, y: number, r: nu
   ctx.arc(x, y - r * 0.95, r * 0.08, 0, Math.PI * 2);
   ctx.fill();
 }
-
-/** Every version she wrote this week, oldest first. */
-export const SPEC_PAGES = ['SPEC v1', 'SPEC v3', 'PLAN v5', 'SPEC v9', 'PLAN v12'] as const;
 
 /** The first `count` spec pages, piled up from (x, y): each new version lands on top, a little higher. */
 function drawSpecs(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, count: number) {

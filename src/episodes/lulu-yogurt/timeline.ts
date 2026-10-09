@@ -5,11 +5,11 @@ import { mouthOf, speakerOf, syllables, type SpokenLine, type Voice } from '../.
 // yogurts are left: vegan protein, peach, caramel. She asks Mirta, the cleaner, which one is the least yuck; Mirta
 // doesn't get it, so Lulu holds up two and Mirta points at the peach. It's unbearable; into the bin it
 // goes. Bye bye: Omli drives her home, and she drinks a protein shake in bed until she falls asleep. Times are video
-// seconds. Under it all, Lulu's drums; Omli's bass (and a guitar) join only in his car.
+// seconds. No music, except on Omli's car stereo: heavy metal.
 
 export const DURATION = 60; // then the end card, see ../outro.ts
 
-/** The groove: 80 BPM, 4/4, so a bar is exactly 3 s. Bars are counted from the start of the Short. */
+/** A grid of bars for the beats and for the car's music: 80 BPM, 4/4, so a bar is exactly 3 s, from the start. */
 export const BPM = 80;
 export const BAR = (60 / BPM) * 4;
 /** Where the arrangement changes, in bars. */
@@ -29,7 +29,7 @@ export const CUE = {
   eat: [38.6, bar(BARS.stop)],
   lid: 39.0,
   bites: [40.2, 41.4],
-  yuck: [bar(BARS.stop), bar(BARS.back)], // the band stops; so does Lulu
+  yuck: [bar(BARS.stop), bar(BARS.back)], // Lulu freezes
   bye: [bar(BARS.back), bar(BARS.ride)],
   toss: 45.3, // into the bin
   ride: [bar(BARS.ride), bar(BARS.bed)],
@@ -40,6 +40,12 @@ export const CUE = {
 
 /** When the pile has stopped growing and the agent starts laughing: the rest of the beat is for the joke. */
 export const SPECS_TURN = CUE.specs[0] + 3.5;
+
+/** Every version she wrote this week, oldest first: they pile up in her thought bubble. */
+export const SPEC_PAGES = ['SPEC v1', 'SPEC v3', 'PLAN v5', 'SPEC v9', 'PLAN v12'] as const;
+/** When each page lands on the pile: the first with the bubble, the last just before the agent turns. */
+const PILE = { from: CUE.specs[0] + 0.4, to: SPECS_TURN - 0.2 } as const;
+export const PAGE_AT = SPEC_PAGES.map((_, i) => PILE.from + (i / (SPEC_PAGES.length - 1)) * (PILE.to - PILE.from));
 
 /** The three yogurts left in the fridge, left to right on the shelf. */
 export const FLAVOURS = ['vegan', 'peach', 'caramel'] as const;

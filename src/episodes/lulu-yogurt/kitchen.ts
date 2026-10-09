@@ -13,14 +13,13 @@ import {
   FRIDGE,
   createBattery,
   createSpecsBubble,
-  SPEC_PAGES,
   createKitchen,
   createMop,
   createSpoon,
   createYogurt,
   type Yogurt,
 } from './sets';
-import { CUE, FLAVOURS, LINES, SPECS_TURN, mouthAt, speakerAt, type Flavour } from './timeline';
+import { CUE, FLAVOURS, LINES, PAGE_AT, SPECS_TURN, mouthAt, speakerAt, type Flavour } from './timeline';
 
 // The office kitchen, 0 → the ride: Lulu shuffles in, drained by a week of specs for a devilish agent; her protein
 // battery pulses; the fridge (seen from inside), three yogurts and three nopes; Mirta and her mop; "this… or this?";
@@ -32,7 +31,7 @@ const LULU_FROM = new THREE.Vector3(7.5, 0, 1.6);
 const LULU_EXIT = new THREE.Vector3(-8.5, 0, 2.6);
 /** Lulu's facing (radians about y; 0 faces the camera). */
 const YAW = {
-  walkIn: -Math.PI / 2 - 0.25,
+  walkIn: -Math.PI / 2 + 0.6,
   slump: 0.35,
   fridge: Math.PI,
   mirta: Math.PI / 2 - 0.45,
@@ -245,7 +244,7 @@ export function createKitchenLocation(me: TiredLulu, mirta: CharacterRig): Locat
     reachTo(armOf(mirta, 1), shoulder.lerp(at, 0.55));
   }
   function poseMirta(t: number) {
-    mirta.root.visible = mop.visible = t >= CUE.mirta[0];
+    mirta.root.visible = mop.visible = bucket.visible = t >= CUE.mirta[0]; // her bucket comes with her
     restRig(mirta, mirtaFeet, t + 0.7);
     if (!mirta.root.visible) return;
     const walk = seg(t, CUE.mirta[0], LINES[0]!.from - 0.6);
@@ -286,9 +285,8 @@ export function createKitchenLocation(me: TiredLulu, mirta: CharacterRig): Locat
     const thought = seg(t, CUE.specs[0], CUE.specs[0] + 0.4) * (1 - seg(t, CUE.specs[1] - 0.3, CUE.specs[1]));
     bubble.sprite.visible = thought > 0;
     bubble.sprite.material.opacity = thought;
-    const piling = seg(t, CUE.specs[0] + 0.4, SPECS_TURN - 0.2);
     const laughing = t >= SPECS_TURN;
-    bubble.show(1 + Math.floor(piling * (SPEC_PAGES.length - 1)), laughing);
+    bubble.show(Math.max(1, PAGE_AT.filter(at => t >= at).length), laughing);
     const shake = laughing ? Math.sin(t * 30) * 0.04 : 0;
     lulu.face.localToWorld(bubble.sprite.position.set(0.1 + shake, 1.7 + Math.sin(t * 2) * 0.05, 0));
   }
