@@ -1,36 +1,28 @@
-import * as THREE from 'three';
-import { ball, enableShadows } from '../../characters/materials';
-import { createCeratops } from '../../characters/ceratops';
+import { createStegosaurus, STEGGY_COLORS } from '../../characters/stegosaurus';
+import { addBandTee } from '../../props/band-tee';
+import { addShortHair } from '../../props/short-hair';
+import { ROUND } from '../../world/interior';
 
-/** Mirta's colours: sage green, a light blue work shirt with white stripes, gold hoop earrings. */
+/** Mirta's colours: fair and rosy, dusty-rose plates, blue eyes; the bow tie matches her black uniform. */
 const MIRTA_COLORS = {
-  body: 0xa8d5b8,
-  belly: 0xeef7ef,
-  spots: 0x7fbf98,
-  shirt: '#6fa8dc',
-  stripes: '#e8f2fb',
-  horn: 0xfff3e0,
-  cheeks: 0xff9fb0,
-  lips: 0xc24a6a,
-  eyes: 0x8a5a2b, // brown iris
-  gold: 0xf5c451,
+  ...STEGGY_COLORS,
+  body: 0xf6d6c4,
+  belly: 0xfff4ec,
+  plates: 0xd99aa5,
+  plateTips: 0xf0c2c9,
+  cheeks: 0xff8fa3,
+  eyes: 0x4a90d9,
+  bowTie: 0x15151a,
+  mustache: null,
 };
 
 /**
- * Mirta: the office's cleaner, the same build as Silvi, with her Papo Pako lanyard (Facilities), a red headscarf
- * knotted at the back, and her own language.
+ * Mirta: the office's cleaner. A round Stegosaurus (not Silvi's build), short blond hair, and the black Facilities
+ * uniform with the word printed on the chest in Papo Pako orange.
  */
 export function createMirta() {
-  const rig = createCeratops(MIRTA_COLORS, { badge: 'MIRTA', role: 'Facilities 🧽' });
-  const scarf = new THREE.MeshStandardMaterial({ color: 0xd94a4a, roughness: 0.85, side: THREE.DoubleSide });
-  // the top of the head, a little bigger than it (head radius 0.5): the scarf sits on it, tipped back
-  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.55, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.42), scarf);
-  cap.scale.set(1, 0.95, 1.08);
-  cap.position.set(0, 0.04, -0.05);
-  cap.rotation.x = -0.35;
-  rig.head.add(cap);
-  rig.head.add(ball(0.11, scarf, [0, 0.12, -0.55], [1.2, 0.8, 0.7])); // the knot
-  for (const s of [-1, 1]) rig.head.add(ball(0.08, scarf, [s * 0.09, 0.0, -0.62], [0.5, 1.4, 0.4])); // its ends
-  enableShadows(rig.head);
+  const rig = createStegosaurus(MIRTA_COLORS);
+  addBandTee(rig, { text: 'FACILITIES', color: 0x15151a, ink: '#ff7a1a', font: ROUND });
+  addShortHair(rig, { color: 0xe8c872, length: 0.36, seed: 21 });
   return rig;
 }

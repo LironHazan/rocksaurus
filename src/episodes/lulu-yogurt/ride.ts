@@ -16,8 +16,8 @@ const FORWARD = Math.PI / 2;
 /** One beat of the groove (seconds): Omli's head bobs on it. */
 const BEAT = 60 / BPM;
 /** The close-up on Lulu above the roof, then Omli at the wheel (seconds into the ride). */
-const LULU_CLOSE = [2.6, 6.2] as const;
-const OMLI_CLOSE = [6.2, 7.8] as const;
+const LULU_CLOSE = [2.0, 4.2] as const;
+const OMLI_CLOSE = [4.2, 5.4] as const;
 
 export function createRideLocation(me: TiredLulu): Location {
   const { lulu, hair } = me;
@@ -49,7 +49,7 @@ export function createRideLocation(me: TiredLulu): Location {
     lulu.head.rotation.y = -0.6 + Math.sin(s * 0.8) * 0.1; // toward us, swaying with the road
     hair.ponytail.rotation.x = 0.7 + Math.sin(t * 13) * 0.15; // in the wind
     hair.ponytail.rotation.z = Math.sin(t * 9) * 0.12;
-    lulu.setMouth(lerp(0, 0.2, ease(seg(s, 4, 5)))); // a slow yawn
+    lulu.setMouth(lerp(0, 0.2, ease(seg(s, 2.8, 3.6)))); // a slow yawn
     lulu.root.updateMatrixWorld(true);
   }
 

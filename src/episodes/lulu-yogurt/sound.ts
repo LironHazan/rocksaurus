@@ -27,8 +27,8 @@ function cues(): Cue<Kind>[] {
     ...CUE.bites.map(at => ({ at, kind: 'spoon' as const })),
     { at: CUE.yuck[0] + 0.15, kind: 'bleh' },
     { at: CUE.toss + 0.45, kind: 'bin' },
-    { at: CUE.ride[0] + 3.1, kind: 'car' },
-    { at: CUE.ride[0] + 6.4, kind: 'car' },
+    { at: CUE.ride[0] + 1.6, kind: 'car' },
+    { at: CUE.ride[0] + 4.2, kind: 'car' },
     ...CUE.sips.map(at => ({ at, kind: 'sip' as const })),
     { at: CUE.asleep + 0.6, kind: 'snore' },
   ];

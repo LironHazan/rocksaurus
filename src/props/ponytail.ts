@@ -39,6 +39,12 @@ export function addPonytail(
   under.rotation.x = -0.95;
   under.position.set(0, 0.03, -0.04);
   group.add(under);
+  // and the nape: the under-layer stops short of the back of the neck, which showed as a bald patch from behind
+  const nape = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.3), hairMat);
+  nape.scale.set(HEAD.x * 1.03, HEAD.y * 1.04, HEAD.z * 1.03);
+  nape.rotation.x = -1.95; // the cap's pole points back and a little down
+  nape.position.set(0, 0.0, -0.03);
+  group.add(nape);
 
   // locks: thick, smooth strands combed from the hairline back to the ponytail, lifted off the head (loose)
   const BASE = new THREE.Vector3(0, 0.32, -0.64); // where they gather (scrunchie)

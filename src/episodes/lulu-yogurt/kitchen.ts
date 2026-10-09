@@ -3,7 +3,7 @@ import { ease, lerp, seg } from '../../engine/math';
 import type { Location, Shot } from '../../engine/director';
 import { idleLulu } from '../../characters/lulu';
 import { armOf, releaseArm } from '../../characters/reach';
-import type { CeratopsRig } from '../../characters/ceratops';
+import type { CharacterRig } from '../../characters/types';
 import { reachTo, restRig, type TiredLulu } from './pose';
 import {
   BIN,
@@ -13,13 +13,14 @@ import {
   FRIDGE,
   createBattery,
   createSpecsBubble,
+  SPEC_PAGES,
   createKitchen,
   createMop,
   createSpoon,
   createYogurt,
   type Yogurt,
 } from './sets';
-import { CUE, FLAVOURS, LINES, mouthAt, speakerAt, type Flavour } from './timeline';
+import { CUE, FLAVOURS, LINES, SPECS_TURN, mouthAt, speakerAt, type Flavour } from './timeline';
 
 // The office kitchen, 0 → the ride: Lulu shuffles in, drained by a week of specs for a devilish agent; her protein
 // battery pulses; the fridge (seen from inside), three yogurts and three nopes; Mirta and her mop; "this… or this?";
@@ -41,6 +42,8 @@ const YAW = {
 const MIRTA_FROM = new THREE.Vector3(9.5, 0, 1.4);
 const MIRTA_SPOT = new THREE.Vector3(2.4, 0, 0.9);
 const MIRTA_YAW = -Math.PI / 2 + 0.55;
+/** How far above the judged cup's lid the fridge camera sits: enough to see over it to her face. */
+const POV_ABOVE_LID = 0.1;
 /** One step of a tired shuffle, and of a quicker walk out (seconds). */
 const SHUFFLE = 0.6;
 const STRIDE = 0.45;
@@ -59,7 +62,7 @@ const lookingAt = (t: number): Flavour | null => {
   return FLAVOURS[i]!;
 };
 
-export function createKitchenLocation(me: TiredLulu, mirta: CeratopsRig): Location {
+export function createKitchenLocation(me: TiredLulu, mirta: CharacterRig): Location {
   const { lulu } = me;
   const kitchen = createKitchen();
   const cups: Record<Flavour, Yogurt> = {
@@ -74,7 +77,7 @@ export function createKitchenLocation(me: TiredLulu, mirta: CeratopsRig): Locati
   const battery = createBattery();
   const batterySize = battery.scale.clone();
   const bubble = createSpecsBubble();
-  kitchen.scene.add(spoon, mop, bucket, battery, bubble);
+  kitchen.scene.add(spoon, mop, bucket, battery, bubble.sprite);
   const mirtaFeet = mirta.feet.map(f => f.position.clone());
   const v = new THREE.Vector3();
   const w = new THREE.Vector3();
@@ -279,11 +282,15 @@ export function createKitchenLocation(me: TiredLulu, mirta: CeratopsRig): Locati
     battery.visible = t >= CUE.battery[0] && t < CUE.battery[1];
     battery.scale.copy(batterySize).multiplyScalar(1 + Math.abs(Math.sin(t * 5)) * 0.04); // a low-battery pulse
     lulu.face.localToWorld(battery.position.set(0.3, 1.3, 0));
-    // the specs bubble: floats in, bobs, floats out
+    // the specs bubble: floats in; the pile grows a version at a time; then the agent laughs (and the bubble shakes)
     const thought = seg(t, CUE.specs[0], CUE.specs[0] + 0.4) * (1 - seg(t, CUE.specs[1] - 0.3, CUE.specs[1]));
-    bubble.visible = thought > 0;
-    bubble.material.opacity = thought;
-    lulu.face.localToWorld(bubble.position.set(0.1, 1.7 + Math.sin(t * 2) * 0.05, 0));
+    bubble.sprite.visible = thought > 0;
+    bubble.sprite.material.opacity = thought;
+    const piling = seg(t, CUE.specs[0] + 0.4, SPECS_TURN - 0.2);
+    const laughing = t >= SPECS_TURN;
+    bubble.show(1 + Math.floor(piling * (SPEC_PAGES.length - 1)), laughing);
+    const shake = laughing ? Math.sin(t * 30) * 0.04 : 0;
+    lulu.face.localToWorld(bubble.sprite.position.set(0.1 + shake, 1.7 + Math.sin(t * 2) * 0.05, 0));
   }
 
   function headOf(rig: { head: THREE.Object3D }) {
@@ -294,8 +301,11 @@ export function createKitchenLocation(me: TiredLulu, mirta: CeratopsRig): Locati
     const looked = lookingAt(t);
     const cup = looked ? CUP_AT[looked] : CUP_AT.peach;
     // mostly her face; the lids of the yogurts at the bottom of the frame, the one she's judging in the middle
-    // the camera slides behind the one she's judging; her face above it
-    return { cam: [cup.x, 2.55, FRIDGE.back + 0.2], look: [lerp(face.x, cup.x, 0.5), face.y - 0.2, face.z] };
+    // straight behind the one she's judging, just above its lid: the cup fills the bottom of the frame, her face the top
+    return {
+      cam: [cup.x, cup.y + CUP_HEIGHT + POV_ABOVE_LID, FRIDGE.back + 0.2],
+      look: [lerp(face.x, cup.x, 0.3), face.y - 0.2, face.z],
+    };
   }
   function closeOn(who: 'Lulu' | 'Mirta'): Shot {
     const h = headOf(who === 'Lulu' ? lulu : mirta);
@@ -308,6 +318,15 @@ export function createKitchenLocation(me: TiredLulu, mirta: CeratopsRig): Locati
       // follow her across the kitchen to the fridge
       const x = lulu.root.position.x;
       return { cam: [x + 2.0, 4.8, 13.5], look: [x - 0.5, 3.0, -0.5] };
+    }
+    if (t >= SPECS_TURN && t < CUE.specs[1]) {
+      // the joke: push in on her face and the laughing agent above it
+      const h = headOf(lulu);
+      const push = ease(seg(t, SPECS_TURN, SPECS_TURN + 1.2));
+      return {
+        cam: [h.x + lerp(1.0, 0.5, push), h.y + lerp(0.6, 1.0, push), h.z + lerp(7.0, 5.4, push)],
+        look: [h.x + 0.2, h.y + lerp(0.4, 0.9, push), h.z],
+      };
     }
     if (t < CUE.battery[1] - 0.3) {
       const h = headOf(lulu);

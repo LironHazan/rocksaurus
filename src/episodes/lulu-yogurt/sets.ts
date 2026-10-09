@@ -149,8 +149,11 @@ export function createBattery(): THREE.Sprite {
 /** The thought bubble's size in the world (its canvas is 4:3). */
 const BUBBLE = { w: 2.4, h: 1.8 } as const;
 
-/** A robot head with devil horns and a smirk, centred on (x, y), `r` wide: the coding agent, as Lulu sees it now. */
-function drawDevilBot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
+/**
+ * A robot head with devil horns and a smirk (or laughing), centred on (x, y), `r` wide: the coding agent, as Lulu
+ * sees it by now.
+ */
+function drawDevilBot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, laughing: boolean) {
   ctx.fillStyle = '#d6332f'; // the horns
   for (const s of [-1, 1]) {
     ctx.beginPath();
@@ -171,12 +174,23 @@ function drawDevilBot(ctx: CanvasRenderingContext2D, x: number, y: number, r: nu
     ctx.lineTo(x + s * r * 0.42, y - r * 0.02);
     ctx.fill();
   }
-  ctx.strokeStyle = '#ff3b3b'; // the smirk
-  ctx.lineWidth = r * 0.07;
-  ctx.beginPath();
-  ctx.moveTo(x - r * 0.3, y + r * 0.18);
-  ctx.quadraticCurveTo(x + r * 0.05, y + r * 0.38, x + r * 0.35, y + r * 0.1);
-  ctx.stroke();
+  if (laughing) {
+    // mouth wide open, and the laugh itself
+    ctx.beginPath();
+    ctx.moveTo(x - r * 0.35, y + r * 0.1);
+    ctx.quadraticCurveTo(x, y + r * 0.6, x + r * 0.35, y + r * 0.1);
+    ctx.fill();
+    ctx.font = `700 ${r * 0.42}px ${ROUND}`;
+    ctx.textAlign = 'center';
+    ctx.fillText('HA HA', x, y + r * 1.0);
+  } else {
+    ctx.strokeStyle = '#ff3b3b'; // the smirk
+    ctx.lineWidth = r * 0.07;
+    ctx.beginPath();
+    ctx.moveTo(x - r * 0.3, y + r * 0.18);
+    ctx.quadraticCurveTo(x + r * 0.05, y + r * 0.38, x + r * 0.35, y + r * 0.1);
+    ctx.stroke();
+  }
   ctx.strokeStyle = '#8a93a6'; // the antenna
   ctx.beginPath();
   ctx.moveTo(x, y - r * 0.62);
@@ -188,12 +202,15 @@ function drawDevilBot(ctx: CanvasRenderingContext2D, x: number, y: number, r: nu
   ctx.fill();
 }
 
-/** A pile of spec pages, each one a new version, fanned out from (x, y). */
-function drawSpecs(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
-  ['PLAN v12', 'SPEC v9', 'SPEC v7'].forEach((label, i) => {
+/** Every version she wrote this week, oldest first. */
+export const SPEC_PAGES = ['SPEC v1', 'SPEC v3', 'PLAN v5', 'SPEC v9', 'PLAN v12'] as const;
+
+/** The first `count` spec pages, piled up from (x, y): each new version lands on top, a little higher. */
+function drawSpecs(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, count: number) {
+  SPEC_PAGES.slice(0, count).forEach((label, i) => {
     ctx.save();
-    ctx.translate(x + i * size * 0.12, y + i * size * 0.1);
-    ctx.rotate(-0.15 + i * 0.12);
+    ctx.translate(x + (i % 2 ? 1 : -1) * size * 0.06, y - i * size * 0.08);
+    ctx.rotate((i % 2 ? 1 : -1) * 0.08 * (i + 1));
     ctx.fillStyle = '#ffffff';
     ctx.strokeStyle = '#9aa0aa';
     ctx.lineWidth = size * 0.02;
@@ -210,69 +227,113 @@ function drawSpecs(ctx: CanvasRenderingContext2D, x: number, y: number, size: nu
   });
 }
 
-/**
- * What Lulu's thinking about after a week of it: a thought bubble with the coding agent as a little devil bot (red
- * horns, red eyes, a smirk) next to the pile of specs and plans she wrote for it. A sprite, so it faces the camera.
- */
-export function createSpecsBubble(): THREE.Sprite {
-  const map = textTexture(
-    512,
-    384,
-    (ctx, w, h) => {
-      ctx.fillStyle = '#ffffff';
-      // the cloud: overlapping puffs, and the little ones that lead down to her head
-      for (const [x, y, r] of [
-        [0.5, 0.42, 0.3],
-        [0.27, 0.45, 0.22],
-        [0.73, 0.45, 0.22],
-        [0.38, 0.25, 0.2],
-        [0.62, 0.25, 0.2],
-        [0.5, 0.6, 0.2],
-        [0.16, 0.86, 0.05],
-        [0.24, 0.76, 0.07],
-      ] as const) {
-        ctx.beginPath();
-        ctx.arc(x * w, y * h, r * h, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      drawSpecs(ctx, w * 0.33, h * 0.42, h * 0.38);
-      drawDevilBot(ctx, w * 0.66, h * 0.44, h * 0.2);
-    },
-    ['700 40px Fredoka'],
-  );
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map, toneMapped: false, transparent: true }));
-  sprite.scale.set(BUBBLE.w, BUBBLE.h, 1);
-  return sprite;
+export interface SpecsBubble {
+  sprite: THREE.Sprite;
+  /** How many spec pages are piled up, and whether the agent is laughing. Repaints only when that changes. */
+  show(pages: number, laughing: boolean): void;
 }
 
-/** The fridge: open shelves inside, a light that comes on, and a door hinged on its left edge. */
-function createFridge(scene: THREE.Scene) {
-  const steel = mat(0xdfe3e8, 0.35, { metalness: 0.3 });
-  const inside = mat(0xf4f8fb, 0.6);
-  const { x, back, w, h, d } = FRIDGE;
-  const wall = 0.12;
-  const panels: [number, number, number, number, number, number, THREE.Material][] = [
-    [w, h, wall, x, 0, back + wall / 2, inside], // back
-    [wall, h, d, x - w / 2 + wall / 2, 0, back + d / 2, steel], // sides
-    [wall, h, d, x + w / 2 - wall / 2, 0, back + d / 2, steel],
-    [w, wall, d, x, h - wall, back + d / 2, steel], // top
-    [w, 0.3, d, x, 0, back + d / 2, steel], // bottom
-  ];
-  for (const [pw, ph, pd, px, py, pz, m] of panels) {
-    const p = box(pw, ph, pd, m);
-    p.position.set(px, py, pz);
-    scene.add(p);
-  }
-  for (const y of [1.4, SHELF_Y, 3.8]) {
-    const shelf = box(w - wall * 2, 0.05, d - 0.2, mat(0xcfe6f5, 0.1, { transparent: true, opacity: 0.7 }));
-    shelf.position.set(x, y - 0.05, back + d / 2 - 0.05);
-    scene.add(shelf);
-  }
-  // what's left: a water bottle on top, someone's labelled lunch at the bottom
-  const water = cylinder(0.14, 0.14, 0.7, mat(0x9fd3ff, 0.1, { transparent: true, opacity: 0.6 }));
-  water.position.set(x + 0.7, 3.8, back + 0.8);
-  const lunch = box(0.9, 0.4, 0.7, mat(0xffffff, 0.4, { transparent: true, opacity: 0.85 }));
-  lunch.position.set(x - 0.4, 1.4, back + 0.9);
+/**
+ * What Lulu's thinking about after a week of it: a thought bubble with the pile of specs and plans she wrote, and the
+ * coding agent as a little devil bot (red horns, red eyes, a smirk) who laughs at the end. A sprite, so it faces the
+ * camera.
+ */
+export function createSpecsBubble(): SpecsBubble {
+  let pages = 1;
+  let laughing = false;
+  const draw = (ctx: CanvasRenderingContext2D, w: number, h: number) => {
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#ffffff';
+    // the cloud: overlapping puffs, and the little ones that lead down to her head
+    for (const [x, y, r] of [
+      [0.5, 0.42, 0.3],
+      [0.27, 0.45, 0.22],
+      [0.73, 0.45, 0.22],
+      [0.38, 0.25, 0.2],
+      [0.62, 0.25, 0.2],
+      [0.5, 0.6, 0.2],
+      [0.16, 0.86, 0.05],
+      [0.24, 0.76, 0.07],
+    ] as const) {
+      ctx.beginPath();
+      ctx.arc(x * w, y * h, r * h, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    drawSpecs(ctx, w * 0.33, h * 0.5, h * 0.34, pages);
+    drawDevilBot(ctx, w * 0.67, h * 0.4, h * 0.2, laughing);
+  };
+  const map = textTexture(512, 384, draw, ['700 40px Fredoka']);
+  const canvas = map.image;
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map, toneMapped: false, transparent: true }));
+  sprite.scale.set(BUBBLE.w, BUBBLE.h, 1);
+  return {
+    sprite,
+    show(nextPages, nextLaughing) {
+      if (nextPages === pages && nextLaughing === laughing) return;
+      pages = nextPages;
+      laughing = nextLaughing;
+      draw(canvas.getContext('2d')!, canvas.width, canvas.height);
+      map.needsUpdate = true;
+    },
+  };
+}
+
+/** Drink colours for the cans and bottles: sodas, juices, sparkling water. */
+const DRINKS = [0xe63946, 0x2a9d8f, 0xf4a261, 0x3a86ff, 0x8ac926, 0xff6fa8, 0xffd23f] as const;
+
+/** A can: a short cylinder in a colour, a silver top. Origin at its base. */
+function can(colour: number): THREE.Group {
+  const g = new THREE.Group();
+  g.add(cylinder(0.11, 0.11, 0.34, mat(colour, 0.35, { metalness: 0.5 }), 16));
+  const top = cylinder(0.1, 0.11, 0.03, mat(0xd8dce4, 0.3, { metalness: 0.9 }), 16);
+  top.position.y = 0.34;
+  g.add(top);
+  return g;
+}
+
+/** A bottle: a body, a neck, a cap. Origin at its base. */
+function bottle(colour: number, height: number): THREE.Group {
+  const g = new THREE.Group();
+  const glass = mat(colour, 0.15, { transparent: true, opacity: 0.85 });
+  g.add(cylinder(0.13, 0.13, height * 0.7, glass, 16));
+  const neck = cylinder(0.05, 0.13, height * 0.25, glass, 16);
+  neck.position.y = height * 0.7;
+  const cap = cylinder(0.055, 0.055, height * 0.06, mat(0xffffff, 0.4), 12);
+  cap.position.y = height * 0.95;
+  g.add(neck, cap);
+  return g;
+}
+
+/** A carton (milk, oat milk): a box with a gable top. Origin at its base. */
+function carton(colour: number): THREE.Group {
+  const g = new THREE.Group();
+  g.add(box(0.3, 0.6, 0.3, mat(colour, 0.6)));
+  const roof = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.21, 0.15, 4, 1), mat(colour, 0.6));
+  roof.rotation.y = Math.PI / 4;
+  roof.position.y = 0.67;
+  g.add(roof);
+  return g;
+}
+
+/**
+ * Everything else in the fridge (it's full; just not of anything Lulu wants): cans and bottles on the bottom two
+ * shelves, cartons and kombucha on top, and more of the bad yogurts beside the three she judges. Nothing stands
+ * behind those three: the camera films them from the back of the fridge.
+ */
+function stock(scene: THREE.Scene) {
+  const { x, back } = FRIDGE;
+  const place = (o: THREE.Object3D, dx: number, y: number, z: number) => {
+    o.position.set(x + dx, y, z);
+    scene.add(o);
+  };
+  // the bottom: tall bottles at the back, cans in front
+  for (let i = 0; i < 6; i++) place(bottle(DRINKS[i % DRINKS.length]!, 0.95), -0.95 + i * 0.38, 0.3, back + 0.45);
+  for (let i = 0; i < 7; i++) place(can(DRINKS[(i + 3) % DRINKS.length]!), -0.95 + i * 0.32, 0.3, FRONT - 0.35);
+  // the next shelf: two rows of cans, and Rorit's lunch
+  for (let i = 0; i < 6; i++) place(can(DRINKS[(i + 1) % DRINKS.length]!), -0.95 + i * 0.32, 1.4, FRONT - 0.3);
+  for (let i = 0; i < 3; i++) place(can(DRINKS[(i + 5) % DRINKS.length]!), 0.15 + i * 0.32, 1.4, back + 0.5);
+  const lunch = box(0.8, 0.4, 0.6, mat(0xffffff, 0.4, { transparent: true, opacity: 0.85 }));
+  place(lunch, -0.6, 1.4, back + 0.6);
   const tag = picture(
     0.7,
     0.24,
@@ -287,23 +348,79 @@ function createFridge(scene: THREE.Scene) {
     },
     { frame: null },
   );
-  tag.position.set(x - 0.4, 1.6, back + 1.27);
-  scene.add(water, lunch, tag);
+  place(tag, -0.6, 1.6, back + 0.93);
+  // the yogurt shelf: more of the same three, stacked at the sides
+  for (const [dx, flavour] of [
+    [-1.0, 'vegan'],
+    [1.0, 'caramel'],
+  ] as const)
+    for (const level of [0, 1]) place(createYogurt(flavour).group, dx, SHELF_Y + level * CUP_HEIGHT, FRONT - 0.3);
+  // the top: oat milk, milk, a row of kombucha
+  place(carton(0xc9b48a), -0.85, 3.8, back + 0.6);
+  place(carton(0x9ec9f0), -0.45, 3.8, back + 0.6);
+  for (let i = 0; i < 4; i++) place(bottle(0xd98c3a, 0.75), 0.05 + i * 0.3, 3.8, FRONT - 0.4);
+}
 
-  const light = new THREE.PointLight(0xe8f4ff, 0, 6, 1.4);
+/**
+ * The fridge: white, with a Papo Pako orange trim, a glass door (it's full, and you can see it), glass shelves, a
+ * light that comes on when it opens. The door is hinged on its left edge.
+ */
+function createFridge(scene: THREE.Scene) {
+  const body = mat(0xf7f6f2, 0.4);
+  const inside = mat(0xffffff, 0.5);
+  const trim = mat(0xff7a1a, 0.5);
+  const { x, back, w, h, d } = FRIDGE;
+  const wall = 0.12;
+  const panels: [number, number, number, number, number, number, THREE.Material][] = [
+    [w, h, wall, x, 0, back + wall / 2, inside], // back
+    [wall, h, d, x - w / 2 + wall / 2, 0, back + d / 2, body], // sides
+    [wall, h, d, x + w / 2 - wall / 2, 0, back + d / 2, body],
+    [w, wall, d, x, h - wall, back + d / 2, body], // top
+    [w, 0.3, d, x, 0, back + d / 2, trim], // the kick plate, in orange
+  ];
+  for (const [pw, ph, pd, px, py, pz, m] of panels) {
+    const p = box(pw, ph, pd, m);
+    p.position.set(px, py, pz);
+    scene.add(p);
+  }
+  const header = box(w, 0.35, d, trim); // an orange band over the door
+  header.position.set(x, h, back + d / 2);
+  scene.add(header);
+  for (const y of [1.4, SHELF_Y, 3.8]) {
+    const shelf = box(w - wall * 2, 0.04, d - 0.2, mat(0xcfe6f5, 0.1, { transparent: true, opacity: 0.6 }));
+    shelf.position.set(x, y - 0.04, back + d / 2 - 0.05);
+    scene.add(shelf);
+  }
+  stock(scene);
+
+  const light = new THREE.PointLight(0xfff4e0, 0, 6, 1.4);
   light.position.set(x, h - 0.6, back + 1.2);
   scene.add(light);
 
-  // the door: hinged on the fridge's left front edge; the handle, and a sticky note
+  // the door: a white frame round a glass pane; the handle, and a sticky note on the glass
   const door = new THREE.Group();
   door.position.set(x - w / 2, 0, FRONT);
-  const panel = box(w, h, 0.18, steel);
-  panel.position.set(w / 2, 0, 0.09);
+  const rail = 0.16;
+  for (const [fw, fh, fx, fy] of [
+    [w, rail, w / 2, 0.3], // bottom
+    [w, rail, w / 2, h - rail], // top
+    [rail, h - 0.3, rail / 2, 0.3], // hinge side
+    [rail, h - 0.3, w - rail / 2, 0.3], // handle side
+  ] as const) {
+    const part = box(fw, fh, 0.14, body);
+    part.position.set(fx, fy, 0.07);
+    door.add(part);
+  }
+  const glass = new THREE.Mesh(
+    new THREE.PlaneGeometry(w - rail * 2, h - 0.3 - rail),
+    new THREE.MeshPhysicalMaterial({ color: 0xdff1ff, roughness: 0.05, transparent: true, opacity: 0.18 }),
+  );
+  glass.position.set(w / 2, 0.3 + (h - 0.3 - rail) / 2, 0.07);
   const handle = box(0.12, 1.6, 0.14, mat(0x8a8f99, 0.3, { metalness: 0.8 }));
-  handle.position.set(w - 0.3, 2.0, 0.25);
+  handle.position.set(w - 0.3, 2.0, 0.22);
   const note = picture(
-    0.8,
-    0.8,
+    0.7,
+    0.7,
     (ctx, cw, ch) => {
       ctx.fillStyle = '#ffd36b';
       ctx.fillRect(0, 0, cw, ch);
@@ -317,9 +434,9 @@ function createFridge(scene: THREE.Scene) {
     },
     { frame: null },
   );
-  note.position.set(w * 0.4, 3.4, 0.19);
+  note.position.set(0.55, h - 0.75, 0.08); // up in the corner, clear of the yogurt shelf
   note.rotation.z = 0.08;
-  door.add(panel, handle, note);
+  door.add(glass, handle, note);
   scene.add(door);
   return { door, light };
 }
