@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ease, lerp, seg } from '../../engine/math';
-import { disposeObject } from '../../engine/dispose';
 import type { Episode } from '../../engine/types';
+import { cuts, direct, type Shot } from '../../engine/director';
 import { createLulu, idleLulu } from '../../characters/lulu';
 import { createOrnithomimus, ORNITHO_SEAT } from '../../characters/ornithomimus';
 import { createCeratops } from '../../characters/ceratops';
@@ -31,13 +31,11 @@ import { soundtrack } from './sound';
 //   49.2–52  "Same time tomorrow?" Lulu: the office protein dealer
 //   then the channel's end card (outro.ts)
 
-type Vec = readonly [number, number, number];
-interface Shot {
-  cam: Vec;
-  look: Vec;
-}
 type Where = 'home' | 'campus';
-const where = (t: number): Where => (t < CUE.arrive[0] ? 'home' : 'campus');
+const where = cuts<Where>([
+  [0, 'home'],
+  [CUE.arrive[0], 'campus'],
+]);
 
 /** Where the three sit on the bench (z), and how high each one's hips are. */
 const SIT_Z = BENCH.z + 0.35;
@@ -126,7 +124,6 @@ const episode: Episode = {
       campus: [lulu.root, bar.group, rorit.root, silvi.root],
     };
     for (const w of ['campus', 'home'] as const) for (const o of CAST[w]) scenes[w].add(o);
-    let current: Where | null = null;
 
     const v = new THREE.Vector3(),
       w = new THREE.Vector3();
@@ -509,26 +506,22 @@ const episode: Episode = {
       return three;
     }
 
-    function update(t: number) {
-      lulu.head.visible = true;
-      for (const s of lulu.neck) s.visible = true;
-      camera.up.set(0, 1, 0);
-      const here = where(t);
-      if (here !== current) {
-        for (const o of CAST[here]) scenes[here].add(o);
-        stage.scene = scenes[here];
-        current = here;
-      }
-      const shot = here === 'home' ? homeScene(t) : campusScene(t);
-      camera.position.set(...shot.cam);
-      camera.lookAt(...shot.look);
-    }
+    const director = direct(
+      stage,
+      {
+        home: { scene: scenes.home, cast: CAST.home, frame: homeScene },
+        campus: { scene: scenes.campus, cast: CAST.campus, frame: campusScene },
+      },
+      where,
+    );
 
     return {
-      update,
-      dispose() {
-        for (const s of Object.values(scenes)) disposeObject(s);
+      update(t) {
+        lulu.head.visible = true;
+        for (const s of lulu.neck) s.visible = true;
+        director.update(t);
       },
+      dispose: director.dispose,
     };
   },
 

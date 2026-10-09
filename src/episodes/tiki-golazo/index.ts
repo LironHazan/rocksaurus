@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { clamp01, ease, lerp, seg } from '../../engine/math';
-import { disposeObject } from '../../engine/dispose';
 import type { Episode } from '../../engine/types';
+import { direct, type Shot } from '../../engine/director';
 import type { CharacterRig, Ellipsoid } from '../../characters/types';
 import { createTyrannosaurus, TIKI_COLORS } from '../../characters/tyrannosaurus';
 import { createRory, idle, resetPose } from '../../characters/rory';
@@ -41,12 +41,6 @@ import { soundtrack, SIUU } from './music';
 //   26.5–28 the kids on the touchline; his little one copies the celebration
 //   28–30   final whistle, 1–0
 
-type Vec = readonly [number, number, number];
-interface Shot {
-  cam: Vec;
-  look: Vec;
-}
-
 const TOUCHES = touches();
 const SHOUT = sungNotes(SIUU);
 const yawOf = ([hx, hz]: P2) => Math.atan2(hx, hz);
@@ -81,7 +75,6 @@ const episode: Episode = {
   captions: CAPTIONS,
 
   setup(stage) {
-    const { camera } = stage;
     const pitch = createPitch();
     const scene = pitch.scene;
     stage.scene = scene; // this episode brings its own pitch
@@ -524,17 +517,11 @@ const episode: Episode = {
       pitch.goal.bulge(netPush(t), NET_HIT.y, NET_HIT.z);
       pitch.board.setScore(t >= CUE.score ? 1 : 0, 0);
 
-      const s = shot(t);
-      camera.position.set(...s.cam);
-      camera.lookAt(...s.look);
+      director.update(t);
     }
 
-    return {
-      update,
-      dispose() {
-        disposeObject(scene);
-      },
-    };
+    const director = direct(stage, { pitch: { scene, frame: shot } }, () => 'pitch');
+    return { update, dispose: director.dispose };
   },
 
   audio(bus, t0) {

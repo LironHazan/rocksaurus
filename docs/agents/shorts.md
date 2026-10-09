@@ -18,7 +18,10 @@ Read this before you add or change an episode, a character, a prop or a set.
    `captions.ts`, `sound.ts`, `sets.ts`, `cast.ts`, `index.ts`, and a `timeline.test.ts` for the timing.
 2. Declare `const episode: Episode = {…}`, then `export default withOutro(episode)`.
 3. Register it in a folder in `src/episodes/index.ts`. The first episode of the first folder is the studio default.
-4. To cut between locations, swap `stage.scene` inside `update(t)`.
+4. Film it with the director (`src/engine/director.ts`): `direct(stage, locations, where)` returns `update` and
+   `dispose`. Each location is `{ scene, cast?, frame(t) }`, where `frame` poses the location and returns its `Shot`;
+   `where` is a cut list (`cuts([[0, 'home'], [CUE.arrive, 'campus']])`). Do not set `stage.scene` or the camera
+   yourself.
 5. A joke variant spreads an existing episode and replaces only `id`, `title` and `captions`
    (`episodes/rory-friday/index.ts`).
 

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ease, lerp, seg } from '../../engine/math';
-import { disposeObject } from '../../engine/dispose';
 import type { Episode } from '../../engine/types';
+import { cuts, direct, type Shot } from '../../engine/director';
 import { idle, resetPose } from '../../characters/rory';
 import { armOf, reachArm, releaseArm, sideOf } from '../../characters/reach';
 import { ORNITHO_SEAT, type OrnithomimusRig } from '../../characters/ornithomimus';
@@ -40,19 +40,14 @@ import { FIDGET_STEP, soundtrack } from './sound';
 //   44–55    Eilon, the tech lead, walks in smiling: "Morning! Was something wrong?"
 //   then the channel's end card (outro.ts)
 
-type Vec = readonly [number, number, number];
-interface Shot {
-  cam: Vec;
-  look: Vec;
-}
 type Where = 'campus' | 'sagish' | 'rorit' | 'call' | 'warRoom';
-function where(t: number): Where {
-  if (t < CUE.campus[1]) return 'campus';
-  if (t < CUE.roritAnswers) return 'sagish';
-  if (t < CUE.callSeniors[0]) return 'rorit';
-  if (t < CUE.warRoom[0]) return 'call';
-  return 'warRoom';
-}
+const where = cuts<Where>([
+  [0, 'campus'],
+  [CUE.campus[1], 'sagish'],
+  [CUE.roritAnswers, 'rorit'],
+  [CUE.callSeniors[0], 'call'],
+  [CUE.warRoom[0], 'warRoom'],
+]);
 
 const SAGISH_SCALE = 0.9; // young
 const TALU_SCALE = 1.15; // tall
@@ -66,8 +61,6 @@ const episode: Episode = {
   captions: CAPTIONS,
 
   setup(stage) {
-    const { camera } = stage;
-
     const campus = createCampus();
     campus.scene.background = sky('#03050f', '#0b1233', '#1a2350');
     campus.scene.fog = new THREE.Fog(0x0b1233, 40, 90);
@@ -127,7 +120,6 @@ const episode: Episode = {
     };
     for (const w of ['campus', 'warRoom', 'call', 'rorit', 'sagish'] as const)
       for (const o of CAST[w]) scenes[w].add(o);
-    let current: Where | null = null;
     const v = new THREE.Vector3();
 
     type Rig = Parameters<typeof resetPose>[0] & { root: THREE.Group; arms: THREE.Group[]; feet: THREE.Group[] };
@@ -507,30 +499,24 @@ const episode: Episode = {
       return headShot(amaz.head, 0.6, 4.2, 0.7);
     }
 
-    function update(t: number) {
-      camera.up.set(0, 1, 0);
-      const here = where(t);
-      if (here !== current) {
-        for (const o of CAST[here]) scenes[here].add(o);
-        stage.scene = scenes[here];
-        current = here;
-      }
-      talu.root.visible = amaz.root.visible = true;
-      let shot: Shot;
-      if (here === 'campus') shot = campusScene(t);
-      else if (here === 'sagish') shot = sagishScene(t);
-      else if (here === 'rorit') shot = roritScene(t);
-      else if (here === 'call') shot = callScene(t);
-      else shot = warRoomScene(t);
-      camera.position.set(...shot.cam);
-      camera.lookAt(...shot.look);
-    }
+    const director = direct(
+      stage,
+      {
+        campus: { scene: scenes.campus, cast: CAST.campus, frame: campusScene },
+        sagish: { scene: scenes.sagish, cast: CAST.sagish, frame: sagishScene },
+        rorit: { scene: scenes.rorit, cast: CAST.rorit, frame: roritScene },
+        call: { scene: scenes.call, cast: CAST.call, frame: callScene },
+        warRoom: { scene: scenes.warRoom, cast: CAST.warRoom, frame: warRoomScene },
+      },
+      where,
+    );
 
     return {
-      update,
-      dispose() {
-        for (const s of Object.values(scenes)) disposeObject(s);
+      update(t) {
+        talu.root.visible = amaz.root.visible = true;
+        director.update(t);
       },
+      dispose: director.dispose,
     };
   },
 

@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { seg, ease, lerp, rng } from '../../engine/math';
-import { disposeObject } from '../../engine/dispose';
 import type { Episode } from '../../engine/types';
+import { cuts, direct, type Shot } from '../../engine/director';
+import type { Vec3 } from '../../characters/types';
 import { createParasaurolophus } from '../../characters/parasaurolophus';
 import { idle, resetPose } from '../../characters/rory';
 import { reachArm, releaseArm, armOf } from '../../characters/reach';
@@ -21,12 +22,6 @@ import { soundtrack, vocal } from './music';
 //   7.5–22.5 three try-ons behind the fitting-room curtain: wizard, ranger, elf
 //   22.5–27 checkout: she finds a ring in a bowl ("free with purchase"), the total is $6.66
 //   27–34.5 she puts on everything and rolls a d20 for initiative: natural 20
-
-type Vec = readonly [number, number, number];
-interface Shot {
-  cam: Vec;
-  look: Vec;
-}
 
 const FACING_RIGHT = Math.PI / 2 - 0.25; // facing +x, turned a little toward the camera
 const NOTES = sungNotes(vocal);
@@ -50,6 +45,13 @@ const dot = (color: number) =>
     ctx.fillRect(0, 0, w, h);
   });
 
+/** The shop sign's neon at t: sputters on, then burns steadily with a slow hum. */
+function neonGlow(t: number): number {
+  if (t < 0.35) return Math.sin(t * 90) > 0 ? 0.2 : 0.05;
+  if (t < 0.6) return Math.sin(t * 70) > -0.3 ? 1 : 0.15;
+  return 0.9 + 0.1 * Math.sin(t * 6);
+}
+
 const episode: Episode = {
   id: 'paris-rot-hotic',
   title: 'Paris Goes to Rot Hotic 🖤',
@@ -57,7 +59,6 @@ const episode: Episode = {
   captions: CAPTIONS,
 
   setup(stage) {
-    const { camera } = stage;
     const store = createStore();
     const scene = store.scene;
     stage.scene = scene; // this episode brings its own shop
@@ -182,8 +183,8 @@ const episode: Episode = {
     scene.add(receipt);
 
     // sparkles for the magic moments: a pool of sprites replayed at each event
-    const POOF_AT: { t: number; pos: Vec; color: number }[] = [
-      ...TRY_AT.map(s => ({ t: s + TRY.swap, pos: [BOOTH.x, 3.4, BOOTH.front + 0.3] satisfies Vec, color: 0xc9a8ff })),
+    const POOF_AT: { t: number; pos: Vec3; color: number }[] = [
+      ...TRY_AT.map(s => ({ t: s + TRY.swap, pos: [BOOTH.x, 3.4, BOOTH.front + 0.3] satisfies Vec3, color: 0xc9a8ff })),
       { t: CUE.take[1] - 0.2, pos: [COUNTER.x - 1.3, 3.4, 1.5], color: 0xffc83a },
       { t: CUE.bag, pos: [COUNTER.x - 0.4, 2.7, 0.9], color: 0xff6bd0 },
       { t: CUE.poof, pos: [0.4, 2.2, 1.2], color: 0xff6bd0 },
@@ -376,7 +377,7 @@ const episode: Episode = {
 
       // the booth camera: a different angle for each look, pushing in after the curtain opens
       const push = ease(seg(local, TRY.open[0], TRY_LEN));
-      const angles: Vec[] = [
+      const angles: Vec3[] = [
         [BOOTH.x, 2.9, 6.8],
         [BOOTH.x + 2.0, 2.7, 6.2],
         [BOOTH.x - 1.4, 2.7, 6.2],
@@ -543,6 +544,23 @@ const episode: Episode = {
       return { cam: [px + 0.1, lerp(2.0, 1.8, k), lerp(9.4, 7.4, k)], look: [px + 0.1, lerp(3.0, 2.6, k), 1.0] };
     }
 
+    // One shop, four beats: the camera cuts between them, the scene stays.
+    const director = direct(
+      stage,
+      {
+        shopping: { scene, frame: shopping },
+        fitting: { scene, frame: fittingRoom },
+        checkout: { scene, frame: checkout },
+        finale: { scene, frame: finale },
+      },
+      cuts([
+        [0, 'shopping'],
+        [TRY_AT[0], 'fitting'],
+        [CUE.counter, 'checkout'],
+        [CUE.finale, 'finale'],
+      ]),
+    );
+
     function update(t: number) {
       resetPose(paris);
       for (const a of paris.arms) releaseArm(a);
@@ -554,18 +572,7 @@ const episode: Episode = {
       paris.setMouth(open);
       paris.setCrestGlow(open);
 
-      // neon: sputters on, then burns steadily with a slow hum
-      store.sign.setGlow(
-        t < 0.35
-          ? Math.sin(t * 90) > 0
-            ? 0.2
-            : 0.05
-          : t < 0.6
-            ? Math.sin(t * 70) > -0.3
-              ? 1
-              : 0.15
-            : 0.9 + 0.1 * Math.sin(t * 6),
-      );
+      store.sign.setGlow(neonGlow(t));
       const door =
         t < CUE.door[1] ? seg(t, CUE.door[0], CUE.door[1]) : 1 - seg(t, CUE.walkIn[1] - 0.1, CUE.walkIn[1] + 0.6);
       store.entrance.setOpen(ease(Math.max(0, door)));
@@ -574,24 +581,12 @@ const episode: Episode = {
       const look: Look = t < CUE.counter ? f.look : t < CUE.poof ? 'elf' : 'party';
       gear.setLook(look);
 
-      let shot: Shot;
-      if (t < TRY_AT[0]) shot = shopping(t);
-      else if (t < CUE.counter) shot = fittingRoom(t);
-      else if (t < CUE.finale) shot = checkout(t);
-      else shot = finale(t);
-
+      director.update(t);
       if (t < TRY_AT[0] || t >= CUE.counter) store.booth.setOpen(1);
       sparkles(t);
-      camera.position.set(...shot.cam);
-      camera.lookAt(...shot.look);
     }
 
-    return {
-      update,
-      dispose() {
-        disposeObject(scene);
-      },
-    };
+    return { update, dispose: director.dispose };
   },
 
   audio(bus, t0) {
