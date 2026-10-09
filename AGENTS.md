@@ -14,6 +14,9 @@ previews a Short and records it to video. GitHub Pages deploys `main`.
 - `npm run dev` — the studio at http://localhost:5173. Open a Short with `?episode=<id>`.
 - `npm run format` — Prettier. Formatting is enforced.
 
+Models: the main session writes code on Sonnet (`.claude/settings.json`). Send reviews to the `reviewer` subagent
+(Opus) and gate, E2E and CI runs to the `runner` subagent (Haiku) (`.claude/agents/`).
+
 The tools are not the usual ones: TypeScript 7 (native compiler), **oxlint** (not ESLint) with the vendored
 **anti-slop** rules (`tools/oxlint/anti-slop/`), **dependency-cruiser** for module boundaries
 (`.dependency-cruiser.cjs`), and **Fallow** for dead code (`.fallowrc.json`; `npx fallow dupes` and `npx fallow health`
