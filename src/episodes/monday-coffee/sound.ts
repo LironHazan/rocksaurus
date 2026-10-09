@@ -1,5 +1,5 @@
 import { cueSheet, every, quieter, type Cue, type Player } from '../../audio/cue-sheet';
-import { ding } from '../../audio/sfx';
+import { ding, chatPop } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
 import { CHAT, CUE, DURATION, TYPING } from './timeline';
 
@@ -66,14 +66,20 @@ function cues(): Cue<Kind>[] {
   // a clock ticking in the quiet rooms: Rory's bedroom, the therapist's office
   for (let t = CUE.rory[0] + 0.5; t < DURATION; t += 1) if (indoors(t)) out.push({ at: t, kind: 'tick' });
   for (const at of every(CUE.rory[0] + 0.3, CUE.rory[1] - 1, 1.6)) out.push({ at, kind: 'snore' });
-  // thumbs on glass: a parent typing during the debate; Lulu typing furiously, mid-session
-  for (const m of CHAT) {
-    const lulu = m.from === 'Lulu';
-    if (!lulu && (m.at < CUE.ask[0] || m.at >= CUE.rory[0])) continue;
-    for (let t = m.at - TYPING + 0.05; t < m.at - 0.05; t += lulu ? 0.11 : 0.17)
-      out.push({ at: t, kind: lulu ? 'tap' : 'softTap' });
-  }
+  out.push(...typing());
   return out;
+}
+
+/** Thumbs on glass: a parent typing during the debate; Lulu typing furiously, mid-session. */
+function typing(): Cue<Kind>[] {
+  return CHAT.flatMap(m => {
+    const lulu = m.from === 'Lulu';
+    if (!lulu && (m.at < CUE.ask[0] || m.at >= CUE.rory[0])) return [];
+    return every(m.at - TYPING + 0.05, m.at - 0.05, lulu ? 0.11 : 0.17).map((at): Cue<Kind> => ({
+      at,
+      kind: lulu ? 'tap' : 'softTap',
+    }));
+  });
 }
 
 /** Half volume: for things heard through a window, or thumbs that aren't furious. */
@@ -81,7 +87,7 @@ const HALF = 0.5;
 
 const PLAYERS: Record<Kind, Player> = {
   bell: (b, w) => ding(b, w, 1568),
-  pop: fx.chatPop,
+  pop: chatPop,
   vibrate: fx.vibrate,
   tap: fx.keyTap,
   softTap: (b, w) => fx.keyTap(quieter(b, HALF), w),

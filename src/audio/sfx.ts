@@ -20,6 +20,12 @@ export function boop(bus: AudioNode, when: number, f0: number, f1: number, len =
 export const hop = (bus: AudioNode, when: number) => boop(bus, when, 520, 300, 0.12, 0.07);
 export const thump = (bus: AudioNode, when: number) => boop(bus, when, 140, 60, 0.25, 0.18);
 
+/** A chat message arriving on the phone in your paw. */
+export const chatPop = (bus: AudioNode, when: number) => boop(bus, when, 620, 980, 0.09, 0.08);
+
+/** Your own chat message going out: higher and shorter than a pop. */
+export const chatSent = (bus: AudioNode, when: number) => boop(bus, when, 900, 1300, 0.07, 0.06);
+
 const noise = (() => {
   const b = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate),
     d = b.getChannelData(0);

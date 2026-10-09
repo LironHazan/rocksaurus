@@ -4,7 +4,7 @@ import { playDrums } from '../../audio/drums';
 import { playVocal } from '../../audio/voice';
 import { ding, stretch } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
-import { cueSheet, every, type Cue, type Player } from '../../audio/cue-sheet';
+import { cueSheet, every, quieter, type Cue, type Player } from '../../audio/cue-sheet';
 import type { DrumPart } from '../../audio/drum-patterns';
 import type { VocalPart } from '../../audio/vowels';
 import { BAR, BPM, CUE, DURATION, TRY, TRY_AT } from './timeline';
@@ -314,16 +314,18 @@ const ORGAN = organPart();
 const LEAD = leadPart();
 const DRUMS = drumPart();
 
+// Each Short's sound table has the same shape but different sounds; the likeness is accidental.
+// fallow-ignore-next-line code-duplication
 const PLAYERS: Record<Kind, Player> = {
   bell: (b, w) => ding(b, w, 2093),
   step: fx.footstep,
-  hangers: (b, w) => fx.hangers(b, w),
-  swish: (b, w) => fx.swish(b, w),
+  hangers: fx.hangers,
+  swish: fx.swish,
   sparkle: fx.sparkle,
   rustle: fx.rustle,
   stretch: (b, w) => stretch(b, w, 1.2),
   kaching: fx.kaching,
-  printer: (b, w) => fx.printer(b, w),
+  printer: fx.printer,
   dice: fx.diceRoll,
 };
 
@@ -331,10 +333,8 @@ const SOUND = cueSheet({ duration: DURATION, players: PLAYERS, cues: cues() });
 
 export function soundtrack(bus: AudioNode, t0: number): void {
   SOUND.play(bus, t0);
-  const drums = new GainNode(bus.context, { gain: 0.5 }); // brushes: soft
-  drums.connect(bus);
   playKeyboardPart(bus, t0, ORGAN);
   playKeyboardPart(bus, t0, LEAD);
-  playDrums(drums, t0, DRUMS, { smooth: true });
+  playDrums(quieter(bus, 0.5), t0, DRUMS, { smooth: true }); // brushes: soft
   playVocal(bus, t0, vocal);
 }

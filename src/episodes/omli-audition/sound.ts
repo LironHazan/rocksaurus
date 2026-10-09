@@ -3,6 +3,7 @@ import { playSyllables } from '../../audio/babble';
 import { playBass } from '../../audio/bass';
 import { playDrums } from '../../audio/drums';
 import { playRiff } from '../../audio/guitar';
+import { chatPop, chatSent } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
 import { TYPING } from '../../props/phone';
 import { BASS, DRUMS, GUITAR } from './music';
@@ -32,8 +33,8 @@ function cues(): Cue<Kind>[] {
 const PLAYERS: Record<Kind, Player> = {
   clank: (b, w) => fx.stomp(quieter(b, 0.5), w),
   buzz: fx.vibrate,
-  pop: fx.chatPop,
-  sent: fx.chatSent,
+  pop: chatPop,
+  sent: chatSent,
   tap: fx.keyTap,
   step: fx.stomp, // a big guy
   whoop: (b, w) => fx.cheer(b, w, 1.6),

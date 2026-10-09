@@ -1,6 +1,7 @@
 import { cueSheet, every, quieter, type Cue, type Player } from '../../audio/cue-sheet';
 import { sing } from '../../audio/voice';
 import { playSyllables } from '../../audio/babble';
+import { chatPop, chatSent } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
 import { TYPING } from '../../props/phone';
 import { CHAT, CUE, DURATION, SYLLABLES } from './timeline';
@@ -67,8 +68,8 @@ function cues(): Cue<Kind>[] {
 const PLAYERS: Record<Kind, Player> = {
   step: (b, w) => fx.stomp(quieter(b, 0.45), w),
   vibrate: fx.vibrate,
-  pop: fx.chatPop,
-  sent: fx.chatSent,
+  pop: chatPop,
+  sent: chatSent,
   tap: fx.keyTap,
   rustle: fx.rustle,
   sparkle: fx.sparkle,

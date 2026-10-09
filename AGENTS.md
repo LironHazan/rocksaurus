@@ -6,8 +6,8 @@ previews a Short and records it to video. GitHub Pages deploys `main`.
 
 ## Commands
 
-- `npm run check` — the gate: typecheck, lint, `lint:boundaries`, `lint:dead-code`, format check, tests. Run it before
-  every commit.
+- `npm run check` — the gate: typecheck, lint, `lint:boundaries`, `lint:dead-code`, `lint:audit` (the same Fallow audit
+  CI runs on a PR, against `origin/main`), format check, tests. Run it before every commit.
 - `npm run build` — `tsc -b && vite build`. CI runs it too.
 - `npm run test:e2e` — builds, then Playwright smoke-tests the studio and the watch page in headless Chromium. CI runs
   it on every PR.

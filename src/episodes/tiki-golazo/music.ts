@@ -6,7 +6,7 @@ import { playVocal } from '../../audio/voice';
 import type { SungNote, VocalPart, Vowel } from '../../audio/vowels';
 import { boop } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
-import { cueSheet, type Cue, type Player } from '../../audio/cue-sheet';
+import { cueSheet, quieter, type Cue, type Player } from '../../audio/cue-sheet';
 import { BAR, BPM, CUE, DURATION, touches } from './timeline';
 import { entriesOf } from '../../lib/object';
 
@@ -165,6 +165,8 @@ function cues(): Cue<Kind>[] {
   return out;
 }
 
+// Each Short's sound table has the same shape but different sounds; the likeness is accidental.
+// fallow-ignore-next-line code-duplication
 const PLAYERS: Record<Kind, Player> = {
   whistle: (b, w) => fx.whistle(b, w, 0.18),
   longWhistle: (b, w) => fx.whistle(b, w, 0.7),
@@ -180,10 +182,8 @@ const SOUND = cueSheet({ duration: DURATION, players: PLAYERS, cues: cues() });
 
 export function soundtrack(bus: AudioNode, t0: number): void {
   SOUND.play(bus, t0);
-  const drums = new GainNode(bus.context, { gain: 0.6 });
-  drums.connect(bus);
   playKeyboardPart(bus, t0, PIANO);
-  playDrums(drums, t0, DRUMS, { smooth: true });
+  playDrums(quieter(bus, 0.6), t0, DRUMS, { smooth: true });
   playVocal(bus, t0, SIUU);
   playVocal(bus, t0, CROWD);
 }

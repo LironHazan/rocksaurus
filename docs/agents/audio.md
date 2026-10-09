@@ -21,4 +21,4 @@ Read this before you add music, sound effects or voices, or change `src/audio/` 
 - **Sound effects are a cue sheet** (`src/audio/cue-sheet.ts`): `cueSheet({ duration, players, cues, beds })` sorts
   the cues, throws on one outside the video, and `play(bus, t0)` schedules everything. An episode declares only its
   cues and how each kind sounds; use `every(from, to, step)` for repeats and `quieter(bus, gain)` for distant sounds.
-  The sounds themselves are in `src/audio/foley.ts` (`chatPop`, `chatSent`, `stomp`, …).
+  The sounds themselves are in `src/audio/foley.ts` and `src/audio/sfx.ts` (`stomp`, `chatPop`, …).
