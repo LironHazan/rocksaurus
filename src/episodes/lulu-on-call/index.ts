@@ -26,8 +26,8 @@ import { atPace } from '../../engine/subtitles';
 import { soundtrack, STEPS, GULPS } from './music';
 import { createOffice, DESK_SPOT } from './sets/office';
 import { createTown } from './sets/town';
-import { createHome, SHAKE_SPOT, MAT_SPOT, SHAKER_GRIP, SHAKER_LENGTH, SHAKER_SCALE } from './sets/home';
-import { createBedroom, BED_TOP } from './sets/bedroom';
+import { createHome, SHAKE_SPOT, MAT_SPOT, SHAKER_GRIP, SHAKER_LENGTH, SHAKER_SCALE } from '../../world/lulu-home';
+import { createBedroom, BED_TOP } from '../../world/bedroom';
 
 // Beat sheet (see timeline.ts for the exact cues and captions.ts for the story text)
 //   0–16   office: types the task to the coding agent with her drumsticks, drums on the desk, logs off at 6

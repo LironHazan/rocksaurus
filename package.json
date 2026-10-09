@@ -13,7 +13,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm test"
+    "check": "npm run typecheck && npm run lint && npm run lint:boundaries && npm run format:check && npm test",
+    "lint:boundaries": "depcruise src"
   },
   "dependencies": {
     "@radix-ui/react-slider": "^1.4.7",
@@ -26,6 +27,7 @@
     "three": "^0.186.1"
   },
   "devDependencies": {
+    "@swc/core": "^1.16.13",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
@@ -33,6 +35,7 @@
     "@types/react-dom": "^19.3.0",
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "dependency-cruiser": "^18.5.0",
     "jsdom": "^30.1.1",
     "oxlint": "^1.86.0",
     "prettier": "^3.9.9",
@@ -40,7 +43,7 @@
     "vite": "^8.3.2",
     "vitest": "^5.0.3"
   },
-  "description": "Rocksaurus Dino Studio \u2014 3D dinosaur band shorts made with React, Three.js and Web Audio.",
+  "description": "Rocksaurus Dino Studio — 3D dinosaur band shorts made with React, Three.js and Web Audio.",
   "engines": {
     "node": ">=24"
   }

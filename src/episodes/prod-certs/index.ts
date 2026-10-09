@@ -8,9 +8,10 @@ import { ORNITHO_SEAT, type OrnithomimusRig } from '../../characters/ornithomimu
 import { SEAT_HEIGHT } from '../../props/furniture';
 import { createPhone, type Phone } from '../../props/phone';
 import { linesAt } from '../../world/screen-script';
-import { createBedroom, BED_TOP } from '../lulu-on-call/sets/bedroom';
-import { createCampus } from '../office-besties/sets';
-import { sky, createCup } from '../monday-coffee/sets';
+import { createBedroom, BED_TOP } from '../../world/bedroom';
+import { createCampus } from '../../world/campus';
+import { sky } from '../../world/sky';
+import { createCup } from '../../props/cup';
 import { withOutro } from '../outro';
 import { CAPTIONS } from './captions';
 import { createAmazaurus, createEilon, createRorit, createSagish, createTaluzarus } from './cast';

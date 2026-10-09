@@ -21,8 +21,9 @@ import { addMohawk } from '../../props/mohawk';
 import { addTattoo } from '../../props/tattoo';
 import { chatView, createPhone, phonePov, type Phone } from '../../props/phone';
 import { addJersey, HOME_KIT, TREX_BODY } from '../../props/soccer';
-import { createBedroom, BED_TOP } from '../lulu-on-call/sets/bedroom';
+import { createBedroom, BED_TOP } from '../../world/bedroom';
 import { CAPTIONS } from './captions';
+import { createCup } from '../../props/cup';
 import {
   ARMCHAIR,
   CAFE_CHAIRS,
@@ -32,7 +33,6 @@ import {
   PARENT_SPOT,
   SCHOOL_DOOR,
   SCHOOLS,
-  createCup,
   createSchoolGate,
   createStreetCafe,
   createTherapy,

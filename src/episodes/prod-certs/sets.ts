@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { box, createRoom, createScreen, createWallClock, cylinder, mat, picture } from '../../world/interior';
 import { createLaptop } from '../../props/laptop';
 import { createSeat } from '../../props/furniture';
-import { createCup } from '../monday-coffee/sets';
+import { createCup } from '../../props/cup';
 import { textTexture } from '../../world/text-texture';
 
 /** Where people are in the war room (camera looks toward -z). */
