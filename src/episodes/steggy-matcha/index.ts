@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { seg, ease, lerp } from '../../engine/math';
-import { disposeObject } from '../../engine/dispose';
 import { atPace } from '../../engine/subtitles';
 import type { Episode } from '../../engine/types';
+import { direct, overShoulder, type Shot } from '../../engine/director';
 import { createStegosaurus, STEGGY_COLORS } from '../../characters/stegosaurus';
 import { createRory, idle, resetPose } from '../../characters/rory';
 import { reachArm, armOf } from '../../characters/reach';
@@ -28,12 +28,6 @@ import { createCafe, TABLE_TOP, RORY_SEAT, RORY_BAR, STEGGY_SEAT, DOOR_SPOT } fr
 //   0–19   Steggy's room at his dad's place: a wall of CDs, his keyboard, he starts his article
 //   19–31  his baby sister nudges him until his focus is gone; he grabs the laptop and leaves
 //   31–43.5 the coffee shop: Rory brings two matcha and sits with him; cheers, a sip, and a happy "ahh"
-
-type Vec = readonly [number, number, number];
-interface Shot {
-  cam: Vec;
-  look: Vec;
-}
 
 const scene = (id: SceneSpan['id']) => SCENES.find(s => s.id === id)!;
 const ROOM_KEYS = keystrokes(ROOM_DOC).filter(k => k < scene('sister').from);
@@ -67,7 +61,6 @@ const episode: Episode = {
   },
 
   setup(stage) {
-    const { camera } = stage;
     const room = createSteggyRoom();
     const cafe = createCafe();
 
@@ -122,11 +115,6 @@ const episode: Episode = {
       }
     }
 
-    /** A screen that faces a character, shot from beside them so their head doesn't block it. */
-    function overShoulder(pos: THREE.Vector3, normal: THREE.Vector3, dist: number, rise: number, angle: number): Shot {
-      const dir = tmp.copy(normal).setY(0).normalize().applyAxisAngle(THREE.Object3D.DEFAULT_UP, angle);
-      return { cam: [pos.x + dir.x * dist, pos.y + rise, pos.z + dir.z * dist], look: [pos.x, pos.y, pos.z] };
-    }
     function screenOf(laptop: typeof room.laptop) {
       laptop.group.updateMatrixWorld(true);
       laptop.screen.mesh.getWorldPosition(v);
@@ -421,30 +409,26 @@ const episode: Episode = {
       return { cam: [0.2, 3.3, lerp(7.6, 6.4, push)], look: [0, 2.6, 0.5] };
     }
 
-    let current: THREE.Scene | null = null;
-    function update(videoTime: number) {
-      const t = videoTime / PACE; // story time
-      const s = sceneAt(t);
-      const target = s.id === 'cafe' ? cafe.scene : room.scene;
-      if (current !== target) {
-        target.add(steggy.root);
-        stage.scene = target;
-        current = target;
-      }
-      steggy.root.visible = true;
-      steggy.root.rotation.set(0, 0, 0);
-      resetAll(t);
-      const shot = s.id === 'room' ? roomScene(t) : s.id === 'sister' ? sisterScene(t) : cafeScene(t);
-      camera.position.set(...shot.cam);
-      camera.lookAt(...shot.look);
-    }
+    const cast = [steggy.root];
+    const director = direct(
+      stage,
+      {
+        room: { scene: room.scene, cast, frame: roomScene },
+        sister: { scene: room.scene, cast, frame: sisterScene },
+        cafe: { scene: cafe.scene, cast, frame: cafeScene },
+      },
+      t => sceneAt(t).id,
+    );
 
     return {
-      update,
-      dispose() {
-        disposeObject(room.scene);
-        disposeObject(cafe.scene);
+      update(videoTime) {
+        const t = videoTime / PACE; // story time
+        steggy.root.visible = true;
+        steggy.root.rotation.set(0, 0, 0);
+        resetAll(t);
+        director.update(t);
       },
+      dispose: director.dispose,
     };
   },
 

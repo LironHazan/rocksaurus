@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ease, lerp, seg } from '../../engine/math';
-import { disposeObject } from '../../engine/dispose';
 import type { Episode } from '../../engine/types';
+import { cuts, direct, type Shot } from '../../engine/director';
 import { createTyrannosaurus, TIKI_COLORS } from '../../characters/tyrannosaurus';
 import { createParasaurolophus, PARIS_COLORS } from '../../characters/parasaurolophus';
 import { createStegosaurus, STEGGY_COLORS } from '../../characters/stegosaurus';
@@ -51,26 +51,23 @@ import { withOutro } from '../outro';
 //   50.2–55   Lulu gets the selfie and flops back on the couch
 //   then the channel's end card (outro.ts): Rory with a sign, subscribe for more Rocksaurus shorts
 
-type Vec = readonly [number, number, number];
-interface Shot {
-  cam: Vec;
-  look: Vec;
-}
 type Parent = 'tiki' | 'paris' | 'steggy';
 type Where = Parent | 'bedroom' | 'therapy' | 'cafe';
 
 /** Which set we're in at time t: each parent's school, Rory's room, the therapist's, the café. */
-function where(t: number): Where {
-  if (t < CUE.parisSchool[0]) return 'tiki';
-  if (t < CUE.steggySchool[0]) return 'paris';
-  if (t < CUE.ask[0]) return 'steggy';
-  if (t < CUE.parisPhone[0]) return 'tiki';
-  if (t < CUE.steggyPhone[0]) return 'paris';
-  if (t < CUE.tikiPhone[0]) return 'steggy';
-  if (t < CUE.rory[0]) return 'tiki';
-  if (t < CUE.therapy[0]) return 'bedroom';
-  return t >= CUE.cafe[0] && t < CUE.end ? 'cafe' : 'therapy';
-}
+const where = cuts<Where>([
+  [0, 'tiki'],
+  [CUE.parisSchool[0], 'paris'],
+  [CUE.steggySchool[0], 'steggy'],
+  [CUE.ask[0], 'tiki'],
+  [CUE.parisPhone[0], 'paris'],
+  [CUE.steggyPhone[0], 'steggy'],
+  [CUE.tikiPhone[0], 'tiki'],
+  [CUE.rory[0], 'bedroom'],
+  [CUE.therapy[0], 'therapy'],
+  [CUE.cafe[0], 'cafe'],
+  [CUE.end, 'therapy'],
+]);
 
 const SUB = 'Tiki, Paris, Steggy, Lulu, Rory';
 /** How far out and up each parent holds their phone: clear of a big belly (or a goth dress). */
@@ -268,7 +265,6 @@ const episode: Episode = {
     };
     for (const w of ['cafe', 'therapy', 'bedroom', 'steggy', 'paris', 'tiki'] as const)
       for (const o of CAST[w]) scenes[w].add(o);
-    let current: Where | null = null;
 
     const v = new THREE.Vector3(),
       w = new THREE.Vector3();
@@ -639,29 +635,30 @@ const episode: Episode = {
     const cafeFlash = new THREE.PointLight(0xffffff, 0, 12, 1.5);
     cafe.scene.add(cafeFlash);
 
-    function update(t: number) {
-      for (const head of HEADS) head.visible = true;
-      camera.up.set(0, 1, 0);
-      const here = where(t);
-      if (here !== current) {
-        for (const o of CAST[here]) scenes[here].add(o);
-        stage.scene = scenes[here];
-        current = here;
-      }
-      let shot: Shot;
-      if (here === 'tiki' || here === 'paris' || here === 'steggy') shot = schoolScene(here, t);
-      else if (here === 'bedroom') shot = bedroomScene(t);
-      else if (here === 'cafe') shot = cafeScene(t);
-      else shot = therapyScene(t);
-      camera.position.set(...shot.cam);
-      camera.lookAt(...shot.look);
-    }
+    const school = (who: Parent) => ({
+      scene: scenes[who],
+      cast: CAST[who],
+      frame: (t: number) => schoolScene(who, t),
+    });
+    const director = direct(
+      stage,
+      {
+        tiki: school('tiki'),
+        paris: school('paris'),
+        steggy: school('steggy'),
+        bedroom: { scene: scenes.bedroom, cast: CAST.bedroom, frame: bedroomScene },
+        therapy: { scene: scenes.therapy, cast: CAST.therapy, frame: therapyScene },
+        cafe: { scene: scenes.cafe, cast: CAST.cafe, frame: cafeScene },
+      },
+      where,
+    );
 
     return {
-      update,
-      dispose() {
-        for (const s of Object.values(scenes)) disposeObject(s);
+      update(t) {
+        for (const head of HEADS) head.visible = true;
+        director.update(t);
       },
+      dispose: director.dispose,
     };
   },
 

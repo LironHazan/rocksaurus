@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { seg, ease, lerp, clamp01 } from '../../engine/math';
-import { disposeObject } from '../../engine/dispose';
 import type { Episode } from '../../engine/types';
+import { direct, overShoulder, type Shot } from '../../engine/director';
 import { createLulu, idleLulu } from '../../characters/lulu';
 import { armOf, reachArm, releaseArm } from '../../characters/reach';
 import { addPonytail } from '../../props/ponytail';
@@ -36,12 +36,6 @@ import { createBedroom, BED_TOP } from '../../world/bedroom';
 //   42–54  pilates: neck stretches, then "the hundred"
 //   54–76  3 AM: asleep, the pager goes off, panics, hotfixes prod with the agent, git blame: herself
 
-type Vec = readonly [number, number, number];
-interface Shot {
-  cam: Vec;
-  look: Vec;
-}
-
 const OFFICE_KEYS = keystrokes(OFFICE_SCRIPT);
 const NIGHT_KEYS = keystrokes(NIGHT_SCRIPT);
 const scene = (id: SceneSpan['id']) => SCENES.find(s => s.id === id)!;
@@ -72,7 +66,6 @@ const episode: Episode = {
   captions: atPace(playedCaptions(CAPTIONS), PACE),
 
   setup(stage) {
-    const { camera } = stage;
     const office = createOffice();
     const town = createTown();
     const home = createHome();
@@ -159,18 +152,6 @@ const episode: Episode = {
       elbow.x += side * 0.3;
       elbow.y -= 0.15;
       reachArm(pivot, target, elbow);
-    }
-
-    /**
-     * A shot of a screen that faces Lulu, from beside her: `angle` swings the camera off the screen's
-     * axis (radians, around the vertical) so her head doesn't block it; `rise` lifts it.
-     */
-    function overShoulder(pos: THREE.Vector3, normal: THREE.Vector3, dist: number, rise: number, angle: number): Shot {
-      const dir = tmp.copy(normal).setY(0).normalize().applyAxisAngle(THREE.Object3D.DEFAULT_UP, angle);
-      return {
-        cam: [pos.x + dir.x * dist, pos.y + rise, pos.z + dir.z * dist],
-        look: [pos.x, pos.y, pos.z],
-      };
     }
 
     function officeScene(t: number): Shot {
@@ -490,37 +471,27 @@ const episode: Episode = {
       return { cam: [0.4, 4.4, 11.5], look: [-0.6, 2, -0.5] }; // back to the opening shot: asleep again
     }
 
-    let current: THREE.Scene | null = null;
-    function update(videoTime: number) {
-      const t = scriptTime(videoTime / PACE); // script time (the walk is shortened)
-      const s = sceneAt(t);
-      const target = scenes[s.id];
-      if (current !== target) {
-        target.add(lulu.root);
-        stage.scene = target;
-        current = target;
-      }
-      resetLulu();
-      for (const part of flannel) part.visible = s.id === 'office';
-      const shot =
-        s.id === 'office'
-          ? officeScene(t)
-          : s.id === 'walk'
-            ? walkScene(t)
-            : s.id === 'gains'
-              ? gainsScene(t)
-              : s.id === 'pilates'
-                ? pilatesScene(t)
-                : nightScene(t);
-      camera.position.set(...shot.cam);
-      camera.lookAt(...shot.look);
-    }
+    const cast = [lulu.root];
+    const director = direct(
+      stage,
+      {
+        office: { scene: scenes.office, cast, frame: officeScene },
+        walk: { scene: scenes.walk, cast, frame: walkScene },
+        gains: { scene: scenes.gains, cast, frame: gainsScene },
+        pilates: { scene: scenes.pilates, cast, frame: pilatesScene },
+        night: { scene: scenes.night, cast, frame: nightScene },
+      },
+      t => sceneAt(t).id,
+    );
 
     return {
-      update,
-      dispose() {
-        for (const sc of new Set(Object.values(scenes))) disposeObject(sc);
+      update(videoTime) {
+        const t = scriptTime(videoTime / PACE); // script time (the walk is shortened)
+        resetLulu();
+        for (const part of flannel) part.visible = sceneAt(t).id === 'office';
+        director.update(t);
       },
+      dispose: director.dispose,
     };
   },
 

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ease, lerp, seg } from '../../engine/math';
-import { disposeObject } from '../../engine/dispose';
 import type { Episode } from '../../engine/types';
+import { cuts, direct, type Shot } from '../../engine/director';
 import { idle, resetPose } from '../../characters/rory';
 import { armOf, reachArm, releaseArm, sideOf } from '../../characters/reach';
 import { SEAT_HEIGHT } from '../../props/furniture';
@@ -27,13 +27,11 @@ import { soundtrack } from './sound';
 //   41.4–47  Rory: "You're IN!" · Tiki: "…temporarily. 😤"
 //   then the channel's end card (outro.ts)
 
-type Vec = readonly [number, number, number];
-interface Shot {
-  cam: Vec;
-  look: Vec;
-}
 type Where = 'gym' | 'stage';
-const where = (t: number): Where => (t < CUE.audition[0] ? 'gym' : 'stage');
+const where = cuts<Where>([
+  [0, 'gym'],
+  [CUE.audition[0], 'stage'],
+]);
 const BEAT = 60 / BPM;
 
 const episode: Episode = {
@@ -77,7 +75,6 @@ const episode: Episode = {
     venue.scene.add(omli.root);
 
     const CAST: Record<Where, THREE.Object3D[]> = { gym: [], stage: [tiki.root] };
-    let current: Where | null = null;
     const v = new THREE.Vector3();
 
     /** Tiki, sitting: hips on the seat, feet forward, the broken arm in its sling. */
@@ -226,25 +223,21 @@ const episode: Episode = {
       return { cam: [PLOT.tiki.x + 2.6, 3.4, PLOT.tiki.z + 5.2], look: [PLOT.tiki.x, 2.6, PLOT.tiki.z] };
     }
 
-    function update(t: number) {
-      camera.up.set(0, 1, 0);
-      tiki.head.visible = lifter.head.visible = true;
-      const here = where(t);
-      if (here !== current) {
-        for (const o of CAST[here]) scenes[here].add(o);
-        stage.scene = scenes[here];
-        current = here;
-      }
-      const shot = here === 'gym' ? gymScene(t) : stageScene(t);
-      camera.position.set(...shot.cam);
-      camera.lookAt(...shot.look);
-    }
+    const director = direct(
+      stage,
+      {
+        gym: { scene: scenes.gym, cast: CAST.gym, frame: gymScene },
+        stage: { scene: scenes.stage, cast: CAST.stage, frame: stageScene },
+      },
+      where,
+    );
 
     return {
-      update,
-      dispose() {
-        for (const s of Object.values(scenes)) disposeObject(s);
+      update(t) {
+        tiki.head.visible = lifter.head.visible = true;
+        director.update(t);
       },
+      dispose: director.dispose,
     };
   },
 
