@@ -2,10 +2,9 @@ import type { KeyboardPart, KeyNote } from '../../audio/keyboard-part';
 import type { DrumPart } from '../../audio/drum-patterns';
 
 // Prog-rock in E minor, 4/4 @ 120 BPM: 1 eighth = 0.25 s, 1 bar = 2 s, 6 bars = 12 s.
-export const BPM = 120;
+const BPM = 120;
 export const BEAT = 60 / BPM;
 export const ROCK_IN = 2; // seconds: the band kicks in
-export const LEAD_IN = 6; // seconds: Steggy switches to the synth lead
 export const GLISS = 10; // seconds: lightning run down the keyboard
 export const FINAL = 11; // seconds: final chord
 

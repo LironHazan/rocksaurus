@@ -3,11 +3,11 @@ import type { Player } from './player';
 
 const TYPES = ['video/mp4;codecs=avc1,mp4a.40.2', 'video/webm;codecs=vp9,opus', 'video/webm'];
 /** Frames per second recorded, unless the caller asks for another rate. */
-export const DEFAULT_FPS = 30;
+const DEFAULT_FPS = 30;
 /** 16 Mbps: well above YouTube's 1080p30 recommendation (8 Mbps), so its re-encode keeps edges and on-screen text sharp. */
-export const VIDEO_BITRATE = 16_000_000;
+const VIDEO_BITRATE = 16_000_000;
 /** 192 kbps stereo AAC/Opus. */
-export const AUDIO_BITRATE = 192_000;
+const AUDIO_BITRATE = 192_000;
 /** How long a download's object URL lives: long enough for the browser to start the download. */
 const REVOKE_AFTER_MS = 10_000;
 

@@ -5,3 +5,4 @@ dist
 .agents
 test-results
 playwright-report
+.fallow

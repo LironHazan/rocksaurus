@@ -11,9 +11,9 @@ import { ROOM_DOC } from './documents';
 // stab (an original groove in A mixolydian). Times are story seconds; it plays PACE times slower.
 
 /** Story tempo (so ~111 BPM as heard). */
-export const BPM = 150;
+const BPM = 150;
 /** Story seconds per eighth / sixteenth note. */
-export const EIGHTH = 30 / BPM;
+const EIGHTH = 30 / BPM;
 const SIXTEENTH = EIGHTH / 2;
 const BAR = 16 * SIXTEENTH;
 
@@ -99,14 +99,14 @@ function phraseFor(bar: number, lastBar: number): Phrase {
   return (t >= sister.from && t < scene('cafe').from ? poking : home)[bar % 4]!;
 }
 
-export interface Events {
+interface Events {
   bass: { at: number; note: string; len: number; kind: SlapKind }[];
   stabs: { at: number; chord: readonly string[] }[];
   pops: number[];
 }
 
 /** Every bass note, stab and mouth pop, in story seconds. */
-export function groove(): Events {
+function groove(): Events {
   const bars = Math.floor(scene('cafe').to / BAR);
   const ev: Events = { bass: [], stabs: [], pops: [] };
   for (let bar = 0; bar < bars; bar++) {

@@ -1,5 +1,5 @@
 // 4/4 @ 120 BPM: 1 eighth = 0.25 s, 1 bar = 2 s, 6 bars = 12 s.
-export const BPM = 120;
+const BPM = 120;
 export const BEAT = 60 / BPM;
 
 import type { BassPart } from '../../audio/bass';

@@ -3,7 +3,7 @@ import { midi as toMidi, type Note } from '../audio/notes';
 import { ball, enableShadows } from '../characters/materials';
 
 /** Lowest and highest keys (3 octaves). */
-export const KEY_RANGE = { low: toMidi('C3'), high: toMidi('B5') } as const;
+const KEY_RANGE = { low: toMidi('C3'), high: toMidi('B5') } as const;
 const WHITE_W = 0.085;
 const BLACK_PCS = new Set([1, 3, 6, 8, 10]);
 const KEYS_TOP = 1.08; // low stand, so the player's shirt shows above the keys

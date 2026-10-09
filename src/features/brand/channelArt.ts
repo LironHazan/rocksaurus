@@ -4,7 +4,7 @@ import { createRockStage } from '../../world/rock-stage';
 import { createRockerRory } from '../../characters/rocker';
 import { disposeObject } from '../../engine/dispose';
 
-export const PROFILE_SIZE = 800;
+const PROFILE_SIZE = 800;
 export const BANNER = { width: 2560, height: 1440, safeWidth: 1546, safeHeight: 423 } as const;
 
 interface ShotOptions {

@@ -1,4 +1,4 @@
-import { mouthOf, speakerOf, syllables, type SpokenLine, type Voice } from '../../audio/babble';
+import { mouthOf, syllables, type SpokenLine, type Voice } from '../../audio/babble';
 import type { TimedChatLine } from '../../props/phone';
 
 // Tiki Taka broke his arm playing in the dads' football league, and the band has a big gig next week. Lulu DMs her
@@ -55,10 +55,9 @@ export const LINES: readonly SpokenLine<Who>[] = [
   { from: 41.6, to: 43.6, who: 'Rory', text: 'You’re IN! 🤘' },
   { from: 44.0, to: 46.6, who: 'Tiki Taka', text: '…temporarily. 😤' },
 ];
-export const VOICES: Record<Who, Voice> = {
+const VOICES: Record<Who, Voice> = {
   Rory: { notes: ['E4', 'G4', 'A4', 'B4'], rate: 0.13 },
   'Tiki Taka': { notes: ['G3', 'A3', 'B3', 'D4'], rate: 0.16 },
 };
 export const SYLLABLES = syllables(LINES, VOICES, 7);
 export const mouthAt = (who: Who, t: number) => mouthOf(SYLLABLES, who, t);
-export const speakerAt = (t: number): Who | null => speakerOf(LINES, t);

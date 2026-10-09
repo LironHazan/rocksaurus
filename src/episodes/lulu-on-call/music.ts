@@ -39,7 +39,7 @@ const office = scene('office'),
   pilates = scene('pilates'),
   night = scene('night');
 
-export const SECTIONS: readonly Section[] = [
+const SECTIONS: readonly Section[] = [
   {
     at: office.from, // lo-fi: lazy kick, ghosted snare, soft hats
     part: groove(office.bpm, office.to - office.from, {
@@ -89,7 +89,7 @@ export const SECTIONS: readonly Section[] = [
 ];
 
 /** Drum hits the animation can follow (e.g. her steps), in episode seconds. */
-export function sectionHits(index: number, name: DrumName): number[] {
+function sectionHits(index: number, name: DrumName): number[] {
   const s = SECTIONS[index]!;
   const step = stepOf(s.part.bpm);
   return [...(s.part.tracks[name] ?? '')].flatMap((ch, i) => (ch === '.' ? [] : [s.at + i * step]));
@@ -100,7 +100,7 @@ export const STEPS = sectionHits(1, 'kick').filter(t => t >= CUE.walkStart && t 
 const SHAKES = Array.from({ length: 10 }, (_, i) => CUE.shake + i * 0.3);
 const GULPS = [0, 1, 2, 3].map(i => CUE.drink + 0.5 + i * 0.6);
 
-export { SHAKES, GULPS };
+export { GULPS };
 
 export function soundtrack(bus: AudioNode, t0: number): void {
   const drums = new GainNode(bus.context, { gain: 0.42 }); // soft: it's background

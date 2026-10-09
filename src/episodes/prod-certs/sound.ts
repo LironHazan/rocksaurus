@@ -10,16 +10,16 @@ import { CUE, DURATION, FIX_SCRIPT, LAPTOP_SCRIPT, SYLLABLES } from './timeline'
 // feet, the cheer when prod comes back, morning birds, snores, Eilon's footsteps, one big collective sigh. And the
 // voices: dino babble, the same syllables the mouths move to.
 
-export interface Bed {
+interface Bed {
   from: number;
   to: number;
   kind: BedKind;
 }
 
 /** Background beds: a quiet room everywhere indoors. */
-export const BEDS: readonly Bed[] = [{ from: CUE.campus[1], to: DURATION, kind: 'room' }];
+const BEDS: readonly Bed[] = [{ from: CUE.campus[1], to: DURATION, kind: 'room' }];
 
-export type FxKind =
+type FxKind =
   | 'cricket'
   | 'page'
   | 'thud'
@@ -33,7 +33,7 @@ export type FxKind =
   | 'bird'
   | 'snore'
   | 'sigh';
-export interface Fx {
+interface Fx {
   at: number;
   kind: FxKind;
 }
@@ -41,7 +41,7 @@ export interface Fx {
 /** Taluzarus never stands still: his feet, the whole night in the war room. */
 export const FIDGET_STEP = 0.3;
 
-export function effects(): Fx[] {
+function effects(): Fx[] {
   const out: Fx[] = [
     { at: CUE.alert, kind: 'page' },
     { at: CUE.alert + 0.7, kind: 'page' },

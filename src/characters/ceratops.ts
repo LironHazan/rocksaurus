@@ -5,7 +5,7 @@ import { textTexture } from '../world/text-texture';
 import { ROUND } from '../world/interior';
 import type { CharacterRig } from './types';
 
-export const SILVI_COLORS = {
+const SILVI_COLORS = {
   body: 0xffc79e, // peach
   belly: 0xfff3e6,
   spots: 0xf2a77a,

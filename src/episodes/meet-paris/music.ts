@@ -2,7 +2,7 @@ import type { VocalPart, SungNote } from '../../audio/vowels';
 import type { DrumPart } from '../../audio/drum-patterns';
 
 // Rock in E minor, 4/4 @ 120 BPM: 1 eighth = 0.25 s, 1 bar = 2 s, 6 bars = 12 s.
-export const BPM = 120;
+const BPM = 120;
 export const BEAT = 60 / BPM;
 export const SING_IN = 2; // seconds: she starts singing
 export const BELT = 10; // seconds: the big high note

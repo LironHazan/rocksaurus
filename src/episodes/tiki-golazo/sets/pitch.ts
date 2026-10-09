@@ -7,7 +7,7 @@ import { createGoal } from '../../../props/soccer';
 import { createSchool, createTree } from '../../../world/school';
 
 // Where things are, for the choreography. The camera looks from +z; Tiki attacks toward +x.
-export const FIELD = { halfX: 15, halfZ: 9 };
+const FIELD = { halfX: 15, halfZ: 9 };
 /** The goal line Tiki scores on; the goal's mouth faces −x. */
 export const GOAL = { x: 12, width: 7, height: 3.6 };
 /** The far touchline, where the kids stand and cheer. */

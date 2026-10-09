@@ -67,7 +67,7 @@ export const LINES: readonly Line[] = [
 ];
 
 /** Each voice's pitches (low to high): Lulu's low and warm, Silvi's bright, Rorit's quick and high. */
-export const VOICES: Record<Member, Voice> = {
+const VOICES: Record<Member, Voice> = {
   Lulu: { notes: ['F3', 'G3', 'A3', 'C4'], rate: 0.17 },
   Silvi: { notes: ['C4', 'D4', 'E4', 'G4'], rate: 0.15 },
   Rorit: { notes: ['F4', 'G4', 'A4', 'C5'], rate: 0.12 },

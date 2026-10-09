@@ -171,7 +171,7 @@ export function createAmazaurus() {
   return rig;
 }
 
-export const EILON_COLORS = { body: 0xff9a7a, belly: 0xfff0e0, bumps: 0xe8765a, cheeks: 0xffb3c1 };
+const EILON_COLORS = { body: 0xff9a7a, belly: 0xfff0e0, bumps: 0xe8765a, cheeks: 0xffb3c1 };
 
 /** Rory's build, measured (see createRory): the body ellipsoid a shirt wraps, and the head. */
 const RORY_FIT: RigFit = { torso: { center: [0, 1.2, 0], radii: [1, 1.1, 0.95] }, head: [1, 0.92, 1] };

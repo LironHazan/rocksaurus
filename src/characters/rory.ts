@@ -3,7 +3,7 @@ import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './ma
 import { growTail } from './tail';
 import type { CharacterRig } from './types';
 
-export const RORY_COLORS = {
+const RORY_COLORS = {
   body: 0xa8e6cf, // mint green
   belly: 0xfff3dc, // cream
   bumps: 0x7fd1ae,

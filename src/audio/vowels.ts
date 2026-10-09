@@ -10,7 +10,7 @@ export const FORMANTS: Record<Vowel, readonly [number, number, number]> = {
 };
 
 /** How wide the mouth opens for each vowel (0..1) — drives the jaw animation. */
-export const MOUTH_OPEN: Record<Vowel, number> = { a: 1, o: 0.8, e: 0.6, u: 0.45, i: 0.35 };
+const MOUTH_OPEN: Record<Vowel, number> = { a: 1, o: 0.8, e: 0.6, u: 0.45, i: 0.35 };
 
 /** [eighth, note, lengthInEighths, vowel = 'a', velocity = 0.7] */
 export type SungNote = readonly [at: number, note: string, len: number, vowel?: Vowel, vel?: number];

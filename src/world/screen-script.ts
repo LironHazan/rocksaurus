@@ -18,7 +18,7 @@ export interface ShownLine {
 }
 
 /** Characters of a line visible at time t. */
-export function visibleChars(line: ScriptLine, t: number): number {
+function visibleChars(line: ScriptLine, t: number): number {
   if (t < line.at) return 0;
   if (!line.cps) return line.text.length;
   return Math.min(line.text.length, Math.floor((t - line.at) * line.cps));
