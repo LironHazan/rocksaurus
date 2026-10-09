@@ -13,7 +13,10 @@ export interface GuitarPart {
 }
 
 /** Rory on guitar: headbangs on the beat, paws on the strings and neck, strums every note, big pose at the end. */
-export function createGuitarist(part: GuitarPart, clock: SongClock): Performer {
+export function createGuitarist(
+  part: GuitarPart,
+  clock: SongClock,
+): Performer & { rig: ReturnType<typeof createRockerRory> } {
   const rory = createRockerRory();
   const root = new THREE.Group();
   root.add(rory.root);
@@ -27,6 +30,7 @@ export function createGuitarist(part: GuitarPart, clock: SongClock): Performer {
 
   return {
     root,
+    rig: rory,
     update(t) {
       const act = clock.activity(t);
       const hit = beatPulse(t, clock.beat);

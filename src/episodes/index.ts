@@ -9,6 +9,7 @@ import parisRotHotic from './paris-rot-hotic';
 import meetSteggy from './meet-steggy';
 import meetTiki from './meet-tiki';
 import tikiGolazo from './tiki-golazo';
+import omliAudition from './omli-audition';
 import meetLulu from './meet-lulu';
 import luluOnCall from './lulu-on-call';
 import officeBesties from './office-besties';
@@ -27,7 +28,7 @@ export interface EpisodeFolder {
 export const folders: readonly EpisodeFolder[] = [
   { id: 'the-band', title: 'The Band', episodes: [bandLive, mondayCoffee] },
   { id: 'meet-the-band', title: 'Meet the Band', episodes: [meetRory, meetParis, meetSteggy, meetTiki, meetLulu] },
-  { id: 'tiki', title: 'Tiki Taka', episodes: [tikiGolazo] },
+  { id: 'tiki', title: 'Tiki Taka', episodes: [tikiGolazo, omliAudition] },
   { id: 'paris', title: 'Paris', episodes: [parisRotHotic] },
   { id: 'lulu', title: 'Lulu', episodes: [luluOnCall, officeBesties] },
   { id: 'steggy', title: 'Steggy', episodes: [steggyMatcha] },

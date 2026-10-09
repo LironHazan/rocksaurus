@@ -16,8 +16,10 @@ export interface BassPart {
   notes: readonly (readonly [number, string, number, number?])[];
 }
 
-/** Tiki Taka on bass: cool nods, forearm over the body, paws on strings and neck following the notes. */
-export function createBassist(part: BassPart, clock: SongClock): Performer {
+type BassistRig = ReturnType<typeof createTyrannosaurus>;
+
+/** Tiki Taka as he plays: cap and sunglasses. */
+export function tikiOnBass(): BassistRig {
   const tiki = createTyrannosaurus();
   addCap(tiki, { scale: 0.72, position: [0, 0.5, 0.15], tilt: -0.05 });
   addSunglasses(tiki.head, {
@@ -27,7 +29,23 @@ export function createBassist(part: BassPart, clock: SongClock): Performer {
     ],
     size: 0.24,
   });
-  const bass = createGuitar({ color: 0xff8c42, neck: 2.1, strings: 4 });
+  return tiki;
+}
+
+export interface BassistOptions {
+  /** Who's playing: any T-Rex build (the bass hangs on its posture). Tiki Taka by default. */
+  rig?: BassistRig;
+  bassColour?: number;
+}
+
+/** A T-Rex on bass (Tiki Taka unless told otherwise): cool nods, forearm over the body, paws following the notes. */
+export function createBassist(
+  part: BassPart,
+  clock: SongClock,
+  { rig = tikiOnBass(), bassColour = 0xff8c42 }: BassistOptions = {},
+): Performer & { rig: BassistRig } {
+  const tiki = rig;
+  const bass = createGuitar({ color: bassColour, neck: 2.1, strings: 4 });
   bass.position.set(0.25, 1.45, 1.22);
   bass.rotation.set(0.05, 0, 1.0);
   enableShadows(bass);
@@ -47,6 +65,7 @@ export function createBassist(part: BassPart, clock: SongClock): Performer {
 
   return {
     root,
+    rig: tiki,
     update(t) {
       const act = clock.activity(t);
       const hit = beatPulse(t, clock.beat);

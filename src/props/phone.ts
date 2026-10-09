@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { ROUND } from '../world/interior';
 import { textTexture } from '../world/text-texture';
+import { reachArm } from '../characters/reach';
 
 /** One message in a group chat. */
 export interface ChatLine {
@@ -208,22 +209,22 @@ function paintChat(ctx: CanvasRenderingContext2D, view: ChatView, style: ChatSty
   ctx.fill();
 
   // messages, newest just above the bar, stacked upward
-  const MAX = W * 0.74;
+  const MAX = W * 0.8;
   let y = BAR_Y - 40;
   for (let i = view.lines.length - 1; i >= 0 && y > 260; i--) {
     const line = view.lines[i]!;
     const mine = line.from === style.owner;
     const firstOfRun = view.lines[i - 1]?.from !== line.from;
-    ctx.font = FONT(32);
+    ctx.font = FONT(36);
     const rows = wrap(ctx, line.text, MAX - 40);
     const textW = Math.max(...rows.map(r => ctx.measureText(r).width));
     const lastW = ctx.measureText(rows.at(-1)!).width;
-    const nameH = !mine && firstOfRun ? 32 : 0;
-    ctx.font = FONT(24, 700);
+    const nameH = !mine && firstOfRun ? 34 : 0;
+    ctx.font = FONT(26, 700);
     const nameW = nameH ? ctx.measureText(line.from).width : 0;
     const metaW = mine ? 112 : 78;
     const fitsBeside = lastW + metaW < MAX - 40;
-    const h = rows.length * 40 + 22 + nameH + (fitsBeside ? 0 : 26);
+    const h = rows.length * 45 + 22 + nameH + (fitsBeside ? 0 : 26);
     const w = Math.min(MAX, Math.max(textW + (rows.length === 1 && fitsBeside ? metaW : 0), nameW) + 40);
     const x = mine ? W - 18 - w : 18;
     const top = y - h;
@@ -247,12 +248,12 @@ function paintChat(ctx: CanvasRenderingContext2D, view: ChatView, style: ChatSty
     }
     if (nameH) {
       ctx.fillStyle = style.colours[line.from] ?? C.accent;
-      ctx.font = FONT(24, 700);
-      ctx.fillText(line.from, x + 20, top + 26);
+      ctx.font = FONT(26, 700);
+      ctx.fillText(line.from, x + 20, top + 28);
     }
     ctx.fillStyle = C.text;
-    ctx.font = FONT(32);
-    rows.forEach((r, k) => ctx.fillText(r, x + 20, top + nameH + 30 + k * 40));
+    ctx.font = FONT(36);
+    rows.forEach((r, k) => ctx.fillText(r, x + 20, top + nameH + 33 + k * 45));
     // the time, and two blue ticks on your own
     ctx.font = FONT(21);
     ctx.fillStyle = mine ? 'rgba(233,237,239,0.6)' : C.meta;
@@ -356,6 +357,9 @@ export function createPhone(style: ChatStyle, { height = 1.0, colour = 0x2c2c30 
   const draw = (ctx: CanvasRenderingContext2D) => paintChat(ctx, current, style);
   const tex = textTexture(W * RES, H * RES, draw, ['700 40px Fredoka', '600 40px Fredoka']);
   tex.anisotropy = 16;
+  // close-ups show the screen at roughly its own size: plain linear filtering keeps small text sharp (mipmaps blur it)
+  tex.generateMipmaps = false;
+  tex.minFilter = THREE.LinearFilter;
   const screen = new THREE.Mesh(screenGeo, new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }));
   screen.position.z = front.position.z + 0.002;
   group.add(screen);
@@ -438,4 +442,64 @@ export function chatView(chat: readonly TimedChatLine[], t: number, owner: strin
     typing: pending && !mine ? pending.from : null,
     draft: letters.slice(0, Math.ceil(letters.length * (pending?.progress ?? 0))).join(''),
   };
+}
+
+// ── holding it ───────────────────────────────────────────────
+
+export interface HoldOptions {
+  /** How far out in front of the shoulders, and how far up, the phone is held (world units). */
+  forward?: number;
+  up?: number;
+  /** Where the paws grip its sides (fractions of its height from the middle) and how far apart. */
+  grip?: number;
+  spread?: number;
+  /** Thumbs tapping. */
+  typing?: boolean;
+}
+
+/**
+ * Holds a phone in both paws in front of the chest, screen toward the face; thumbs tap while `typing`. The paws sit
+ * on the phone's sides, so they don't cover the newest message.
+ */
+export function holdPhone(
+  rig: { root: THREE.Object3D; arms: readonly THREE.Object3D[]; head: THREE.Object3D },
+  phone: Phone,
+  t: number,
+  { forward = 0.9, up = 0.1, grip = 0.05, spread = 0.4, typing = false }: HoldOptions = {},
+): void {
+  rig.root.updateMatrixWorld(true);
+  const [l, r] = rig.arms;
+  const mid = l!
+    .getWorldPosition(new THREE.Vector3())
+    .add(r!.getWorldPosition(new THREE.Vector3()))
+    .multiplyScalar(0.5);
+  const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(rig.root.getWorldQuaternion(new THREE.Quaternion()));
+  phone.group.position
+    .copy(mid)
+    .addScaledVector(fwd, forward)
+    .add(new THREE.Vector3(0, up, 0));
+  phone.group.lookAt(rig.head.getWorldPosition(new THREE.Vector3()));
+  phone.group.updateMatrixWorld(true);
+  for (const arm of rig.arms) {
+    const side = arm.userData.side as number;
+    const tap = typing ? Math.max(0, Math.sin(t * 22 + side * 1.7)) * 0.04 : 0;
+    // the phone faces its owner, so its +x is on their right: mirror the side
+    const edge = phone.group.localToWorld(
+      new THREE.Vector3(-side * phone.height * spread, phone.height * grip + tap, 0.02),
+    );
+    reachArm(arm, arm.parent!.worldToLocal(edge));
+  }
+}
+
+/** A shot through the owner's eyes onto the screen (hide their head first); returns camera and target. */
+export function phonePov(phone: Phone, camera: THREE.Camera) {
+  phone.group.updateMatrixWorld(true);
+  const p = phone.group.getWorldPosition(new THREE.Vector3());
+  const n = new THREE.Vector3(0, 0, 1).transformDirection(phone.group.matrixWorld);
+  const screenUp = new THREE.Vector3(0, 1, 0).transformDirection(phone.group.matrixWorld);
+  camera.up.copy(screenUp);
+  // close enough that the phone fills most of the frame's width, with room under it for the captions
+  const cam = p.clone().addScaledVector(n, phone.height * 1.3);
+  const look = p.clone().addScaledVector(screenUp, -phone.height * 0.1);
+  return { cam: [cam.x, cam.y, cam.z] as const, look: [look.x, look.y, look.z] as const };
 }

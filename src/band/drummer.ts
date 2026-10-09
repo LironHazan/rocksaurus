@@ -12,7 +12,7 @@ const LEFT_HAND: DrumName[] = ['snare', 'tom', 'floorTom', 'click'];
 const RIGHT_HAND: DrumName[] = ['hat', 'ride', 'crash', 'china', 'splash', 'click'];
 
 /** Lulu on drums: sticks on the hits, kick foot, cymbals wobble, ponytail swings, neck headbang. */
-export function createDrummer(part: DrumPart, clock: SongClock): Performer {
+export function createDrummer(part: DrumPart, clock: SongClock): Performer & { rig: ReturnType<typeof createLulu> } {
   const root = new THREE.Group();
   const kit = createDrumKit();
   kit.group.scale.setScalar(1.2);
@@ -43,6 +43,7 @@ export function createDrummer(part: DrumPart, clock: SongClock): Performer {
 
   return {
     root,
+    rig: lulu,
     update(t) {
       const act = clock.activity(t);
       const counting = t < countInEnd && clicks.length > 0;
