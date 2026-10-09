@@ -13,7 +13,7 @@ import {
   PACE,
   SCENES,
   WALK_END,
-  beatPulse,
+  scenePulse,
   playedCaptions,
   sceneAt,
   scriptTime,
@@ -174,7 +174,7 @@ const episode: Episode = {
     }
 
     function officeScene(t: number): Shot {
-      const beat = beatPulse(t, OFFICE);
+      const beat = scenePulse(t, OFFICE);
       lulu.root.position.copy(DESK_SPOT);
       const working = t >= CUE.typeFrom && t < CUE.logOff;
       idleLulu(lulu, t, {
@@ -262,7 +262,7 @@ const episode: Episode = {
     const Z = new THREE.Vector3(0, 0, 1);
 
     function gainsScene(t: number): Shot {
-      const beat = beatPulse(t, GAINS);
+      const beat = scenePulse(t, GAINS);
       lulu.root.position.copy(SHAKE_SPOT);
       lulu.root.rotation.y = 0.2;
       const drinking = t >= CUE.drink && t < CUE.flex;

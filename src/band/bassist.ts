@@ -17,7 +17,7 @@ export type { BassPart } from '../audio/bass';
 type BassistRig = ReturnType<typeof createTyrannosaurus>;
 
 /** Tiki Taka as he plays: cap and sunglasses. */
-export function tikiOnBass(): BassistRig {
+function tikiOnBass(): BassistRig {
   const tiki = createTyrannosaurus();
   addCap(tiki, { scale: 0.72, position: [0, 0.5, 0.15], tilt: -0.05 });
   addSunglasses(tiki.head, {

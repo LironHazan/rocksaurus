@@ -58,30 +58,6 @@ function noiseBurst(
   src.stop(when + len + 0.05);
 }
 
-/** Rumbly tummy: wobbling low noise + a sliding sub tone. */
-export function growl(bus: AudioNode, when: number, len = 1) {
-  const src = ctx.createBufferSource(),
-    lp = new BiquadFilterNode(ctx, { type: 'lowpass', frequency: 220, Q: 4 });
-  const g = ctx.createGain(),
-    lfo = new OscillatorNode(ctx, { frequency: 9 }),
-    depth = new GainNode(ctx, { gain: 0.35 });
-  src.buffer = noise;
-  src.loop = true;
-  g.gain.setValueAtTime(0, when);
-  g.gain.linearRampToValueAtTime(0.5, when + 0.1);
-  g.gain.setTargetAtTime(0, when + len - 0.3, 0.1);
-  lfo.connect(depth);
-  depth.connect(g.gain);
-  src.connect(lp);
-  lp.connect(g);
-  g.connect(bus);
-  src.start(when);
-  src.stop(when + len + 0.3);
-  lfo.start(when);
-  lfo.stop(when + len + 0.3);
-  boop(bus, when, 90, 50, len, 0.25);
-}
-
 export const sniff = (bus: AudioNode, when: number) =>
   noiseBurst(bus, when, 0.16, { type: 'highpass', freq: 2500, vol: 0.12, attack: 0.08 });
 

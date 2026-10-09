@@ -1,0 +1,19 @@
+name: Fallow
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # audit diffs the PR against its base, so it needs the history
+      # Fails only on what this PR adds (dead code, complexity, duplication); old findings are reported, not gated.
+      - uses: fallow-rs/fallow@v3.32.0
+        with:
+          command: audit

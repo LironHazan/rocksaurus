@@ -4,7 +4,7 @@ import { createRockerRory } from '../../characters/rocker';
 import { loadTrack, playTrack } from '../../audio/track';
 import { boop } from '../../audio/sfx';
 import { playRiff } from '../../audio/guitar';
-import { riff as synthRiff } from '../../audio/rory-riff';
+import { roryRiff as synthRiff } from '../../audio/rory-riff';
 import type { Episode } from '../../engine/types';
 
 // ── Your riff ────────────────────────────────────────────────────────────────

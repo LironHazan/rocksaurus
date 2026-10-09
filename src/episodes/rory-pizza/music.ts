@@ -3,7 +3,7 @@ import * as sfx from '../../audio/sfx';
 import type { Riff, RiffNote } from '../../audio/guitar';
 
 // 4/4 @ 120 BPM → 1 beat = 0.5 s, 1 eighth = 0.25 s, 1 bar = 2 s. Eighth index = seconds × 4.
-export const BPM = 120;
+const BPM = 120;
 export const BEAT = 60 / BPM;
 
 const walkBar = (bar: number, vel: number): RiffNote[] => {

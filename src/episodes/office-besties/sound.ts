@@ -23,7 +23,7 @@ export const BEDS: readonly Bed[] = [
   { from: CUE.arrive[0], to: DURATION, kind: 'street' },
 ];
 
-export type FxKind =
+type FxKind =
   | 'step'
   | 'vibrate'
   | 'pop'
@@ -38,7 +38,7 @@ export type FxKind =
   | 'gulp'
   | 'gasp'
   | 'giggle';
-export interface Fx {
+interface Fx {
   at: number;
   kind: FxKind;
 }
@@ -50,7 +50,7 @@ const WALKS = [
   [CUE.seat[0], CUE.seat[1] - 0.4],
 ] as const;
 
-export function effects(): Fx[] {
+function effects(): Fx[] {
   const out: Fx[] = [
     { at: CUE.buzz, kind: 'vibrate' },
     ...CHAT.map(m => ({ at: m.at, kind: m.from === 'Lulu' ? ('sent' as const) : ('pop' as const) })),

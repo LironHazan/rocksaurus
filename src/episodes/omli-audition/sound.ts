@@ -13,23 +13,23 @@ import { CHAT, CUE, DURATION, MUSIC_AT, SYLLABLES } from './timeline';
 // Natural sound in Omli's gym (the dumbbell, the buzz, Lulu's DM, his thumbs), Omli's heavy footsteps; then the
 // audition itself: Omli's bass alone, Lulu's drums (the smooth kit), Rory's guitar, and the band whooping at the end.
 
-export interface Bed {
+interface Bed {
   from: number;
   to: number;
   kind: BedKind;
 }
-export const BEDS: readonly Bed[] = [
+const BEDS: readonly Bed[] = [
   { from: 0, to: CUE.gym[1], kind: 'room' },
   { from: CUE.audition[0], to: DURATION, kind: 'room' },
 ];
 
-export type FxKind = 'clank' | 'buzz' | 'pop' | 'sent' | 'tap' | 'step' | 'whoop';
-export interface Fx {
+type FxKind = 'clank' | 'buzz' | 'pop' | 'sent' | 'tap' | 'step' | 'whoop';
+interface Fx {
   at: number;
   kind: FxKind;
 }
 
-export function effects(): Fx[] {
+function effects(): Fx[] {
   const out: Fx[] = [
     // curls: the dumbbell's top and bottom clank, then he sets it down for the phone
     { at: 0.9, kind: 'clank' },

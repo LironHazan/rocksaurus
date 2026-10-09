@@ -1,3 +1,4 @@
+import { beatPulse } from '../../band/timing';
 import type { Caption } from '../../engine/types';
 
 // Lulu On Call: one day (and night) in the life of a drummer who codes.
@@ -27,7 +28,7 @@ export const SCENES: readonly SceneSpan[] = [
 
 const WALK = SCENES.find(s => s.id === 'walk')!;
 /** How long the walk home actually plays (story seconds). The rest of its time slot is skipped. */
-export const WALK_LEN = 10;
+const WALK_LEN = 10;
 /** Where the played walk ends, in script time. */
 export const WALK_END = WALK.from + WALK_LEN;
 /** How much of the script is skipped after the walk: everything later moves up by this much. */
@@ -79,7 +80,4 @@ export function sceneAt(t: number): SceneSpan {
 }
 
 /** Beat phase in the scene's tempo: 1 on each beat, decaying to 0 before the next. */
-export function beatPulse(t: number, scene: SceneSpan, sharpness = 3): number {
-  const beat = 60 / scene.bpm;
-  return Math.pow(1 - (((t - scene.from) / beat) % 1), sharpness);
-}
+export const scenePulse = (t: number, scene: SceneSpan): number => beatPulse(t - scene.from, 60 / scene.bpm);

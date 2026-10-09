@@ -1,7 +1,7 @@
 // 4/4 @ 120 BPM, 16 steps (16th notes) per bar, 1 bar = 2 s. 8 bars = 16 s.
 import type { DrumPart } from '../../audio/drum-patterns';
 
-export const BPM = 120;
+const BPM = 120;
 export const BEAT = 60 / BPM;
 const REST = '................';
 const bars = (pattern: string, n: number) => Array(n).fill(pattern).join(' ');

@@ -8,7 +8,7 @@ import type { BassPart } from '../../audio/bass';
 
 // "Rocksaurus Live" — prog rock in E Dorian (bright minor) with a major-key chorus.
 // 120 BPM: 1 eighth = 0.25 s. Bars mix 4/4 (8 eighths) and 7/8 (7 eighths, grouped 2+2+3).
-export const BPM = 120;
+const BPM = 120;
 export const BEAT = 60 / BPM;
 const E = 60 / BPM / 2; // seconds per eighth
 

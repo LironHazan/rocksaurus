@@ -42,7 +42,7 @@ export const LINES: readonly SpokenLine<Who>[] = [
 ];
 
 /** Voices, low to high: Amazaurus slow and low, Eilon cheerful, Sagish young, Taluzarus fast. */
-export const VOICES: Record<Who, Voice> = {
+const VOICES: Record<Who, Voice> = {
   Amazaurus: { notes: ['D3', 'E3', 'F3', 'G3'], rate: 0.22 },
   Eilon: { notes: ['C4', 'E4', 'G4', 'A4'], rate: 0.14 },
   Sagish: { notes: ['G3', 'A3', 'C4', 'D4'], rate: 0.11 },

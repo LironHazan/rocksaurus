@@ -19,7 +19,7 @@ export const RORIT_COLORS = {
 };
 
 /** Height of the hips above the ground, and where the body's underside is (it rests on a seat there). */
-export const ORNITHO_HIP = 1.4;
+const ORNITHO_HIP = 1.4;
 export const ORNITHO_SEAT = 1.25;
 const THIGH = 0.55;
 const SHIN = 0.6;

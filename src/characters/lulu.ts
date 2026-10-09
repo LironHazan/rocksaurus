@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
 import { growTail } from './tail';
 
-export const LULU_COLORS = {
+const LULU_COLORS = {
   body: 0xb48ce8, // lavender (saturated enough to stay purple under stage lights)
   belly: 0xf1e2ff,
   spots: 0xff8fcf, // pink
@@ -12,7 +12,7 @@ export const LULU_COLORS = {
 };
 
 const BODY = { y: 1, rx: 1.05, ry: 0.95, rz: 1 }; // body ellipsoid
-export const NECK_REST: readonly number[] = [-0.15, 0.05, 0.12, 0.15]; // gentle S-curve, base → head
+const NECK_REST: readonly number[] = [-0.15, 0.05, 0.12, 0.15]; // gentle S-curve, base → head
 
 /** Places a flattened blob on a surface, facing along its normal. */
 function stickOn(mesh: THREE.Object3D, pos: THREE.Vector3, normal: THREE.Vector3) {

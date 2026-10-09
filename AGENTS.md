@@ -6,7 +6,8 @@ previews a Short and records it to video. GitHub Pages deploys `main`.
 
 ## Commands
 
-- `npm run check` — the gate: typecheck, lint, `lint:boundaries`, format check, tests. Run it before every commit.
+- `npm run check` — the gate: typecheck, lint, `lint:boundaries`, `lint:dead-code`, format check, tests. Run it before
+  every commit.
 - `npm run build` — `tsc -b && vite build`. CI runs it too.
 - `npm run test:e2e` — builds, then Playwright smoke-tests the studio and the watch page in headless Chromium. CI runs
   it on every PR.
@@ -14,10 +15,12 @@ previews a Short and records it to video. GitHub Pages deploys `main`.
 - `npm run format` — Prettier. Formatting is enforced.
 
 The tools are not the usual ones: TypeScript 7 (native compiler), **oxlint** (not ESLint) with the vendored
-**anti-slop** rules (`tools/oxlint/anti-slop/`), and **dependency-cruiser** for module boundaries
-(`.dependency-cruiser.cjs`). Node 24. anti-slop means: every non-`const` type assertion has a `// SAFETY:` comment
-(prefer `instanceof`, type guards and `satisfies`), and tests never mock modules: jsdom's missing Web Audio and canvas
-are `src/test/browser-stand-in.ts`.
+**anti-slop** rules (`tools/oxlint/anti-slop/`), **dependency-cruiser** for module boundaries
+(`.dependency-cruiser.cjs`), and **Fallow** for dead code (`.fallowrc.json`; `npx fallow dupes` and `npx fallow health`
+report duplication and complexity). On a PR, `fallow audit` fails on any dead code, complexity or duplication the PR
+adds. Node 24. anti-slop means: every non-`const` type assertion has a `// SAFETY:` comment (prefer `instanceof`, type
+guards and `satisfies`), and tests never mock modules: jsdom's missing Web Audio and canvas are
+`src/test/browser-stand-in.ts`.
 
 ## Rules
 

@@ -20,7 +20,7 @@ const felt = (color: number) =>
 export type Look = 'goth' | 'wizard' | 'ranger' | 'elf' | 'party';
 
 /** Which pieces each look includes. */
-export const LOOKS: Record<
+const LOOKS: Record<
   Look,
   { hat: boolean; cloak: number | null; bracers: boolean; ears: boolean; staff: boolean; sword: boolean }
 > = {

@@ -14,7 +14,7 @@ import { entriesOf } from '../../lib/object';
 // An eighth is 0.25 s and a bar is six eighths, so bar n starts at n × 1.5 s. It stays minor while she shops,
 // holds a low note while she finds the ring, and turns bright and major at the register.
 
-export const BARS = Math.round(DURATION / BAR); // 23
+const BARS = Math.round(DURATION / BAR); // 23
 
 interface Chord {
   bass: string;
@@ -279,14 +279,13 @@ export const vocal: VocalPart = {
   ],
 };
 
-export type FxKind =
-  'bell' | 'step' | 'hangers' | 'swish' | 'sparkle' | 'rustle' | 'stretch' | 'kaching' | 'printer' | 'dice';
-export interface Fx {
+type FxKind = 'bell' | 'step' | 'hangers' | 'swish' | 'sparkle' | 'rustle' | 'stretch' | 'kaching' | 'printer' | 'dice';
+interface Fx {
   at: number;
   kind: FxKind;
 }
 
-export function effects(): Fx[] {
+function effects(): Fx[] {
   const out: Fx[] = [{ at: CUE.bell, kind: 'bell' }];
   for (let t = CUE.walkIn[0]; t < CUE.walkIn[1]; t += 0.42) out.push({ at: t, kind: 'step' });
   for (let t = CUE.browse[0] + 0.3; t < CUE.pick; t += 0.55) out.push({ at: t, kind: 'hangers' });
@@ -315,9 +314,9 @@ export function effects(): Fx[] {
   return out.sort((a, b) => a.at - b.at);
 }
 
-export const ORGAN = organPart();
-export const LEAD = leadPart();
-export const DRUMS = drumPart();
+const ORGAN = organPart();
+const LEAD = leadPart();
+const DRUMS = drumPart();
 export const EFFECTS = effects();
 
 const PLAYERS: Record<FxKind, (bus: AudioNode, when: number) => void> = {

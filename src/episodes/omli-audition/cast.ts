@@ -12,7 +12,7 @@ import { addShortHair } from '../../props/short-hair';
 import { addJersey, HOME_KIT, TREX_BODY } from '../../props/soccer';
 import type { FittedRig } from '../../characters/types';
 
-export const OMLI_COLORS = {
+const OMLI_COLORS = {
   ...TIKI_COLORS,
   body: 0x8a5a3c, // brown
   stripes: 0x6b4229,

@@ -114,7 +114,7 @@ export const PASSES: readonly (readonly [kick: number, arrive: number, fromTiki:
 ];
 
 /** Every time a foot meets the ball (for the thump sound and the kicking leg). */
-export const TOUCH_EVERY = 0.55;
+const TOUCH_EVERY = 0.55;
 export function touches(): number[] {
   const out = PASSES.map(p => p[0]);
   for (let t = CUE.dribble[0] + TOUCH_EVERY; t < CUE.shot - 0.2; t += TOUCH_EVERY) out.push(t);

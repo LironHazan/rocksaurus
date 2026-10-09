@@ -1,7 +1,7 @@
 import { clamp01 } from './math';
 import type { Caption, Format } from './types';
 
-export const CAPTION_FONT = 'Fredoka';
+const CAPTION_FONT = 'Fredoka';
 /** The caption font as `document.fonts.load()` wants it: await it before recording or snapshotting. */
 export const CAPTION_FONT_SPEC = `700 80px ${CAPTION_FONT}`;
 

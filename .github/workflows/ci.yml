@@ -18,6 +18,7 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run lint:boundaries
+      - run: npm run lint:dead-code
       - run: npm run format:check
       - run: npm test
       - run: npm run build

@@ -8,7 +8,7 @@ import { ball } from '../../../characters/materials';
 export const RACK = { x0: -2.4, x1: 3.4, z: -2.9, pole: 3.0 };
 export const BOOTH = { x: -6.2, width: 2.6, front: -2.5 };
 export const COUNTER = { x: 7.0, front: 6.5, z0: -1, z1: 3.1, top: 1.55 };
-export const DOOR = { x: -8.95, z: 1.6 };
+const DOOR = { x: -8.95, z: 1.6 };
 
 const FONT = "'Metal Mania'";
 const FONT_LOAD = `40px ${FONT}`; // what document.fonts.load needs, so the signs repaint once the font arrives

@@ -4,7 +4,7 @@ import { createPlayer, type Player } from '../../engine/player';
 import type { Episode, Format, Stage } from '../../engine/types';
 import { parseDebugCamera, type DebugCamera } from './debugCamera';
 
-export interface StudioSession {
+interface StudioSession {
   stage: Stage;
   player: Player;
 }

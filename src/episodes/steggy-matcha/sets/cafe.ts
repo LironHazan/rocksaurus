@@ -5,7 +5,7 @@ import { createMatchaCup } from '../../../props/matcha';
 import { ball } from '../../../characters/materials';
 
 export const TABLE_TOP = 1.65;
-export const TABLE = new THREE.Vector3(0, 0, 0.5);
+const TABLE = new THREE.Vector3(0, 0, 0.5);
 /** They sit facing each other across a round café table: Steggy on the right, Rory on the left. */
 export const STEGGY_SEAT = new THREE.Vector3(1.95, 0.75, 0.5);
 export const RORY_SEAT = new THREE.Vector3(-1.95, 0.75, 0.5);

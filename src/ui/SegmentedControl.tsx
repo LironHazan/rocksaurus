@@ -2,7 +2,7 @@ import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import type { ReactNode } from 'react';
 import styles from './ui.module.css';
 
-export interface Segment<T extends string> {
+interface Segment<T extends string> {
   value: T;
   label: ReactNode;
 }

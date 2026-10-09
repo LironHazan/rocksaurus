@@ -14,7 +14,7 @@ export const mainBar = (bar: number): RiffNote[] => [
   [bar * 8 + 6, 'A2', 2, 'open'],
 ];
 
-export const riff: Riff = {
+export const roryRiff: Riff = {
   bpm: 120,
   notes: [
     ...mainBar(0),

@@ -25,7 +25,7 @@ export const BEDS: readonly Bed[] = [
   { from: CUE.end, to: DURATION, kind: 'room' },
 ];
 
-export type FxKind =
+type FxKind =
   | 'bell'
   | 'pop'
   | 'vibrate'
@@ -44,7 +44,7 @@ export type FxKind =
   | 'stir'
   | 'saucer'
   | 'sigh';
-export interface Fx {
+interface Fx {
   at: number;
   kind: FxKind;
 }
@@ -53,7 +53,7 @@ export interface Fx {
 const buzzing = (t: number) => (t >= CUE.rory[0] && t < CUE.rory[1]) || (t >= CUE.therapy[0] && t < CUE.cafe[0]);
 const indoors = (t: number) => t >= CUE.rory[0] && (t < CUE.cafe[0] || t >= CUE.end);
 
-export function effects(): Fx[] {
+function effects(): Fx[] {
   const out: Fx[] = [
     // drop-off: the school bell, birds in the trees, the odd car
     { at: 0.5, kind: 'bell' },

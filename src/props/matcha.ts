@@ -9,45 +9,6 @@ function mesh(geo: THREE.BufferGeometry, mat: THREE.Material): THREE.Mesh {
   return m;
 }
 
-/** A matcha bowl (chawan) full of frothy green tea. Origin at its base. */
-export function createMatchaBowl(): THREE.Group {
-  const g = new THREE.Group();
-  const profile = [
-    [0.0, 0],
-    [0.16, 0],
-    [0.17, 0.04],
-    [0.3, 0.1],
-    [0.36, 0.26],
-    [0.37, 0.36],
-    [0.34, 0.36],
-    [0.33, 0.27],
-    [0.27, 0.13],
-    [0.0, 0.1],
-  ].map(([x, y]) => new THREE.Vector2(x, y));
-  g.add(
-    mesh(new THREE.LatheGeometry(profile, 40), new THREE.MeshStandardMaterial({ color: 0x3b3f4a, roughness: 0.5 })),
-  );
-  const tea = mesh(new THREE.CircleGeometry(0.33, 32), new THREE.MeshStandardMaterial({ color: FOAM, roughness: 0.9 }));
-  tea.rotation.x = -Math.PI / 2;
-  tea.position.y = 0.31;
-  g.add(tea);
-  return g;
-}
-
-/** A bamboo matcha whisk (chasen), tines down. Origin at the tines' tip. */
-export function createWhisk(): THREE.Group {
-  const g = new THREE.Group();
-  const bamboo = new THREE.MeshStandardMaterial({ color: 0xe3c98f, roughness: 0.7 });
-  const tines = mesh(new THREE.CylinderGeometry(0.11, 0.05, 0.22, 20, 1, true), bamboo);
-  tines.position.y = 0.11;
-  const core = mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.2, 12), bamboo);
-  core.position.y = 0.12;
-  const handle = mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.3, 14), bamboo);
-  handle.position.y = 0.37;
-  g.add(tines, core, handle);
-  return g;
-}
-
 /** A café cup of matcha latte with a handle. Origin at its base. */
 export function createMatchaCup(color = 0xf4f1ea): THREE.Group {
   const g = new THREE.Group();

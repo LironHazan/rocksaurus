@@ -109,7 +109,7 @@ export function tom(bus: AudioNode, when: number, vel = 1, pitch = 120) {
   noiseHit(bus, when, { type: 'bandpass', freq: 3000, Q: 1, peak: 0.1 * vel, decay: 0.02 }); // stick
 }
 
-export const hat = (bus: AudioNode, when: number, vel = 1, open = false) => {
+const hat = (bus: AudioNode, when: number, vel = 1, open = false) => {
   metal(bus, when, { hp: 9000, peak: 0.04 * vel, decay: open ? 0.3 : 0.04 });
   noiseHit(bus, when, { type: 'highpass', freq: 7000, peak: 0.08 * vel, decay: open ? 0.3 : 0.045 });
 };
@@ -120,19 +120,19 @@ export const crash = (bus: AudioNode, when: number, vel = 1) => {
 };
 
 /** Trashy china: dark, gritty metal with a fast bloom — the big-accent cymbal. */
-export const china = (bus: AudioNode, when: number, vel = 1) => {
+const china = (bus: AudioNode, when: number, vel = 1) => {
   metal(bus, when, { base: 61, hp: 2600, peak: 0.13 * vel, decay: 1.4 });
   noiseHit(bus, when, { type: 'bandpass', freq: 5200, Q: 0.8, peak: 0.26 * vel, decay: 1.1 });
 };
 
 /** Splash: small, bright, gone quickly. */
-export const splash = (bus: AudioNode, when: number, vel = 1) => {
+const splash = (bus: AudioNode, when: number, vel = 1) => {
   metal(bus, when, { base: 70, hp: 6000, peak: 0.09 * vel, decay: 0.55 });
   noiseHit(bus, when, { type: 'highpass', freq: 7000, peak: 0.2 * vel, decay: 0.45 });
 };
 
 /** Ride: a defined 'ping' with a little wash. */
-export const ride = (bus: AudioNode, when: number, vel = 1) => {
+const ride = (bus: AudioNode, when: number, vel = 1) => {
   metal(bus, when, { base: 52, hp: 5500, peak: 0.05 * vel, decay: 0.8 });
   const o = new OscillatorNode(ctx, { type: 'sine', frequency: 2650 }),
     g = env(when, 0.035 * vel, 0.6);
@@ -142,7 +142,7 @@ export const ride = (bus: AudioNode, when: number, vel = 1) => {
   o.stop(when + 0.65);
 };
 
-export const stickClick = (bus: AudioNode, when: number) => {
+const stickClick = (bus: AudioNode, when: number) => {
   noiseHit(bus, when, { type: 'bandpass', freq: 3000, Q: 5, peak: 0.4, decay: 0.03 });
 };
 

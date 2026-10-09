@@ -139,16 +139,16 @@ const CROWD: VocalPart = {
   ],
 };
 
-export const PIANO = pianoPart();
+const PIANO = pianoPart();
 export const DRUMS = drumPart();
 
-export type FxKind = 'whistle' | 'longWhistle' | 'kick' | 'shot' | 'net' | 'cheer' | 'thud' | 'boing';
-export interface Fx {
+type FxKind = 'whistle' | 'longWhistle' | 'kick' | 'shot' | 'net' | 'cheer' | 'thud' | 'boing';
+interface Fx {
   at: number;
   kind: FxKind;
 }
 
-export function effects(): Fx[] {
+function effects(): Fx[] {
   const out: Fx[] = [
     { at: CUE.whistle, kind: 'whistle' },
     ...touches()
