@@ -17,11 +17,13 @@ const LIE = new THREE.Vector3(1.75, BED_TOP + 0.85, -0.5);
 const LIE_ROLL = 1.45;
 /** How far she tips the shaker back to drink (radians: base up). */
 const DRINK_TILT = -1.7;
-/** Her body under the blanket: a sphere this big round her middle (her body ellipsoid is about 1 across). */
-const BODY_UNDER_BLANKET = 1.15;
-/** How high the blanket comes while she sits up (her lap, above the mattress), and no limit once she lies down. */
-const LAP = 0.7;
-const UNCAPPED = 10;
+/** How high the blanket comes while she sits up: to her waist, above the mattress. */
+const WAIST = 0.95;
+/** Lying down, the blanket's top over her body: her body's radius, about. */
+const BODY_TOP = 1.0;
+/** Over her body: the flat top, and where the cloth reaches the mattress again. Over each foot, the same. */
+const BODY_DRAPE = { flat: 0.5, fall: 1.7 } as const;
+const FOOT_DRAPE = { flat: 0.2, fall: 0.8, above: 0.45, over: 0.35 } as const;
 /** Where the shaker ends up: on its side on the blanket. */
 const DROPPED = new THREE.Vector3(1.6, BED_TOP + 0.75, 1.2);
 /** Grip points on the bottle, in its own (unscaled) space: either side of its middle. */
@@ -74,10 +76,18 @@ export function createBedLocation(me: TiredLulu): Location {
     for (const side of [-1, 1] as const) me.grip(side, shaker.localToWorld(v.set(side * GRIP.x, GRIP.y, 0)));
   }
 
-  /** The blanket over her: on her lap while she sits up, all of her once she's lying down. */
+  /** The blanket over her: up to her waist while she sits up, all of her once she's lying down, and her feet. */
   function tuckIn(lying: number) {
-    lulu.body.localToWorld(v.set(0, 1.0, 0));
-    blanket.drape(v, BODY_UNDER_BLANKET, BED_TOP + lerp(LAP, UNCAPPED, lying));
+    const middle = lulu.body.localToWorld(new THREE.Vector3(0, 1.0, lerp(0.55, 0, lying)));
+    middle.y = lerp(BED_TOP + WAIST, middle.y + BODY_TOP, lying);
+    const feet = lulu.feet.map(f => {
+      const top = f.getWorldPosition(new THREE.Vector3());
+      return top.setY(Math.max(top.y + FOOT_DRAPE.over, BED_TOP + FOOT_DRAPE.above)); // on her side, they're higher
+    });
+    blanket.drape([
+      { top: middle, ...BODY_DRAPE },
+      ...feet.map(top => ({ top, flat: FOOT_DRAPE.flat, fall: FOOT_DRAPE.fall })),
+    ]);
   }
 
   function zzz(t: number) {

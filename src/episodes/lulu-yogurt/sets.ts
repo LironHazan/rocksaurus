@@ -587,14 +587,27 @@ const MATTRESS = { top: BED_TOP, back: -2.3, front: 1.1, foot: 2.9 } as const;
 /** Where the blanket starts (her shoulders), how far it hangs over the edges, and its grid. */
 const BLANKET = { head: -1.5, overhang: 0.55, segX: 48, segZ: 36, loft: 0.06 } as const;
 
+/** Something under the blanket: the top of it (world), the flat part right over it, and where the cloth meets the bed. */
+export interface Mound {
+  top: THREE.Vector3;
+  flat: number;
+  fall: number;
+}
+
 export interface Blanket {
   mesh: THREE.Mesh;
   /**
-   * Drapes it over the bed and over a body (a sphere, world space), no higher than `cap` (her lap, while she sits
-   * up). The flat part lies on the mattress; past the edges it hangs straight down.
+   * Drapes it over the bed and over whatever is under it. Over each mound the cloth sits on its top, then falls away
+   * smoothly to the mattress (no hard edge); past the mattress's edges it hangs straight down.
    */
-  drape(body: THREE.Vector3, radius: number, cap: number): void;
+  drape(mounds: readonly Mound[]): void;
 }
+
+/** 0 at `a`, 1 at `b`, eased at both ends. */
+const smoothstep = (a: number, b: number, x: number) => {
+  const k = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return k * k * (3 - 2 * k);
+};
 
 /**
  * A quilted blanket: lavender-blue squares stitched on the diagonal, with the white sheet turned down over its top
@@ -638,7 +651,7 @@ export function createBlanket(): Blanket {
   const position = geometry.attributes.position!;
   return {
     mesh,
-    drape(body, radius, cap) {
+    drape(mounds) {
       for (let i = 0; i < position.count; i++) {
         const x = flat[i * 3]!;
         const z = flat[i * 3 + 2]!;
@@ -646,11 +659,13 @@ export function createBlanket(): Blanket {
         const px = Math.min(x, MATTRESS.foot);
         const pz = Math.min(z, MATTRESS.front);
         const hang = x - px + (z - pz);
-        let y = MATTRESS.top + loft - hang;
-        // over her: the top of the body sphere, plus the blanket's own thickness, up to the cap
-        const d2 = (px - body.x) ** 2 + (pz - body.z) ** 2;
-        if (hang === 0 && d2 < radius * radius)
-          y = Math.max(y, Math.min(cap, body.y + Math.sqrt(radius * radius - d2) + loft));
+        const bed = MATTRESS.top + loft;
+        let y = bed - hang;
+        if (hang === 0)
+          for (const { top, flat: plateau, fall } of mounds) {
+            const d = Math.hypot(px - top.x, pz - top.z);
+            y = Math.max(y, top.y + loft - (top.y - MATTRESS.top) * smoothstep(plateau, fall, d));
+          }
         position.setXYZ(i, px + Math.sign(x - px) * loft, y, pz + Math.sign(z - pz) * loft);
       }
       position.needsUpdate = true;

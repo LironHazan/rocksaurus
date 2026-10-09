@@ -27,8 +27,10 @@ import { CUE, FLAVOURS, LINES, PAGE_AT, SPECS_TURN, mouthAt, speakerAt, type Fla
 
 /** Where Lulu stands at the fridge, where she comes in from and leaves to. */
 const LULU_SPOT = new THREE.Vector3(FRIDGE.x + 0.4, 0, 0.6);
-const LULU_FROM = new THREE.Vector3(7.5, 0, 1.6);
+const LULU_FROM = new THREE.Vector3(5.2, 0, 1.8); // inside the room: its right wall is at x = 8
 const LULU_EXIT = new THREE.Vector3(-8.5, 0, 2.6);
+/** The opening shot follows her, but never so far right that it sees past the room's right wall (x = 8). */
+const OPENING_CAM_MAX_X = 5.5;
 /** Lulu's facing (radians about y; 0 faces the camera). */
 const YAW = {
   walkIn: -Math.PI / 2 + 0.6,
@@ -313,9 +315,9 @@ export function createKitchenLocation(me: TiredLulu, mirta: CharacterRig): Locat
   }
   function shot(t: number): Shot {
     if (t < CUE.enter[1]) {
-      // follow her across the kitchen to the fridge
+      // follow her across the kitchen to the fridge, the camera kept inside the room's walls
       const x = lulu.root.position.x;
-      return { cam: [x + 2.0, 4.8, 13.5], look: [x - 0.5, 3.0, -0.5] };
+      return { cam: [Math.min(x + 1.0, OPENING_CAM_MAX_X), 4.8, 13.5], look: [x - 0.5, 3.0, -0.5] };
     }
     if (t >= SPECS_TURN && t < CUE.specs[1]) {
       // the joke: push in on her face and the laughing agent above it
