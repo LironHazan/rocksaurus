@@ -7,7 +7,8 @@ Cute 3D dinosaur shorts made entirely with web tech: **Three.js** for the pictur
 synthesized piano. Every episode is a pure function of time, so it renders the same way every time and
 records straight to a video file you can upload to YouTube.
 
-**Live studio:** https://lironhazan.github.io/rocksaurus/ (deployed by GitHub Actions on every push to `main`).
+**Watch the Shorts:** https://lironhazan.github.io/rocksaurus/watch (deployed by GitHub Actions on every push to
+`main`). The public site is the player only; the studio runs locally with `npm run dev`.
 
 ## Run
 

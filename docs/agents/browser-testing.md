@@ -21,7 +21,8 @@ the scene graph, not the picture. The first run of these checks found a real bug
 
 ## Playwright
 
-- `npm run test:e2e` builds the app and runs `e2e/` against `vite preview`: the same bundle GitHub Pages serves.
+- `npm run test:e2e` builds the app (studio and player) and runs `e2e/` against `vite preview`. GitHub Pages serves
+  the public build instead (`npm run build:public`: the player only); its workflow fails if studio code is in it.
 - Keep it a smoke test: each page load costs tens of seconds in software rendering. Add a Playwright test only for
   what needs a real browser (rendering, routing, controls), not for a Short's logic.
 - **No screenshot baselines.** Software rendering differs between machines. The tests check that the frame is not

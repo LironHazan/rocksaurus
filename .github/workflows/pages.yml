@@ -1,4 +1,4 @@
-name: Deploy studio to GitHub Pages
+name: Deploy the watch page to GitHub Pages
 
 on:
   push:
@@ -24,9 +24,18 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      # Pages serves the site from /<repo>/ (local dev stays at /)
-      - run: npm run build -- --base /${{ github.event.repository.name }}/
-      # single-page app: unknown paths (e.g. /rocksaurus/brand) fall back to the app instead of a 404
+      # The public site is the watch player only; the studio runs locally (`npm run dev`).
+      # Pages serves the site from /<repo>/ (local dev stays at /).
+      - run: npm run build:public -- --base /${{ github.event.repository.name }}/
+      # Never publish the studio: fail if any of its UI made it into the public build.
+      - name: Check the studio is not in the public build
+        run: |
+          if grep -rlE "Record video|Save snapshot|MediaRecorder" dist; then
+            echo "::error::Studio code is in the public build; the site would publish the studio."
+            exit 1
+          fi
+      # single-page app: any other path (an old studio link, /rocksaurus/brand) falls back to the app, which sends it
+      # to /watch instead of a 404
       - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
