@@ -85,8 +85,9 @@ function createCar() {
   const wheels: THREE.Object3D[] = [];
   for (const x of [-2.3, 2.3])
     for (const z of [-1, 1]) {
-      const tyre = cylinder(WHEEL, WHEEL, 0.4, mat(0x16161a, 0.8), 20);
-      tyre.geometry.translate(0, -0.2, 0);
+      // its own geometry, centred on its axle (the shared cylinder() geometry stands on its base)
+      const tyre = new THREE.Mesh(new THREE.CylinderGeometry(WHEEL, WHEEL, 0.4, 20), mat(0x16161a, 0.8));
+      tyre.castShadow = tyre.receiveShadow = true;
       tyre.rotation.x = Math.PI / 2;
       tyre.position.set(x, WHEEL, z * (width / 2 - 0.1));
       const hub = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.06, 0.06), mat(0xc0c4cc, 0.3, { metalness: 0.8 }));
