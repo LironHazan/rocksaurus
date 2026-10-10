@@ -10,19 +10,19 @@ import { createTiredLulu } from './pose';
 import { soundtrack } from './sound';
 import { CUE, DURATION } from './timeline';
 
-// Beat sheet (video seconds; see timeline.ts for the cues and lines, music.ts for the groove)
-//   0–5      6 PM, the Papo Pako Shapeworks office kitchen: Lulu drags herself in
-//   5–14     a week of specs for the coding agent: she rubs her eyes; in a thought bubble the pile of specs
-//            grows, then the agent (a little devil bot) laughs. "Can't believe I stopped managing humans… to
-//            manage bots": held long enough to read
-//   14–18    her protein battery: 5%
-//   18–27    the fridge, from inside: vegan protein (nope), peach (nope), caramel (NOPE). A sigh.
-//   27–38.6  Mirta mops in. "Which one is the least yuck?" Lost in translation. "This… or this?" The peach.
-//   38.6–42  the lid, two spoonfuls
-//   42–45    the band stops. So does Lulu: green, shivering
-//   45–48    into the bin (by paw, not on Mirta's floor). "Bye bye 👋"
-//   48–54    Omli drives her home; her neck goes out the sunroof
-//   54–60    7:30 PM, in bed with a protein shake: sip, sip… asleep
+// Beat sheet (video seconds; see timeline.ts for the cues and lines, sound.ts for the sound, music.ts for the car)
+//   0–5        6 PM, the Papo Pako Shapeworks office kitchen: Lulu drags herself in
+//   5–12.5     a week of specs for the coding agent: she rubs her eyes; in a thought bubble the pile of specs
+//              grows, then the agent (a little devil bot) laughs. "Can't believe I stopped managing humans… to
+//              manage bots"
+//   12.5–16.5  her protein battery: 5%
+//   16.5–25.5  the fridge, from inside: vegan protein (nope), peach (nope), caramel (NOPE), each one hopping. A sigh.
+//   25.5–37.1  Mirta mops in. "Which one is the least yuck?" Lost in translation. "This… or this?" The peach.
+//   37.1–40.5  the lid, two spoonfuls
+//   40.5–43.5  the yuck: Lulu freezes, green, shivering
+//   43.5–46.5  into the bin (by paw, not on Mirta's floor). "Bye bye 👋"
+//   46.5–52.5  Omli drives her home, his stereo playing metal; her neck goes out the sunroof
+//   52.5–58.5  7:30 PM, in bed with a protein shake: sip, sip… asleep
 //   then the channel's end card (outro.ts)
 
 type Where = 'kitchen' | 'ride' | 'bed';
