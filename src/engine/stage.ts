@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { WebGPURenderer } from 'three/webgpu';
 import { disposeObject } from './dispose';
+import { dropTinyShadowCasters } from './shadows';
 import type { Format, Overlay, Stage } from './types';
 
 /** A touch brighter than neutral: ACES filmic tone mapping darkens the mid-tones a little. */
@@ -46,6 +47,8 @@ export async function createStage(container: HTMLElement, format: Format): Promi
     camera: new THREE.PerspectiveCamera(format.fov, width / height, NEAR, FAR),
     canvas,
     render(overlay?: Overlay) {
+      // a scene's first frame: its cast is in by now, so this is when to decide which shapes throw shadows
+      if (!scenes.has(stage.scene)) dropTinyShadowCasters(stage.scene);
       scenes.add(stage.scene);
       renderer.render(stage.scene, stage.camera);
       ctx.drawImage(renderer.domElement, 0, 0);
