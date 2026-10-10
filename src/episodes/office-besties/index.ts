@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { ease, lerp, seg } from '../../engine/math';
 import type { Episode } from '../../engine/types';
 import { cuts, direct, type Shot } from '../../engine/director';
-import { createLulu, idleLulu } from '../../characters/lulu';
+import { createLulu, idleLulu, reachLulu, resetLulu as resetLuluPose, walkLulu } from '../../characters/lulu';
 import { createOrnithomimus, ORNITHO_SEAT } from '../../characters/ornithomimus';
 import { createCeratops } from '../../characters/ceratops';
 import { idle, resetPose } from '../../characters/rory';
@@ -93,7 +93,6 @@ const episode: Episode = {
     const lulu = createLulu();
     const hair = addPonytail(lulu);
     addFlannel(lulu);
-    const luluFeet = lulu.feet.map(f => f.position.clone());
 
     const rorit = createOrnithomimus();
     rorit.root.scale.setScalar(RORIT_SCALE);
@@ -130,20 +129,7 @@ const episode: Episode = {
     const UP = new THREE.Vector3(0, 1, 0);
 
     function resetLulu() {
-      lulu.root.position.set(0, 0, 0);
-      lulu.root.rotation.set(0, 0, 0);
-      lulu.squash.rotation.set(0, 0, 0);
-      lulu.squash.scale.set(1, 1, 1);
-      lulu.head.rotation.set(0, 0, 0);
-      lulu.tail.rotation.set(0, 0, 0);
-      for (const a of lulu.arms) {
-        releaseArm(a);
-        a.rotation.set(-0.3, 0, a.userData.side * 0.15);
-      }
-      lulu.feet.forEach((f, i) => f.position.copy(luluFeet[i]!));
-      for (const e of lulu.eyes) e.scale.set(1, 1, 1);
-      for (const s of lulu.sticks) s.visible = false;
-      lulu.setMouth(0);
+      resetLuluPose(lulu);
       hair.ponytail.rotation.set(0.1, 0, 0);
     }
     function resetRig(rig: Parameters<typeof resetPose>[0] & { arms: THREE.Group[] }, feet: THREE.Vector3[]) {
@@ -154,24 +140,7 @@ const episode: Episode = {
       for (const arm of rig.arms) releaseArm(arm);
     }
     /** Lulu's walk cycle at `phase` (1 = one step). */
-    function walkLulu(phase: number, amount = 1) {
-      const p = Math.PI * phase;
-      lulu.root.position.y += Math.abs(Math.sin(p)) * 0.18 * amount;
-      for (const f of lulu.feet)
-        f.position.y += Math.max(0, Math.sin(p + (f.userData.side > 0 ? 0 : Math.PI))) * 0.4 * amount;
-      lulu.squash.rotation.z = Math.sin(p) * 0.06 * amount;
-      lulu.tail.rotation.y = Math.sin(p) * 0.35 * amount;
-      hair.ponytail.rotation.x = 0.1 + Math.abs(Math.sin(p - 0.5)) * 0.35 * amount;
-    }
-    /** Lulu reaches a paw to a world point (her arms stretch, so anything is in reach). */
-    function luluGrip(side: -1 | 1, world: THREE.Vector3) {
-      const pivot = armOf(lulu, side);
-      const target = lulu.body.worldToLocal(world.clone());
-      const elbow = pivot.position.clone().lerp(target, 0.5);
-      elbow.x += side * 0.3;
-      elbow.y -= 0.15;
-      reachArm(pivot, target, elbow);
-    }
+    const walk = (phase: number, amount = 1) => walkLulu(lulu, phase, amount, hair.ponytail);
     /** Any rig's paw to a world point. */
     function grip(arm: THREE.Object3D, world: THREE.Vector3) {
       reachArm(arm, arm.parent!.worldToLocal(world.clone()));
@@ -233,7 +202,7 @@ const episode: Episode = {
         lulu.root.position.lerpVectors(DOOR_FROM, HOME_SPOT, ease(k));
         const turn = ease(seg(t, CUE.buzz + 0.3, CUE.buzz + 0.8));
         lulu.root.rotation.y = lerp(Math.PI / 2, 0.25, turn);
-        if (t < CUE.buzz) walkLulu((t - 0.2) / 0.35);
+        if (t < CUE.buzz) walk((t - 0.2) / 0.35);
         const out = t >= CUE.buzz + 0.6;
         phone.group.visible = out;
         if (out) holdPhone(t, chatView(CHAT, t, 'Lulu', START_CLOCK).draft.length > 0);
@@ -265,7 +234,7 @@ const episode: Episode = {
       if (t < CUE.grab) {
         const reach = ease(seg(t, CUE.stash[0] + 0.3, CUE.grab));
         const rest = lulu.body.localToWorld(new THREE.Vector3(-0.8, 1.2, 0.6));
-        luluGrip(-1, rest.lerp(top, reach));
+        reachLulu(lulu, -1, rest.lerp(top, reach));
         lulu.head.rotation.y = -0.4; // eyes on the stash
       } else {
         // the bar: from the bin to her paw, then held up high (and she's very pleased with herself)
@@ -277,7 +246,7 @@ const episode: Episode = {
           .setFromEuler(UPRIGHT)
           .slerp(new THREE.Quaternion().setFromEuler(new THREE.Euler(0, STASH_YAW, 0.3)), lifted);
         bar.group.updateMatrixWorld(true);
-        luluGrip(-1, bar.group.localToWorld(new THREE.Vector3(-0.15, -0.05, 0)));
+        reachLulu(lulu, -1, bar.group.localToWorld(new THREE.Vector3(-0.15, -0.05, 0)));
         lulu.setMouth(0.5 * raised);
         lulu.root.position.y += Math.abs(Math.sin((t - CUE.raise) * 6)) * 0.1 * seg(t, CUE.raise, CUE.raise + 0.2);
         lulu.head.rotation.y = lerp(-0.4, 0.1, raised);
@@ -355,7 +324,7 @@ const episode: Episode = {
         const k = seg(t, CUE.arrive[0], CUE.handoff[0] - 0.2);
         lulu.root.position.lerpVectors(LULU_ENTER, LULU_HANDOFF, k);
         lulu.root.rotation.y = Math.PI / 2;
-        if (k < 1) walkLulu((t - CUE.arrive[0]) / 0.35);
+        if (k < 1) walk((t - CUE.arrive[0]) / 0.35);
       } else if (t < CUE.seat[0]) {
         lulu.root.position.copy(LULU_HANDOFF);
         lulu.root.rotation.y = lerp(Math.PI / 2, HANDOFF_YAW, ease(seg(t, CUE.handoff[0], CUE.give)));
@@ -363,7 +332,7 @@ const episode: Episode = {
         const k = ease(seg(t, CUE.seat[0], CUE.seat[1] - 0.6));
         lulu.root.position.lerpVectors(LULU_HANDOFF, new THREE.Vector3(SEATED.Lulu.x, 0, SIT_Z + 1.6), k);
         lulu.root.rotation.y = lerp(HANDOFF_YAW, 0, ease(seg(t, CUE.seat[0], CUE.seat[1] - 0.4)));
-        walkLulu((t - CUE.seat[0]) / 0.35, 1 - seg(t, CUE.seat[1] - 0.7, CUE.seat[1] - 0.4));
+        walk((t - CUE.seat[0]) / 0.35, 1 - seg(t, CUE.seat[1] - 0.7, CUE.seat[1] - 0.4));
       }
       if (seated) {
         const drop = ease(seg(t, CUE.seat[1] - 0.4, CUE.seat[1]));
@@ -394,7 +363,7 @@ const episode: Episode = {
         .lerp(atBeak, bite * (1 - seg(t, CUE.chomp[1], CUE.chomp[1] + 0.3)));
       bar.group.rotation.set(0, 0, 0.25);
       bar.group.updateMatrixWorld(true);
-      if (t < CUE.give + 0.4) luluGrip(1, bar.group.localToWorld(new THREE.Vector3(-0.25, -0.05, 0)));
+      if (t < CUE.give + 0.4) reachLulu(lulu, 1, bar.group.localToWorld(new THREE.Vector3(-0.25, -0.05, 0)));
       if (t >= CUE.give - 0.25 && t < CUE.chomp[1] + 0.5) {
         // both paws on it
         for (const arm of rorit.arms)

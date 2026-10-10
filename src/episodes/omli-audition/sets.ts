@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { box, createRoom, mat, picture, ROUND } from '../../world/interior';
+import { addKeyLight, box, createRoom, mat, picture, ROUND } from '../../world/interior';
 import { createRockStage } from '../../world/rock-stage';
 import { createSeat } from '../../props/furniture';
 
@@ -33,13 +33,7 @@ export function createGym() {
   scene.background = new THREE.Color(0x3a3a44);
   createRoom(scene, { wall: 0x4a4a56, floor: 0x26262c });
   scene.add(new THREE.HemisphereLight(0xffffff, 0x50505a, 1.3));
-  const key = new THREE.DirectionalLight(0xfff0dc, 2.0);
-  key.position.set(4, 9, 8);
-  key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
-  key.shadow.radius = 5;
-  Object.assign(key.shadow.camera, { left: -8, right: 8, top: 9, bottom: -2, near: 1, far: 30 });
-  scene.add(key);
+  addKeyLight(scene, 0xfff0dc, 2.0);
 
   // the rack, full of dumbbells
   const rack = box(4.4, 1.1, 0.9, mat(0x15151a, 0.5));

@@ -33,12 +33,21 @@ export function addPonytail(
   });
   const group = new THREE.Group();
 
-  // a thin under-layer so no scalp shows between the locks
-  const under = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 32, 0, Math.PI * 2, 0, Math.PI * 0.56), hairMat);
-  under.scale.set(HEAD.x * 1.04, HEAD.y * 1.05, HEAD.z * 1.04);
-  under.rotation.x = -0.95;
+  // a thin under-layer so no scalp shows between the locks: a cap of the head's own ellipsoid, a little bigger. The
+  // cap is tipped back in its geometry, before the scale: tipping the scaled mesh swapped the radii, so the head
+  // poked through at the back (a bald patch from behind).
+  const cap = (pole: number, size: number, coverage: number) => {
+    const g = new THREE.SphereGeometry(1, 48, 32, 0, Math.PI * 2, 0, Math.PI * coverage).rotateX(pole);
+    const m = new THREE.Mesh(g, hairMat);
+    m.scale.set(HEAD.x * size, HEAD.y * size, HEAD.z * size);
+    return m;
+  };
+  const under = cap(-0.95, 1.04, 0.56);
   under.position.set(0, 0.03, -0.04);
-  group.add(under);
+  // and the nape, down to where the neck starts
+  const nape = cap(-1.95, 1.03, 0.42);
+  nape.position.set(0, 0, -0.03);
+  group.add(under, nape);
 
   // locks: thick, smooth strands combed from the hairline back to the ponytail, lifted off the head (loose)
   const BASE = new THREE.Vector3(0, 0.32, -0.64); // where they gather (scrunchie)

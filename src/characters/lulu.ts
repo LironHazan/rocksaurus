@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
 import { growTail } from './tail';
+import { armOf, reachArm, releaseArm } from './reach';
 
 const LULU_COLORS = {
   body: 0xb48ce8, // lavender (saturated enough to stay purple under stage lights)
@@ -12,6 +13,10 @@ const LULU_COLORS = {
 };
 
 const BODY = { y: 1, rx: 1.05, ry: 0.95, rz: 1 }; // body ellipsoid
+/** Where her feet stand (x either side, z forward), on the ground. */
+const FOOT = { x: 0.6, z: 0.62 } as const;
+/** Her arms at rest: a little forward, a little out. */
+const ARM_REST = { x: -0.3, out: 0.15 } as const;
 const NECK_REST: readonly number[] = [-0.15, 0.05, 0.12, 0.15]; // gentle S-curve, base → head
 
 /** Places a flattened blob on a surface, facing along its normal. */
@@ -77,7 +82,7 @@ export function createLulu(colors = LULU_COLORS) {
   for (const s of [-1, 1]) {
     body.add(ball(0.42, M.body, [s * 0.62, 0.5, 0.3]));
     const foot = new THREE.Group();
-    foot.position.set(s * 0.6, 0, 0.62);
+    foot.position.set(s * FOOT.x, 0, FOOT.z);
     foot.add(ball(0.32, M.body, [0, 0.18, 0], [1, 0.6, 1.2]));
     for (let k = -1; k <= 1; k++) foot.add(ball(0.07, M.belly, [k * 0.11, 0.15, 0.38]));
     foot.userData.side = s;
@@ -253,4 +258,52 @@ export function idleLulu(rig: LuluRig, t: number, { eyesOpen = 0.75, nod = 0 } =
   const ph = (t + 1.3) % 3.7;
   const open = Math.min(ph < 0.18 ? Math.abs(ph - 0.09) / 0.09 : 1, eyesOpen);
   for (const e of rig.eyes) e.scale.y = Math.max(0.08, open);
+}
+
+/**
+ * Back to her neutral pose: call first every frame, then idleLulu() and the pose. Puts the body, head, tail, feet,
+ * eyes, cheeks and mouth back, hides the drumsticks, and lets go of anything her arms reached for. (Her hair is a
+ * prop: its caller resets it.)
+ */
+export function resetLulu(rig: LuluRig): void {
+  rig.root.position.set(0, 0, 0);
+  rig.root.rotation.set(0, 0, 0);
+  rig.squash.position.set(0, 0, 0);
+  rig.squash.rotation.set(0, 0, 0);
+  rig.squash.scale.set(1, 1, 1);
+  rig.head.rotation.set(0, 0, 0);
+  rig.tail.rotation.set(0, 0, 0);
+  for (const a of rig.arms) {
+    releaseArm(a);
+    a.rotation.set(ARM_REST.x, 0, a.userData.side * ARM_REST.out);
+  }
+  for (const f of rig.feet) f.position.set(f.userData.side * FOOT.x, 0, FOOT.z);
+  for (const c of rig.cheeks) c.scale.set(1, 0.7, 0.35);
+  for (const e of rig.eyes) e.scale.set(1, 1, 1);
+  for (const s of rig.sticks) s.visible = false;
+  rig.setMouth(0);
+}
+
+/**
+ * Her walk cycle at `phase` (1 = one step), scaled by `amount`: the bob, the feet lifting in turn, the sway and the
+ * tail. With `ponytail`, it bounces too. Call after resetLulu(), so the feet start on the ground.
+ */
+export function walkLulu(rig: LuluRig, phase: number, amount = 1, ponytail?: THREE.Object3D): void {
+  const p = Math.PI * phase;
+  rig.root.position.y += Math.abs(Math.sin(p)) * 0.18 * amount;
+  for (const f of rig.feet)
+    f.position.y += Math.max(0, Math.sin(p + (f.userData.side > 0 ? 0 : Math.PI))) * 0.4 * amount;
+  rig.squash.rotation.z = Math.sin(p) * 0.06 * amount;
+  rig.tail.rotation.y = Math.sin(p) * 0.35 * amount;
+  if (ponytail) ponytail.rotation.x = 0.1 + Math.abs(Math.sin(p - 0.5)) * 0.35 * amount;
+}
+
+/** A paw to a world point, the elbow bent out and down (her arms stretch, so anything is in reach). */
+export function reachLulu(rig: LuluRig, side: -1 | 1, world: THREE.Vector3): void {
+  const pivot = armOf(rig, side);
+  const target = rig.body.worldToLocal(world.clone());
+  const elbow = pivot.position.clone().lerp(target, 0.5);
+  elbow.x += side * 0.3;
+  elbow.y -= 0.15;
+  reachArm(pivot, target, elbow);
 }
