@@ -10,6 +10,8 @@ export interface BassPart {
 }
 
 const { ctx } = audio;
+/** How many different plucks a part cycles through (by note), so a repeated note never sounds machine-identical. */
+const PLUCK_TAKES = 7;
 
 /** Warm bass amp: low-end boost, gentle drive for growl, then a darker cab. */
 function createBassAmp(bus: AudioNode) {
@@ -45,7 +47,7 @@ export function playBass(bus: AudioNode, t0: number, { bpm, notes }: BassPart): 
     atTime(t0 + at * eighth, () => {
       const f = 440 * 2 ** ((midi(note) - 69) / 12);
       const src = ctx.createBufferSource();
-      src.buffer = pluck(f, { dur: 2.5, rho: 0.996, bright: 0.18, seed: 50 + (i % 7) }); // soft finger attack
+      src.buffer = pluck(f, { dur: 2.5, rho: 0.996, bright: 0.18, seed: 50 + (i % PLUCK_TAKES) }); // soft finger attack
       const g = ctx.createGain();
       const start = t0 + at * eighth,
         stop = start + len * eighth;

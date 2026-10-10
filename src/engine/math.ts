@@ -6,8 +6,9 @@ export const clamp01 = (x: number): number => Math.min(1, Math.max(0, x));
 /** 0..1 progress of t through the window [a, b]. */
 export const seg = (t: number, a: number, b: number): number => clamp01((t - a) / (b - a));
 
-/** easeInOutQuad */
-export const ease = (x: number): number => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
+/** easeInOutQuad: speeding up to halfway, then slowing down. */
+const HALFWAY = 0.5;
+export const ease = (x: number): number => (x < HALFWAY ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
 
 export const lerp = (a: number, b: number, k: number): number => a + (b - a) * k;
 

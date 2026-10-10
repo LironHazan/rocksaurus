@@ -6,6 +6,8 @@ import { ball, enableShadows } from '../characters/materials';
 const KEY_RANGE = { low: toMidi('C3'), high: toMidi('B5') } as const;
 const WHITE_W = 0.085;
 const BLACK_PCS = new Set([1, 3, 6, 8, 10]);
+/** Semitones in an octave: a MIDI note's pitch class is its number mod this. */
+const OCTAVE = 12;
 const KEYS_TOP = 1.08; // low stand, so the player's shirt shows above the keys
 
 export interface StageKeyboard {
@@ -72,11 +74,11 @@ export function createStageKeyboard(): StageKeyboard {
   const keys = new Map<number, THREE.Group>();
   const keyX = new Map<number, number>();
   const range = [...Array(KEY_RANGE.high - KEY_RANGE.low + 1).keys()].map(i => KEY_RANGE.low + i);
-  const whiteCount = range.filter(m => !BLACK_PCS.has(m % 12)).length;
+  const whiteCount = range.filter(m => !BLACK_PCS.has(m % OCTAVE)).length;
   const x0 = -((whiteCount - 1) * WHITE_W) / 2 + 0.08;
   let whiteIndex = 0;
   for (const m of range) {
-    const black = BLACK_PCS.has(m % 12);
+    const black = BLACK_PCS.has(m % OCTAVE);
     const x = black ? x0 + (whiteIndex - 0.5) * WHITE_W : x0 + whiteIndex * WHITE_W;
     if (!black) whiteIndex++;
     const len = black ? 0.24 : 0.4;

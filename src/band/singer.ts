@@ -9,6 +9,12 @@ import { sungNotes, mouthOpenAt, type VocalPart } from '../audio/vowels';
 import { beatPulse } from './timing';
 import type { Performer, SongClock } from './types';
 
+/** A note held this long (seconds) closes her eyes; this long, she belts it (head back). */
+const LONG_NOTE_S = 0.9;
+const BELT_S = 1.4;
+/** On the final pose her mouth stays at least this open: the last note still ringing. */
+const POSE_MOUTH = 0.6;
+
 /** Paris on vocals: bill opens with the vowels, crest glows, eyes close on long notes, paw up on the big notes. */
 export function createSinger(part: VocalPart, clock: SongClock): Performer {
   const root = new THREE.Group();
@@ -33,8 +39,8 @@ export function createSinger(part: VocalPart, clock: SongClock): Performer {
       const hit = beatPulse(t, clock.beat);
       const open = mouthOpenAt(notes, t);
       const note = notes.find(n => t >= n.start && t < n.end) ?? null;
-      const longNote = note !== null && note.end - note.start >= 0.9;
-      const belting = longNote && note.end - note.start >= 1.4;
+      const longNote = note !== null && note.end - note.start >= LONG_NOTE_S;
+      const belting = longNote && note.end - note.start >= BELT_S;
 
       resetPose(paris);
       idle(paris, t, { eyesOpen: longNote || act === 'pose' ? 0.15 : 1 });
@@ -42,7 +48,7 @@ export function createSinger(part: VocalPart, clock: SongClock): Performer {
       paris.torso.rotation.x = open * 0.05;
       paris.squash.scale.y = 1 - hit * 0.025;
       paris.tail.rotation.y = Math.sin((t * Math.PI) / clock.beat / 2) * 0.3;
-      paris.setMouth(act === 'pose' ? Math.max(open, 0.6) : open);
+      paris.setMouth(act === 'pose' ? Math.max(open, POSE_MOUTH) : open);
       paris.setCrestGlow(open * (belting ? 1.6 : 1) + (act === 'pose' ? 0.8 : 0));
 
       root.updateMatrixWorld(true);

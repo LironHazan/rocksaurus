@@ -306,6 +306,9 @@ export function addJersey(
   return kit;
 }
 
+/** Two unit directions closer than this are the same point (rounding noise in the icosahedron's vertices). */
+const SAME_POINT = 0.01;
+
 /** A classic black-and-white football: dark patches where the twelve pentagons are. Radius 0.36. */
 export function createBall(): THREE.Group {
   const g = new THREE.Group();
@@ -319,7 +322,7 @@ export function createBall(): THREE.Group {
   const seen: THREE.Vector3[] = [];
   for (let i = 0; i < pos.count; i++) {
     const v = new THREE.Vector3().fromBufferAttribute(pos, i).normalize();
-    if (seen.some(s => s.distanceTo(v) < 0.01)) continue;
+    if (seen.some(s => s.distanceTo(v) < SAME_POINT)) continue; // the geometry repeats vertices
     seen.push(v);
     const patch = ball(R * 0.36, black, [0, 0, 0], [1, 1, 0.3], 20);
     patch.position.copy(v).multiplyScalar(R * 0.93);

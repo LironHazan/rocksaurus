@@ -44,11 +44,20 @@ const MOUTH_SHUT = 0.05;
 /** The open mouth's width when barely open, as a fraction of wide open: it stays round, never a slit. */
 const MOUTH_MIN_WIDTH = 0.6;
 
-/** setMouth(k) for a face with a closed `smile` and an open `mouth`: 0 = closed smile, 1 = wide open. */
-export function mouthSetter(smile: THREE.Object3D, mouth: THREE.Object3D): (k: number) => void {
+/**
+ * setMouth(k) for a face with a closed `smile` and an open `mouth`: 0 = closed smile, 1 = wide open. The open mouth
+ * grows from `minWidth` and `minHeight` (fractions of wide open) to full size; a mouth that never quite closes (Silvi's)
+ * passes a minimum height.
+ */
+export function mouthSetter(
+  smile: THREE.Object3D,
+  mouth: THREE.Object3D,
+  minWidth = MOUTH_MIN_WIDTH,
+  minHeight = 0,
+): (k: number) => void {
   return k => {
     smile.visible = k < MOUTH_SHUT;
     mouth.visible = k >= MOUTH_SHUT;
-    mouth.scale.set(MOUTH_MIN_WIDTH + (1 - MOUTH_MIN_WIDTH) * k, k, 1);
+    mouth.scale.set(minWidth + (1 - minWidth) * k, minHeight + (1 - minHeight) * k, 1);
   };
 }

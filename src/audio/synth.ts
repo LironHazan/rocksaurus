@@ -2,6 +2,12 @@ import { audio } from './context';
 import { frequency, type Note } from './notes';
 
 const { ctx } = audio;
+/** The filter opens with each note, up to a cap (Hz) so high notes don't fizz, then settles lower. */
+const FILTER_OPEN_MAX_HZ = 9000;
+const FILTER_SETTLED_MAX_HZ = 4500;
+/** Vibrato only on notes longer than this (seconds), and it takes up to this long to bloom. */
+const VIBRATO_FROM_S = 0.4;
+const VIBRATO_RAMP_S = 0.45;
 
 /** Bright, singing synth lead: two detuned saws through a resonant filter that opens on each note, delayed vibrato. */
 export function lead(bus: AudioNode, when: number, note: Note, vel = 0.5, dur = 0.5): void {
@@ -9,8 +15,8 @@ export function lead(bus: AudioNode, when: number, note: Note, vel = 0.5, dur = 
   const out = ctx.createGain();
   const filter = new BiquadFilterNode(ctx, { type: 'lowpass', Q: 4 });
   filter.frequency.setValueAtTime(900, when);
-  filter.frequency.linearRampToValueAtTime(Math.min(9000, f * 9), when + 0.03);
-  filter.frequency.setTargetAtTime(Math.min(4500, f * 5), when + 0.03, 0.15);
+  filter.frequency.linearRampToValueAtTime(Math.min(FILTER_OPEN_MAX_HZ, f * 9), when + 0.03);
+  filter.frequency.setTargetAtTime(Math.min(FILTER_SETTLED_MAX_HZ, f * 5), when + 0.03, 0.15);
   out.gain.setValueAtTime(0, when);
   out.gain.linearRampToValueAtTime(0.11 * vel, when + 0.012);
   out.gain.setTargetAtTime(0.08 * vel, when + 0.012, 0.2);
@@ -21,7 +27,7 @@ export function lead(bus: AudioNode, when: number, note: Note, vel = 0.5, dur = 
   const vibrato = new OscillatorNode(ctx, { frequency: 5.6 });
   const depth = ctx.createGain();
   depth.gain.setValueAtTime(0, when);
-  depth.gain.linearRampToValueAtTime(dur > 0.4 ? 12 : 0, when + Math.min(dur, 0.45)); // cents, only on longer notes
+  depth.gain.linearRampToValueAtTime(dur > VIBRATO_FROM_S ? 12 : 0, when + Math.min(dur, VIBRATO_RAMP_S)); // cents
   vibrato.connect(depth);
   for (const detune of [-7, 7]) {
     const o = new OscillatorNode(ctx, { type: 'sawtooth', frequency: f, detune });

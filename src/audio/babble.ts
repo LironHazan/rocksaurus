@@ -30,6 +30,10 @@ export interface Syllable<W extends string = string> {
 
 const VOWELS: readonly Vowel[] = ['a', 'e', 'i', 'o', 'u'];
 
+/** Talking comes in phrases: a breath (seconds) after every few syllables. */
+const PHRASE_SYLLABLES = 5;
+const BREATH = 0.18;
+
 /** Every syllable of everyone's lines, in order. Questions rise at the end. */
 export function syllables<W extends string>(
   lines: readonly SpokenLine<W>[],
@@ -48,7 +52,7 @@ export function syllables<W extends string>(
       const step = Math.min(notes.length - 1, Math.floor(r() * 3) + (rising ? 1 : 0));
       const dur = rate * (0.7 + r() * 0.6);
       out.push({ at: t, dur, note: notes[step]!, vowel: VOWELS[Math.floor(r() * VOWELS.length)]!, who: line.who });
-      t += dur + 0.02 + (++i % 5 === 0 ? 0.18 : 0);
+      t += dur + 0.02 + (++i % PHRASE_SYLLABLES === 0 ? BREATH : 0);
     }
   }
   return out.sort((a, b) => a.at - b.at);

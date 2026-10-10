@@ -14,6 +14,8 @@ const LULU_COLORS = {
 };
 
 const BODY = { y: 1, rx: 1.05, ry: 0.95, rz: 1 }; // body ellipsoid
+/** She blinks every `every` seconds, a slow sleepy blink `length` long; shut, an eye keeps `shut` of its height. */
+const BLINK = { every: 3.7, length: 0.18, shut: 0.08 } as const;
 /** Where her feet stand (x either side, z forward), on the ground. */
 const FOOT = { x: 0.6, z: 0.62 } as const;
 /** Her arms at rest: a little forward, a little out. */
@@ -253,9 +255,10 @@ export function idleLulu(rig: LuluRig, t: number, { eyesOpen = 0.75, nod = 0 } =
     pitch += seg.rotation.x;
   });
   rig.head.rotation.x = -pitch * 0.85 + nod * 0.25; // keep the face mostly level
-  const ph = (t + 1.3) % 3.7;
-  const open = Math.min(ph < 0.18 ? Math.abs(ph - 0.09) / 0.09 : 1, eyesOpen);
-  for (const e of rig.eyes) e.scale.y = Math.max(0.08, open);
+  const ph = (t + 1.3) % BLINK.every;
+  const half = BLINK.length / 2;
+  const open = Math.min(ph < BLINK.length ? Math.abs(ph - half) / half : 1, eyesOpen);
+  for (const e of rig.eyes) e.scale.y = Math.max(BLINK.shut, open);
 }
 
 /**

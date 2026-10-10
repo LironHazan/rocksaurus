@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import { ball } from '../characters/materials';
 
+/** Four strings or fewer is a bass: thicker strings. */
+const BASS_STRINGS = 4;
+
 /**
  * Chunky toy electric guitar. Origin = center of the body, neck points +y.
  *   neck: neck length (1.5 guitar, ~2.1 bass) · strings: 6 guitar, 4 bass
@@ -54,7 +57,7 @@ export function createGuitar({ color = 0xe63946, neck: neckLen = 1.5, strings = 
     const from = new THREE.Vector3(k * 0.22, -0.36, 0.2); // bridge (wider spacing)
     const to = new THREE.Vector3(k * 0.12, nutY, 0.105); // nut (narrower)
     const dir = to.clone().sub(from);
-    const thickness = (strings <= 4 ? 0.011 : 0.0075) - i * 0.0008; // lowest string thickest
+    const thickness = (strings <= BASS_STRINGS ? 0.011 : 0.0075) - i * 0.0008; // lowest string thickest; a bass's thicker
     const str = new THREE.Mesh(new THREE.CylinderGeometry(thickness, thickness, dir.length(), 6), stringMat);
     str.position.copy(from).addScaledVector(dir, 0.5);
     str.quaternion.setFromUnitVectors(up, dir.normalize());

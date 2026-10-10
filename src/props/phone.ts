@@ -44,6 +44,10 @@ const C = {
   tick: '#53bdeb',
   chip: '#182229',
 };
+/** The chat stops stacking messages at the header's bottom edge (canvas px from the top); the date chip needs this
+ * much more room under it. */
+const HEADER_BOTTOM = 260;
+const DATE_CHIP_ROOM = 40;
 const W = 540,
   H = 1170;
 const FONT = (size: number, weight = 600) => `${weight} ${size}px ${ROUND}`;
@@ -209,7 +213,7 @@ function paintChat(ctx: CanvasRenderingContext2D, view: ChatView, style: ChatSty
   // messages, newest just above the bar, stacked upward
   const MAX = W * 0.8;
   let y = BAR_Y - 40;
-  for (let i = view.lines.length - 1; i >= 0 && y > 260; i--) {
+  for (let i = view.lines.length - 1; i >= 0 && y > HEADER_BOTTOM; i--) {
     const line = view.lines[i]!;
     const mine = line.from === style.owner;
     const firstOfRun = view.lines[i - 1]?.from !== line.from;
@@ -272,7 +276,7 @@ function paintChat(ctx: CanvasRenderingContext2D, view: ChatView, style: ChatSty
     y = top - (view.lines[i - 1]?.from === line.from ? 8 : 18);
   }
   // the date chip, while there's room for it
-  if (y > 300) {
+  if (y > HEADER_BOTTOM + DATE_CHIP_ROOM) {
     ctx.fillStyle = C.chip;
     ctx.beginPath();
     ctx.roundRect(W / 2 - 60, 232, 120, 40, 12);

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
-import { createFoot } from './parts';
+import { createFoot, mouthSetter } from './parts';
 import { growTail } from './tail';
 import type { CharacterRig, RigFit, Vec3 } from './types';
 import { taperedTube } from '../props/tube';
@@ -242,11 +242,7 @@ export function createStegosaurus(colors: StegosaurusColors = STEGGY_COLORS): St
       torso: { center: [...BODY.at], radii: radiiOf(BODY.radius, BODY.scale) },
       head: radiiOf(HEAD.radius, HEAD.scale),
     },
-    setMouth(k) {
-      smile.visible = k < 0.05;
-      mouth.visible = k >= 0.05;
-      mouth.scale.set(0.6 + 0.4 * k, k, 1);
-    },
+    setMouth: mouthSetter(smile, mouth),
     setFrown(on) {
       smile.rotation.z = on ? 0 : Math.PI;
       smile.position.y = on ? -0.29 : -0.2;

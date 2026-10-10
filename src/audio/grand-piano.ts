@@ -4,9 +4,13 @@ import { pianoSamples } from './piano-model';
 
 const { ctx } = audio;
 const cache = new Map<number, AudioBuffer>();
+/** The tone filter opens with velocity, up to this (Hz). */
+const BRIGHTEST_HZ = 14000;
 
 /** How long each rendered note lasts (it's damped earlier when the key is released). */
-const secondsFor = (m: number) => Math.min(4, Math.max(1.5, 2.5 + (60 - m) * 0.05));
+/** How long a note is rendered (seconds): low notes ring longer, between these bounds. */
+const RING = { shortest: 1.5, longest: 4 } as const;
+const secondsFor = (m: number) => Math.min(RING.longest, Math.max(RING.shortest, 2.5 + (60 - m) * 0.05));
 
 function bufferFor(m: number): AudioBuffer {
   let b = cache.get(m);
@@ -34,7 +38,7 @@ export function grand(bus: AudioNode, when: number, note: Note, vel = 0.5, dur =
   const f0 = 440 * 2 ** ((m - 69) / 12);
   const tone = new BiquadFilterNode(ctx, {
     type: 'lowpass',
-    frequency: Math.min(14000, f0 * 4 + 1500 + vel * 7000),
+    frequency: Math.min(BRIGHTEST_HZ, f0 * 4 + 1500 + vel * 7000),
     Q: 0.5,
   });
   const g = new GainNode(ctx, { gain: 0 });

@@ -291,6 +291,11 @@ export interface WallClock {
   set(h: number, m: number): void;
 }
 
+/** A clock face: 12 hours, 60 minutes; every third hour (12, 3, 6, 9) gets a long tick. */
+const HOURS = 12;
+const MINUTES = 60;
+const QUARTER = 3;
+
 export function createWallClock(r = 0.6): WallClock {
   const group = new THREE.Group();
   const face = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.08, 48), mat(0xffffff, 0.4));
@@ -298,9 +303,9 @@ export function createWallClock(r = 0.6): WallClock {
   const rim = new THREE.Mesh(new THREE.TorusGeometry(r, 0.06, 10, 48), mat(0x2a2a35, 0.4));
   group.add(face, rim);
   const dark = mat(0x2a2a35, 0.5);
-  for (let i = 0; i < 12; i++) {
-    const tickMark = new THREE.Mesh(new THREE.BoxGeometry(0.04, i % 3 ? 0.06 : 0.12, 0.02), dark);
-    const a = (i / 12) * Math.PI * 2;
+  for (let i = 0; i < HOURS; i++) {
+    const tickMark = new THREE.Mesh(new THREE.BoxGeometry(0.04, i % QUARTER ? 0.06 : 0.12, 0.02), dark);
+    const a = (i / HOURS) * Math.PI * 2;
     tickMark.position.set(Math.sin(a) * r * 0.82, Math.cos(a) * r * 0.82, 0.05);
     tickMark.rotation.z = -a;
     group.add(tickMark);
@@ -318,8 +323,8 @@ export function createWallClock(r = 0.6): WallClock {
   return {
     group,
     set(h, m) {
-      minuteHand.rotation.z = -(m / 60) * Math.PI * 2;
-      hourHand.rotation.z = -(((h % 12) + m / 60) / 12) * Math.PI * 2;
+      minuteHand.rotation.z = -(m / MINUTES) * Math.PI * 2;
+      hourHand.rotation.z = -(((h % HOURS) + m / MINUTES) / HOURS) * Math.PI * 2;
     },
   };
 }

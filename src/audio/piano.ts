@@ -37,14 +37,20 @@ function getPianoWave() {
   return pianoWave;
 }
 
+/** The tone filter: bright on the attack, up to a cap (Hz); it darkens as the note decays, but never below a floor. */
+const BRIGHTEST_HZ = 10000;
+const DARKEST_HZ = 700;
+/** The hammer's thud is band-passed no higher than this (Hz): above it, it would sound like a click. */
+const HAMMER_MAX_HZ = 4000;
+
 export function piano(bus: AudioNode, when: number, note: string | number, vel = 0.5, dur = 1): void {
   const f = 440 * 2 ** ((midi(note) - 69) / 12);
   const out = ctx.createGain();
   const lp = ctx.createBiquadFilter();
   lp.type = 'lowpass';
   lp.Q.value = 0.4;
-  lp.frequency.setValueAtTime(Math.min(10000, f * 7 + 2500 * vel), when);
-  lp.frequency.exponentialRampToValueAtTime(Math.max(f * 2.2, 700), when + 1.6);
+  lp.frequency.setValueAtTime(Math.min(BRIGHTEST_HZ, f * 7 + 2500 * vel), when);
+  lp.frequency.exponentialRampToValueAtTime(Math.max(f * 2.2, DARKEST_HZ), when + 1.6);
   out.connect(lp);
   lp.connect(bus);
 
@@ -71,7 +77,7 @@ export function piano(bus: AudioNode, when: number, note: string | number, vel =
     hg = ctx.createGain();
   hn.buffer = noiseBuf;
   hf.type = 'bandpass';
-  hf.frequency.value = Math.min(4000, f * 3);
+  hf.frequency.value = Math.min(HAMMER_MAX_HZ, f * 3);
   hf.Q.value = 1.5;
   hg.gain.setValueAtTime(vel * 0.05, when);
   hg.gain.exponentialRampToValueAtTime(0.0001, when + 0.04);

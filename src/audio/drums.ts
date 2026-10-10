@@ -2,9 +2,14 @@ import { audio } from './context';
 import { rng } from '../engine/math';
 import { drumHits, hitVelocity, type DrumName, type DrumPart } from './drum-patterns';
 import { atTime } from './schedule';
+import { noiseStart } from './noise';
 
 const { ctx } = audio;
 
+/** How far into the noise buffer (seconds) a hit may start: it leaves room for the longest decay. */
+const NOISE_WINDOW_S = 1.5;
+/** Only a snare hit harder than this (velocity, 0–1) rings the rim. */
+const RIMSHOT_FROM = 0.5;
 const noise = (() => {
   const b = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate),
     d = b.getChannelData(0),
@@ -36,7 +41,7 @@ function noiseHit(bus: AudioNode, when: number, { type, freq, Q = 0.7, peak, dec
   src.connect(f);
   f.connect(g);
   g.connect(bus);
-  src.start(when, (when * 7.3) % 1.5);
+  src.start(when, noiseStart(when, 7.3, NOISE_WINDOW_S));
   src.stop(when + decay + 0.05);
 }
 
@@ -97,7 +102,7 @@ export function kick(bus: AudioNode, when: number, vel = 1) {
 
 export function snare(bus: AudioNode, when: number, vel = 1) {
   membrane(bus, when, 195, { vel, decay: 0.18, level: 0.38, modes: 3 }); // drum body
-  if (vel > 0.5) noiseHit(bus, when, { type: 'bandpass', freq: 920, Q: 9, peak: 0.16 * vel, decay: 0.06 }); // rimshot ring
+  if (vel > RIMSHOT_FROM) noiseHit(bus, when, { type: 'bandpass', freq: 920, Q: 9, peak: 0.16 * vel, decay: 0.06 }); // rimshot ring
   noiseHit(bus, when, { type: 'bandpass', freq: 4200, Q: 0.5, peak: 0.32 * vel, decay: 0.24 }); // snare wires
   noiseHit(bus, when, { type: 'highpass', freq: 1500, Q: 0.7, peak: 0.18 * vel, decay: 0.12 });
   noiseHit(bus, when, { type: 'bandpass', freq: 2500, Q: 2, peak: 0.18 * vel, decay: 0.015 }); // stick crack

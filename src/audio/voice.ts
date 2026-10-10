@@ -1,7 +1,14 @@
 import { audio } from './context';
+import { noiseStart, whiteNoise } from './noise';
 import { frequency } from './notes';
 import { FORMANTS, type VocalPart, type Vowel } from './vowels';
 import { atTime } from './schedule';
+
+/** A held note (longer than this, seconds) gets a full vibrato, a short one a hint; it blooms over up to this long. */
+const FULL_VIBRATO_FROM_S = 0.45;
+const VIBRATO_RAMP_S = 0.5;
+/** How far into the breath noise (seconds) a breath may start: it leaves room for itself. */
+const BREATH_WINDOW_S = 0.8;
 
 const { ctx } = audio;
 
@@ -10,11 +17,8 @@ function breathNoise(): AudioBuffer {
   if (breath) return breath;
   breath = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const d = breath.getChannelData(0);
-  let seed = 7;
-  for (let i = 0; i < d.length; i++) {
-    seed = (seed * 16807) % 2147483647;
-    d[i] = (seed / 2147483647) * 2 - 1;
-  }
+  const noise = whiteNoise(7);
+  for (let i = 0; i < d.length; i++) d[i] = noise();
   return breath;
 }
 
@@ -48,7 +52,7 @@ export function sing(bus: AudioNode, when: number, note: string, vowel: Vowel = 
   const vibrato = new OscillatorNode(ctx, { frequency: 5.4 });
   const depth = ctx.createGain();
   depth.gain.setValueAtTime(0, when);
-  depth.gain.linearRampToValueAtTime(dur > 0.45 ? 22 : 6, when + Math.min(0.5, dur)); // cents
+  depth.gain.linearRampToValueAtTime(dur > FULL_VIBRATO_FROM_S ? 22 : 6, when + Math.min(VIBRATO_RAMP_S, dur)); // cents
   vibrato.connect(depth);
   for (const detune of [-4, 4]) {
     const o = new OscillatorNode(ctx, { type: 'sawtooth', frequency: f });
@@ -70,7 +74,7 @@ export function sing(bus: AudioNode, when: number, note: string, vowel: Vowel = 
   noise.connect(formants[1]!);
   noise.connect(ng);
   ng.connect(air);
-  noise.start(when, (when * 3.7) % 0.8);
+  noise.start(when, noiseStart(when, 3.7, BREATH_WINDOW_S));
   noise.stop(when + 0.15);
 }
 
