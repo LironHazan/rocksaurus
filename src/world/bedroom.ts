@@ -1,8 +1,11 @@
 import * as THREE from 'three';
-import { box, createRoom, createScreen, mat, picture, MONO, ROUND } from './interior';
+import { box, createRoom, createScreen, livePanel, mat, picture, MONO, ROUND } from './interior';
 import { textTexture } from './text-texture';
 
 export const BED_TOP = 1.05;
+
+/** Texels across a small display: plenty for a few big digits. */
+const DISPLAY_PX = 256;
 
 /** A small canvas-texture panel that is repainted when its text changes (alarm clock, pager screen). */
 function display(
@@ -11,20 +14,13 @@ function display(
   paint: (ctx: CanvasRenderingContext2D, w: number, h: number, text: string) => void,
 ) {
   let text = '';
-  const draw = (ctx: CanvasRenderingContext2D, cw: number, ch: number) => paint(ctx, cw, ch, text);
-  const tex = textTexture(256, Math.round((256 * h) / w), draw);
-  const canvas = tex.image;
-  const mesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(w, h),
-    new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }),
-  );
+  const panel = livePanel(w, h, DISPLAY_PX, (ctx, cw, ch) => paint(ctx, cw, ch, text));
   return {
-    mesh,
+    mesh: panel.mesh,
     set(next: string) {
       if (next === text) return;
       text = next;
-      draw(canvas.getContext('2d')!, canvas.width, canvas.height);
-      tex.needsUpdate = true;
+      panel.repaint();
     },
   };
 }

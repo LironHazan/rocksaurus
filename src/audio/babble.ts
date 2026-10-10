@@ -61,6 +61,12 @@ export function mouthOf<W extends string>(all: readonly Syllable<W>[], who: W, t
   return 0;
 }
 
+/** talk(rig, who, t, rest?) for a cast: opens the rig's mouth with `who`'s babble, never less than `rest`. */
+export const talker =
+  <W extends string>(mouthAt: (who: W, t: number) => number) =>
+  (rig: { setMouth(k: number): void }, who: W, t: number, rest = 0): void =>
+    rig.setMouth(Math.max(rest, mouthAt(who, t)));
+
 export const speakerOf = <W extends string>(lines: readonly SpokenLine<W>[], t: number): W | null =>
   lines.find(l => t >= l.from && t < l.to)?.who ?? null;
 

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { box, createRoom, cylinder, mat, picture, ROUND } from '../../../world/interior';
+import { addKeyLight, box, createRoom, cylinder, mat, picture, ROUND } from '../../../world/interior';
 import { createLaptop } from '../../../props/laptop';
 import { createMatchaCup } from '../../../props/matcha';
 import { ball } from '../../../characters/materials';
@@ -56,13 +56,7 @@ export function createCafe() {
   createRoom(scene, { wall: 0xf1e4d3, floor: 0x8a5a3b });
 
   scene.add(new THREE.HemisphereLight(0xfff4e6, 0x7a5a40, 1.05));
-  const key = new THREE.DirectionalLight(0xffe8cc, 1.9);
-  key.position.set(3, 9, 8);
-  key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
-  key.shadow.radius = 5;
-  Object.assign(key.shadow.camera, { left: -8, right: 8, top: 9, bottom: -2, near: 1, far: 30 });
-  scene.add(key);
+  addKeyLight(scene, 0xffe8cc, 1.9, { from: [3, 9, 8] });
 
   // brick back wall
   const bricks = picture(
