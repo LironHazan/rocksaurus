@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
-import { createFoot } from './parts';
+import { createFoot, mouthSetter } from './parts';
 import { growTail } from './tail';
 import { textTexture } from '../world/text-texture';
 import { ROUND } from '../world/interior';
@@ -18,6 +18,9 @@ const SILVI_COLORS = {
   eyes: 0x2fa86b, // green iris
   gold: 0xf5c451,
 };
+
+/** Silvi's mouth is wider, and never quite closes: it opens from 70% wide and 40% high. */
+const SILVI_MOUTH = { minWidth: 0.7, minHeight: 0.4 } as const;
 
 export interface CeratopsRig extends CharacterRig {
   /** Lulu-sized head anchor, scaled to this head, so Lulu's hair props (ponytail) fit. */
@@ -247,11 +250,7 @@ export function createCeratops(
     tail,
     face,
     badge: badgeMesh,
-    setMouth(k) {
-      smile.visible = k < 0.05;
-      mouth.visible = k >= 0.05;
-      mouth.scale.set(0.7 + 0.3 * k, 0.4 + k * 0.6, 1);
-    },
+    setMouth: mouthSetter(smile, mouth, SILVI_MOUTH.minWidth, SILVI_MOUTH.minHeight),
     setFrown(on) {
       smile.rotation.z = on ? 0 : Math.PI;
     },

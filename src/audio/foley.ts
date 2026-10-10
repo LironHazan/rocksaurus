@@ -1,18 +1,20 @@
 import { audio } from './context';
+import { noiseStart, whiteNoise } from './noise';
 
 // Everyday foley: keys, a shaker, gulps, a pager, a clock, footsteps.
 const { ctx } = audio;
+/** How far into the noise buffer (seconds) a burst, a swish and a bed may start: each leaves room for itself. */
+const BURST_WINDOW_S = 0.8;
+const SWISH_WINDOW_S = 0.5;
+const BED_WINDOW_S = 0.9;
 
 let noiseBuf: AudioBuffer | null = null;
 function noise(): AudioBuffer {
   if (noiseBuf) return noiseBuf;
   noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
   const d = noiseBuf.getChannelData(0);
-  let seed = 11;
-  for (let i = 0; i < d.length; i++) {
-    seed = (seed * 16807) % 2147483647;
-    d[i] = (seed / 2147483647) * 2 - 1;
-  }
+  const noise = whiteNoise(11);
+  for (let i = 0; i < d.length; i++) d[i] = noise();
   return noiseBuf;
 }
 
@@ -24,7 +26,7 @@ function burst(bus: AudioNode, when: number, len: number, type: BiquadFilterType
   g.gain.linearRampToValueAtTime(vol, when + 0.004);
   g.gain.exponentialRampToValueAtTime(0.0001, when + len);
   src.connect(f).connect(g).connect(bus);
-  src.start(when, (when * 7.3) % 0.8);
+  src.start(when, noiseStart(when, 7.3, BURST_WINDOW_S));
   src.stop(when + len + 0.05);
 }
 
@@ -75,9 +77,11 @@ export const stomp = (bus: AudioNode, when: number) => tone(bus, when, 'sine', 1
 
 // ── In a shop ──────────────────────────────────────────────
 
+/** The clacks cycle through this many pitches: hangers aren't all the same. */
+const HANGER_PITCHES = 3;
 /** Metal hangers sliding along a rail: a quick run of clacks. */
 export function hangers(bus: AudioNode, when: number, n = 6) {
-  for (let i = 0; i < n; i++) burst(bus, when + i * 0.05, 0.05, 'bandpass', 2400 + (i % 3) * 700, 0.1, 3);
+  for (let i = 0; i < n; i++) burst(bus, when + i * 0.05, 0.05, 'bandpass', 2400 + (i % HANGER_PITCHES) * 700, 0.1, 3);
 }
 
 /** A curtain pulled across: a soft swish of filtered noise. */
@@ -91,7 +95,7 @@ export function swish(bus: AudioNode, when: number, len = 0.5) {
   g.gain.linearRampToValueAtTime(0.1, when + len * 0.4);
   g.gain.exponentialRampToValueAtTime(0.0001, when + len);
   src.connect(f).connect(g).connect(bus);
-  src.start(when, (when * 3.1) % 0.5);
+  src.start(when, noiseStart(when, 3.1, SWISH_WINDOW_S));
   src.stop(when + len + 0.05);
 }
 
@@ -114,11 +118,13 @@ export function printer(bus: AudioNode, when: number, len = 0.9) {
   for (let t = 0; t < len; t += 0.045) burst(bus, when + t, 0.02, 'bandpass', 2800, 0.05, 2);
 }
 
+/** Each bounce lands on another edge of the die: three pitches, cycling. */
+const DIE_FACES_HEARD = 3;
 /** A die clattering across a counter: bounces that get closer together and quieter. */
 export function diceRoll(bus: AudioNode, when: number) {
   let t = 0;
   for (let i = 0; i < 9; i++) {
-    burst(bus, when + t, 0.04, 'bandpass', 1800 + (i % 3) * 600, 0.2 * 0.8 ** i, 2.5);
+    burst(bus, when + t, 0.04, 'bandpass', 1800 + (i % DIE_FACES_HEARD) * 600, 0.2 * 0.8 ** i, 2.5);
     tone(bus, when + t, 'triangle', 900, 500, 0.05, 0.05 * 0.8 ** i);
     t += 0.19 * 0.78 ** i;
   }
@@ -227,6 +233,8 @@ const BEDS: Record<BedKind, { type: BiquadFilterType; freq: number; Q: number; v
   fountain: { type: 'bandpass', freq: 2400, Q: 0.5, vol: 0.035, wobble: 0.2 }, // splashing water
 };
 
+/** A bed fades in and out over a quarter of its length, at most this long (seconds). */
+const BED_FADE_MAX_S = 0.4;
 /** A background bed for a whole shot: looped noise, fading in and out so cuts don't click. */
 export function bed(bus: AudioNode, when: number, len: number, kind: BedKind) {
   const { type, freq, Q, vol, wobble } = BEDS[kind];
@@ -237,14 +245,14 @@ export function bed(bus: AudioNode, when: number, len: number, kind: BedKind) {
   const depth = new GainNode(ctx, { gain: wobble / 2 });
   lfo.connect(depth).connect(swell.gain);
   const g = new GainNode(ctx, { gain: 0 });
-  const fade = Math.min(0.4, len / 4);
+  const fade = Math.min(BED_FADE_MAX_S, len / 4);
   g.gain.setValueAtTime(0, when);
   g.gain.linearRampToValueAtTime(vol, when + fade);
   g.gain.setValueAtTime(vol, when + len - fade);
   g.gain.linearRampToValueAtTime(0, when + len);
   src.connect(f).connect(swell).connect(g).connect(bus);
   for (const n of [src, lfo]) {
-    n.start(when, n === src ? (when * 5.7) % 0.9 : 0);
+    n.start(when, n === src ? noiseStart(when, 5.7, BED_WINDOW_S) : 0);
     n.stop(when + len + 0.05);
   }
 }
@@ -269,10 +277,13 @@ export function carPass(bus: AudioNode, when: number, len = 2.2) {
   src.stop(when + len + 0.05);
 }
 
+/** Handwriting isn't even: the gaps between strokes cycle through three lengths, their pitch through four. */
+const STROKE_GAPS = 3;
+const STROKE_PITCHES = 4;
 /** A pen scribbling notes: little scratchy strokes. */
 export function scribble(bus: AudioNode, when: number, len = 1) {
-  for (let t = 0, i = 0; t < len; t += 0.07 + (i % 3) * 0.03, i++)
-    burst(bus, when + t, 0.05 + (i % 2) * 0.03, 'bandpass', 3600 + (i % 4) * 400, 0.05, 2);
+  for (let t = 0, i = 0; t < len; t += 0.07 + (i % STROKE_GAPS) * 0.03, i++)
+    burst(bus, when + t, 0.05 + (i % 2) * 0.03, 'bandpass', 3600 + (i % STROKE_PITCHES) * 400, 0.05, 2);
 }
 
 /** The espresso machine's steam wand: a hiss with a milky gurgle under it. */

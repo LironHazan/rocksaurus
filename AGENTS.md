@@ -13,14 +13,16 @@ previews a Short and records it to video. GitHub Pages deploys `main`.
   it on every PR.
 - `npm run dev` — the studio at http://localhost:5173. Open a Short with `?episode=<id>`.
 - `npm run format` — Prettier. Formatting is enforced.
+- `npm run skills` — restores the agent skills pinned in `skills-lock.json` into `.agents/skills/` (Claude Code reads
+  them through the `.claude/skills` link). Run it once in every fresh clone or worktree: the skills are not committed.
 
 The tools are not the usual ones: TypeScript 7 (native compiler), **oxlint** (not ESLint) with the vendored
-**anti-slop** rules (`tools/oxlint/anti-slop/`), **dependency-cruiser** for module boundaries
-(`.dependency-cruiser.cjs`), and **Fallow** for dead code (`.fallowrc.json`; `npx fallow dupes` and `npx fallow health`
-report duplication and complexity). On a PR, `fallow audit` fails on any dead code, complexity or duplication the PR
-adds. Node 24. anti-slop means: every non-`const` type assertion has a `// SAFETY:` comment (prefer `instanceof`, type
-guards and `satisfies`), and tests never mock modules: jsdom's missing Web Audio and canvas are
-`src/test/browser-stand-in.ts`.
+**anti-slop** rules (`tools/oxlint/anti-slop/`) and the house rules in `tools/oxlint/rocksaurus/`,
+**dependency-cruiser** for module boundaries (`.dependency-cruiser.cjs`), and **Fallow** for dead code
+(`.fallowrc.json`; `npx fallow dupes` and `npx fallow health` report duplication and complexity). On a PR,
+`fallow audit` fails on any dead code, complexity or duplication the PR adds. Node 24. anti-slop means: every
+non-`const` type assertion has a `// SAFETY:` comment (prefer `instanceof`, type guards and `satisfies`), and tests
+never mock modules: jsdom's missing Web Audio and canvas are `src/test/browser-stand-in.ts`.
 
 ## Rules
 
@@ -41,7 +43,8 @@ guards and `satisfies`), and tests never mock modules: jsdom's missing Web Audio
   format switch is the easy bug here.
 - **No magic numbers in logic.** A number that means something (a limit, a timeout, a threshold, a stride) is a named
   constant with its unit and reason (`const RGBA = 4`, `FIRST_PICTURE_TIMEOUT_MS`). Scene data stays literal: geometry
-  coordinates, colours, beat sheets, note tables.
+  coordinates, colours, beat sheets, note tables. `rocksaurus/no-magic-numbers-in-logic` checks the numbers that
+  decide something (comparisons, `%`, `Math.min`/`max` limits, timer delays) everywhere but episodes and tests.
 - **Comment the why, not the what:** intent, units, ranges, beat sheets, what an anonymous shape is
   (`ball(…) // snout`). No comment that repeats a name in the code, and no section banner that repeats what follows.
 - **Tests:** unit-test pure logic (timing, parts, captions, scripts) with Vitest globals. Every registered Short is
@@ -63,4 +66,5 @@ guards and `satisfies`), and tests never mock modules: jsdom's missing Web Audio
 - Anything the browser shows (to test it): [docs/agents/browser-testing.md](docs/agents/browser-testing.md).
 - three.js code: the pinned `three-best-practices` skill. UI in `src/ui/` or `src/app/` (CSS modules and the tokens in
   `src/styles/global.css`, Radix primitives): the `frontend-design` skill. Adding or splitting a module: the
-  `codebase-design` and `setup-ts-deep-modules` skills. Skills are pinned in `skills-lock.json`.
+  `codebase-design` and `setup-ts-deep-modules` skills. Skills are pinned in `skills-lock.json`; if they are
+  missing, run `npm run skills`.

@@ -4,6 +4,9 @@ import { taperedTube, curve3 } from './tube';
 
 // Lulu's head ellipsoid around the `face` group (see createLulu: head ball 0.6 scaled 1 × 0.9 × 1.1)
 const HEAD = { x: 0.6, y: 0.54, z: 0.66 };
+/** The thinnest a tube gets at its tip (radius, head units): thinner, and the tube's end pinches into spikes. */
+const CORE_THINNEST = 0.02;
+const LOCK_THINNEST = 0.006;
 
 /** The hair, and the ponytail's pivot at the scrunchie: rotate it to make it swing. */
 export interface Ponytail {
@@ -115,7 +118,7 @@ export function addPonytail(
   // hidden core so no gaps show between the locks
   ponytail.add(
     new THREE.Mesh(
-      taperedTube(tailCurve, s => Math.max(0.02, fullness(s) * 0.7 * (1 - Math.pow(s, 4)))),
+      taperedTube(tailCurve, s => Math.max(CORE_THINNEST, fullness(s) * 0.7 * (1 - Math.pow(s, 4)))),
       hairMat,
     ),
   );
@@ -140,7 +143,7 @@ export function addPonytail(
       new THREE.Mesh(
         taperedTube(
           new THREE.CatmullRomCurve3(pts),
-          t => Math.max(0.006, thick * Math.min(1, 0.5 + t * 5) * (1 - Math.pow(t, 1.6))),
+          t => Math.max(LOCK_THINNEST, thick * Math.min(1, 0.5 + t * 5) * (1 - Math.pow(t, 1.6))),
           { segments: 48, radial: 12 },
         ),
         hairMat,

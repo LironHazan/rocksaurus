@@ -6,6 +6,11 @@ import { textTexture } from '../world/text-texture';
 /** A protein bar's length (along x), sized for dinosaur paws. */
 export const BAR_LENGTH = 0.7;
 
+/** The bar never scales to zero (a degenerate mesh); it's hidden once eaten. The far crimp is torn off as soon as
+ * the wrapper starts to open (`open`, 0–1). */
+const NEVER_ZERO = 0.01;
+const CRIMP_TORN = 0.05;
+
 export interface ProteinBar {
   group: THREE.Group;
   /** 0 = sealed; 1 = wrapper torn open, the bar peeking out. */
@@ -89,12 +94,12 @@ export function createProteinBar({ colour = '#e2582b', flavour = 'Choc Fudge Bro
     const out = open * BAR_LENGTH * 0.45;
     const left = (1 - eaten) * BAR_LENGTH * 0.95;
     choc.visible = open > 0 && eaten < 1;
-    choc.scale.x = Math.max(0.01, left / (BAR_LENGTH * 0.95));
+    choc.scale.x = Math.max(NEVER_ZERO, left / (BAR_LENGTH * 0.95));
     choc.position.x = out + (left - BAR_LENGTH * 0.95) / 2;
     const peel = 1 - open * 0.45;
     wrapper.scale.x = peel;
     wrapper.position.x = -BAR_LENGTH * (1 - peel) * 0.5;
-    crimps[1]!.visible = open < 0.05;
+    crimps[1]!.visible = open < CRIMP_TORN;
   }
   return {
     group,

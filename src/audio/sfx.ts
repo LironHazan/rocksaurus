@@ -1,4 +1,5 @@
 import { audio } from './context';
+import { whiteNoise } from './noise';
 
 const { ctx } = audio;
 
@@ -29,11 +30,8 @@ export const chatSent = (bus: AudioNode, when: number) => boop(bus, when, 900, 1
 const noise = (() => {
   const b = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate),
     d = b.getChannelData(0);
-  let seed = 9;
-  for (let i = 0; i < d.length; i++) {
-    seed = (seed * 16807) % 2147483647;
-    d[i] = (seed / 2147483647) * 2 - 1;
-  }
+  const noise = whiteNoise(9);
+  for (let i = 0; i < d.length; i++) d[i] = noise();
   return b;
 })();
 

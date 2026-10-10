@@ -10,6 +10,11 @@ export interface Meadow {
   update(t: number): void;
 }
 
+/** No flowers where the band stands: within this much either side of the middle, in front of `back`. */
+const STAGE = { halfWidth: 2.2, back: -2 } as const;
+/** The clouds drift right and wrap round over this width (world units), centred on the middle. */
+const CLOUD_LOOP = 50;
+
 /** Pastel sky, rounded grassy hill, flowers and drifting clouds. */
 export function createMeadow(scene: THREE.Scene, { seed = 7 } = {}): Meadow {
   {
@@ -56,9 +61,9 @@ export function createMeadow(scene: THREE.Scene, { seed = 7 } = {}): Meadow {
   for (let i = 0; i < 40; i++) {
     const x = (r() - 0.5) * 22,
       z = -10 + r() * 13;
-    if (Math.abs(x) < 2.2 && z > -2) continue; // keep the stage clear
+    if (Math.abs(x) < STAGE.halfWidth && z > STAGE.back) continue; // keep the stage clear
     const f = new THREE.Group();
-    const pm = new THREE.MeshStandardMaterial({ color: petalCols[i % 4], roughness: 0.9 });
+    const pm = new THREE.MeshStandardMaterial({ color: petalCols[i % petalCols.length], roughness: 0.9 });
     for (let p = 0; p < 5; p++) {
       const a = (p / 5) * Math.PI * 2;
       const petal = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 8), pm);
@@ -95,7 +100,7 @@ export function createMeadow(scene: THREE.Scene, { seed = 7 } = {}): Meadow {
   function update(t: number) {
     for (const c of clouds) {
       const u = c.userData;
-      c.position.set(((u.x0 + t * u.speed + 25) % 50) - 25, u.y, u.z);
+      c.position.set(((u.x0 + t * u.speed + CLOUD_LOOP / 2) % CLOUD_LOOP) - CLOUD_LOOP / 2, u.y, u.z);
     }
   }
 

@@ -1,3 +1,5 @@
+import { whiteNoise } from './noise';
+
 // A physically-inspired piano tone, rendered sample by sample (pure math, no Web Audio, so it's testable).
 //
 // What makes a piano sound like a piano and not a synth:
@@ -9,13 +11,19 @@
 //  - a short, soft hammer knock at the very start
 
 const UNISON_CENTS = [0, 1.1, -0.9];
+/** Strings per note, as on a real piano: one wound string in the bass (below MIDI 40, E2), two up to MIDI 52 (E3),
+ * three above. */
+const ONE_STRING_BELOW = 40;
+const TWO_STRINGS_BELOW = 52;
+/** Partials above this (Hz) are left out: inaudible on a phone speaker, and they only cost time. */
+const HIGHEST_PARTIAL_HZ = 12000;
 
 /** Peak-normalized samples of one piano note (MIDI number), `seconds` long. */
 export function pianoSamples(midiNote: number, sampleRate: number, seconds: number): Float32Array<ArrayBuffer> {
   const n = Math.floor(sampleRate * seconds);
   const out = new Float32Array(new ArrayBuffer(n * 4));
   const f0 = 440 * 2 ** ((midiNote - 69) / 12);
-  const strings = midiNote < 40 ? 1 : midiNote < 52 ? 2 : 3;
+  const strings = midiNote < ONE_STRING_BELOW ? 1 : midiNote < TWO_STRINGS_BELOW ? 2 : 3;
   const B = 0.00008 * 2 ** ((midiNote - 48) / 18); // stiffer (more inharmonic) up high
   const ring = 1.6 * (261.6 / f0) ** 0.5; // low notes ring longer
   const hammer = 1 / 7;
@@ -23,7 +31,7 @@ export function pianoSamples(midiNote: number, sampleRate: number, seconds: numb
 
   for (let p = 1; p <= 24; p++) {
     const fp = p * f0 * Math.sqrt(1 + B * p * p);
-    if (fp > nyquist || fp > 12000) break;
+    if (fp > nyquist || fp > HIGHEST_PARTIAL_HZ) break;
     const amp = (Math.abs(Math.sin(Math.PI * p * hammer)) + 0.08) / p ** 1.05;
     // per-partial decay: higher partials die faster; fast "ping" + slow aftersound
     const tauFast = (ring * 0.35) / (1 + 0.7 * (p - 1));
@@ -52,12 +60,11 @@ export function pianoSamples(midiNote: number, sampleRate: number, seconds: numb
   }
 
   // hammer knock: a few ms of soft, low noise
-  let seed = midiNote * 9301 + 49297;
+  const noise = whiteNoise(midiNote * 9301 + 49297);
   let lp = 0;
   const knock = Math.floor(sampleRate * 0.012);
   for (let i = 0; i < knock; i++) {
-    seed = (seed * 16807) % 2147483647;
-    lp += ((seed / 2147483647) * 2 - 1 - lp) * 0.15;
+    lp += (noise() - lp) * 0.15;
     out[i]! += lp * 0.25 * (1 - i / knock);
   }
 

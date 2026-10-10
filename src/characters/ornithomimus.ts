@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
+import { mouthSetter } from './parts';
 import { growTail } from './tail';
 import { reachArm, sideOf } from './reach';
 import { taperedTube } from '../props/tube';
@@ -286,11 +287,7 @@ export function createOrnithomimus(colors = RORIT_COLORS, { athleisure = true } 
       torso.add(m);
       return m;
     },
-    setMouth(k) {
-      smile.visible = k < 0.05;
-      mouth.visible = k >= 0.05;
-      mouth.scale.set(0.6 + 0.4 * k, k, 1);
-    },
+    setMouth: mouthSetter(smile, mouth),
     setFrown(on) {
       smile.rotation.z = on ? 0 : Math.PI;
     },

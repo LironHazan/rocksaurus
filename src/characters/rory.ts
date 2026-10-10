@@ -150,6 +150,11 @@ export function resetPose(rig: CharacterRig): void {
   rig.setFrown(false);
 }
 
+/** A blink: shut and open again in this long (seconds). Shut, an eye is squashed to this much of its height (not to
+ * zero, which would make the mesh degenerate). */
+const BLINK_S = 0.16;
+const EYE_SHUT = 0.08;
+
 /** Breathing, idle sway and auto-blink — call every frame, then layer episode-specific poses on top. */
 export function idle(rig: CharacterRig, t: number, { blinkEvery = 3.1, eyesOpen = 1 } = {}): void {
   const breath = Math.sin(t * 2.2) * 0.02;
@@ -158,6 +163,7 @@ export function idle(rig: CharacterRig, t: number, { blinkEvery = 3.1, eyesOpen 
   rig.head.rotation.x = Math.sin(t * 1.1) * 0.04;
 
   const ph = (t + 0.7) % blinkEvery;
-  const open = Math.min(ph < 0.16 ? Math.abs(ph - 0.08) / 0.08 : 1, eyesOpen);
-  for (const e of rig.eyes) e.scale.y = Math.max(0.08, open);
+  const half = BLINK_S / 2;
+  const open = Math.min(ph < BLINK_S ? Math.abs(ph - half) / half : 1, eyesOpen);
+  for (const e of rig.eyes) e.scale.y = Math.max(EYE_SHUT, open);
 }

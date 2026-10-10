@@ -47,7 +47,8 @@
     "anti-slop/no-unsafe-dictionary-type": "error",
     "anti-slop/no-widen-then-assert": "error",
     "anti-slop/require-readable-spacing": "off",
-    "anti-slop/require-safety-comment-for-type-assertion": "error"
+    "anti-slop/require-safety-comment-for-type-assertion": "error",
+    "rocksaurus/no-magic-numbers-in-logic": "error"
   },
   "overrides": [
     {
@@ -55,12 +56,22 @@
       "env": {
         "node": true
       }
+    },
+    {
+      "files": ["src/episodes/**", "**/*.test.ts", "**/*.test.tsx"],
+      "rules": {
+        "rocksaurus/no-magic-numbers-in-logic": "off"
+      }
     }
   ],
   "jsPlugins": [
     {
       "name": "anti-slop",
       "specifier": "./tools/oxlint/anti-slop/index.ts"
+    },
+    {
+      "name": "rocksaurus",
+      "specifier": "./tools/oxlint/rocksaurus/index.ts"
     }
   ]
 }

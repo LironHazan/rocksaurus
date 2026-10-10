@@ -10,6 +10,11 @@ export interface ShortHairOptions {
   seed?: number;
 }
 
+/** Directions on the head (unit vector, head space) with no hair: the face is forward of `forward` and below
+ * `up`; nothing grows below the nape. */
+const FACE = { forward: 0.45, up: 0.5 } as const;
+const NAPE = -0.05;
+
 /**
  * Short hair made of many small pointed tufts that grow out from the crown and flow over the head and forward
  * into a fringe — overlapping clumps with direction and pointed tips, like stylized animation hair.
@@ -39,7 +44,7 @@ export function addShortHair(
     const n = d.clone().normalize();
     return n.multiplyScalar(k / Math.sqrt((n.x / ax) ** 2 + (n.y / ay) ** 2 + (n.z / az) ** 2));
   };
-  const isFace = (d: THREE.Vector3) => d.z > 0.45 && d.y < 0.5; // keep the forehead, eyes and face clear
+  const isFace = (d: THREE.Vector3) => d.z > FACE.forward && d.y < FACE.up; // keep the forehead, eyes and face clear
 
   // tufts: grow from the crown whorl outward along the scalp; front ones fall forward as a fringe
   const crown = new THREE.Vector3(0, 0.8, -0.6).normalize();
@@ -50,7 +55,7 @@ export function addShortHair(
     const th = i * 2.399963;
     const d = new THREE.Vector3(Math.cos(th) * ring, y, Math.sin(th) * ring);
     d.applyAxisAngle(new THREE.Vector3(1, 0, 0), -0.55); // tip the hair region back: high hairline, full at the back
-    if (d.y < -0.05 || isFace(d)) continue;
+    if (d.y < NAPE || isFace(d)) continue;
 
     // flow: along the surface, away from the crown (perpendicular part of d − crown)
     const away = d.clone().sub(crown);

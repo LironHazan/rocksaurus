@@ -1,4 +1,5 @@
 import { audio } from './context';
+import { whiteNoise } from './noise';
 import { midi, type Note } from './notes';
 import { pluck } from './guitar';
 
@@ -13,11 +14,8 @@ function click(): AudioBuffer {
   if (clickBuf) return clickBuf;
   clickBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.02), ctx.sampleRate);
   const d = clickBuf.getChannelData(0);
-  let seed = 77;
-  for (let i = 0; i < d.length; i++) {
-    seed = (seed * 16807) % 2147483647;
-    d[i] = ((seed / 2147483647) * 2 - 1) * (1 - i / d.length);
-  }
+  const noise = whiteNoise(77);
+  for (let i = 0; i < d.length; i++) d[i] = noise() * (1 - i / d.length);
   return clickBuf;
 }
 
@@ -36,6 +34,9 @@ export function slapAmp(bus: AudioNode): AudioNode {
   return chain[0]!;
 }
 
+/** How many different plucks a part cycles through (by note), so a repeated note never sounds machine-identical. */
+const PLUCK_TAKES = 7;
+
 /** One slapped, popped or ghosted bass note into a slapAmp(). */
 export function slap(amp: AudioNode, when: number, note: Note, kind: SlapKind = 'slap', dur = 0.2): void {
   const m = midi(note);
@@ -43,7 +44,7 @@ export function slap(amp: AudioNode, when: number, note: Note, kind: SlapKind = 
   const bright = kind === 'pop' ? 0.55 : kind === 'slap' ? 0.42 : 0.2;
   const vel = kind === 'ghost' ? 0.25 : 0.8;
   const src = new AudioBufferSourceNode(ctx, {
-    buffer: pluck(f, { dur: 1.2, rho: 0.993, bright, seed: 11 + (m % 7) }),
+    buffer: pluck(f, { dur: 1.2, rho: 0.993, bright, seed: 11 + (m % PLUCK_TAKES) }),
   });
   const g = new GainNode(ctx, { gain: 0 });
   g.gain.setValueAtTime(vel, when);

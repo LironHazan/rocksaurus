@@ -13,7 +13,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 1500, // three.js is big; it is one cached vendor chunk
   },
   test: {
-    include: ['src/**/*.test.{ts,tsx}'], // e2e/ is Playwright's
+    include: ['src/**/*.test.{ts,tsx}', 'tools/oxlint/rocksaurus/**/*.test.ts'], // e2e/ is Playwright's
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],

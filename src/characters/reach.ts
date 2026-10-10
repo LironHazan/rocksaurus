@@ -64,6 +64,9 @@ function parts(pivot: THREE.Object3D): ReachParts {
   return created;
 }
 
+/** An arm never squashes below this much of its length, however close the target: shorter looks like a stump. */
+const SHORTEST_ARM = 0.2;
+
 /**
  * Poses a capsule arm (a shoulder pivot with a CapsuleGeometry child) so its paw lands on `target`.
  * With `elbow`, the arm bends: upper arm shoulder → elbow, forearm elbow → target. Use the elbow to
@@ -78,7 +81,7 @@ export function reachArm(pivot: THREE.Object3D, target: THREE.Vector3, elbow: TH
   const d = end.clone().sub(pivot.position);
   const len = d.length();
   pivot.quaternion.setFromUnitVectors(DOWN, d.clone().normalize());
-  p.arm.scale.set(1, Math.max(0.2, len / p.full), 1);
+  p.arm.scale.set(1, Math.max(SHORTEST_ARM, len / p.full), 1);
   p.arm.position.y = -len / 2;
 
   p.joint.visible = p.forearm.visible = !!elbow;
@@ -88,7 +91,7 @@ export function reachArm(pivot: THREE.Object3D, target: THREE.Vector3, elbow: TH
     const flen = f.length();
     p.forearm.position.copy(elbow).addScaledVector(f, 0.5);
     p.forearm.quaternion.setFromUnitVectors(UP, f.normalize());
-    p.forearm.scale.set(1, Math.max(0.2, flen / p.full), 1);
+    p.forearm.scale.set(1, Math.max(SHORTEST_ARM, flen / p.full), 1);
   }
   p.paw.position.copy(target);
 }
