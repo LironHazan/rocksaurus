@@ -13,6 +13,8 @@ import { EpisodeList } from './components/EpisodeList';
 import { StudioHeader } from './components/StudioHeader';
 import { SnapshotBar } from './components/SnapshotBar';
 import { Transport } from './components/Transport';
+import { PerfReadout } from './components/PerfReadout';
+import { useFrameStats } from './frameStats';
 import styles from './Studio.module.css';
 
 /** The studio: pick an episode and format, preview it, scrub it, record it to a video or save a frame as an image. */
@@ -25,6 +27,8 @@ export function StudioPage() {
 
   const { containerRef, session } = useStudioSession(episode, FORMATS[formatId], debugCamera);
   const { time, soundOn, paused } = usePlayback(session?.player ?? null);
+  // dev builds only: what each frame costs, for tuning scenes
+  const frameStats = useFrameStats(import.meta.env.DEV ? (session?.stage.renderer ?? null) : null);
   const [recording, setRecording] = useState(false);
   const [status, setStatus] = useState('');
   const [crop, setCrop] = useState<SnapshotCrop>('pinterest');
@@ -109,6 +113,7 @@ export function StudioPage() {
             onSave={() => void snapshot()}
           />
         </div>
+        <PerfReadout stats={frameStats} />
         <p className={styles.status} role="status">
           {status}
         </p>
