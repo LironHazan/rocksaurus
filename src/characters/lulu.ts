@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
+import { createFoot, mouthSetter } from './parts';
 import { growTail } from './tail';
 import { armOf, reachArm, releaseArm } from './reach';
 
@@ -81,11 +82,12 @@ export function createLulu(colors = LULU_COLORS) {
   const feet = [];
   for (const s of [-1, 1]) {
     body.add(ball(0.42, M.body, [s * 0.62, 0.5, 0.3]));
-    const foot = new THREE.Group();
-    foot.position.set(s * FOOT.x, 0, FOOT.z);
-    foot.add(ball(0.32, M.body, [0, 0.18, 0], [1, 0.6, 1.2]));
-    for (let k = -1; k <= 1; k++) foot.add(ball(0.07, M.belly, [k * 0.11, 0.15, 0.38]));
-    foot.userData.side = s;
+    const foot = createFoot(s, M.body, M.belly, [FOOT.x, 0, FOOT.z], {
+      radius: 0.32,
+      lift: 0.18,
+      stretch: [1, 0.6, 1.2],
+      toe: { radius: 0.07, gap: 0.11, y: 0.15, z: 0.38 },
+    });
     squash.add(foot);
     feet.push(foot);
   }
@@ -230,11 +232,7 @@ export function createLulu(colors = LULU_COLORS) {
 
   enableShadows(root);
 
-  function setMouth(k: number) {
-    smile.visible = k < 0.05;
-    mouth.visible = k >= 0.05;
-    mouth.scale.set(0.6 + 0.4 * k, k, 1);
-  }
+  const setMouth = mouthSetter(smile, mouth);
 
   return { root, squash, body, neck, head, face, flower, eyes, cheeks, arms, sticks, feet, tail, setMouth };
 }

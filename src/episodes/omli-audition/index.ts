@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { ease, lerp, seg } from '../../engine/math';
 import type { Episode } from '../../engine/types';
 import { cuts, direct, type Shot } from '../../engine/director';
+import { talker } from '../../audio/babble';
 import { idle, resetPose } from '../../characters/rory';
 import { armOf, reachArm, releaseArm, sideOf } from '../../characters/reach';
 import { SEAT_HEIGHT } from '../../props/furniture';
@@ -16,7 +17,7 @@ import { createInjuredTiki, createParis, createSteggy } from './cast';
 import { createOmli } from '../../characters/omli';
 import { BASS, DRUMS, GUITAR, luluPlays, omliPlays, roryPlays } from './music';
 import { BENCH_TOP, OMLI_ENTER, OMLI_SPOT, PLOT, createAuditionStage, createDumbbell, createGym } from './sets';
-import { BPM, CHAT, COLOURS, CUE, DURATION, MUSIC_AT, START_CLOCK, mouthAt, type Who } from './timeline';
+import { BPM, CHAT, COLOURS, CUE, DURATION, MUSIC_AT, START_CLOCK, mouthAt } from './timeline';
 import { soundtrack } from './sound';
 
 // Beat sheet (video seconds; timeline.ts has the cues, the chat and the lines, music.ts the song)
@@ -92,8 +93,7 @@ const episode: Episode = {
       for (const e of tiki.eyes) e.scale.y = Math.min(e.scale.y, 0.55);
       tiki.head.rotation.x += 0.18;
     }
-    const talk = (rig: { setMouth(k: number): void }, who: Who, t: number, rest = 0) =>
-      rig.setMouth(Math.max(rest, mouthAt(who, t)));
+    const talk = talker(mouthAt);
 
     // ── Omli's home gym ─────────────────────────────────────────
     const curlArm = armOf(lifter, 1);

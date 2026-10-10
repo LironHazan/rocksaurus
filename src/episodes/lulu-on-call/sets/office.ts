@@ -1,5 +1,16 @@
 import * as THREE from 'three';
-import { box, createRoom, createScreen, createWallClock, cylinder, mat, picture, ROUND } from '../../../world/interior';
+import {
+  addKeyLight,
+  box,
+  createRoom,
+  createScreen,
+  createWallClock,
+  cylinder,
+  mat,
+  paintWindowFrame,
+  picture,
+  ROUND,
+} from '../../../world/interior';
 import { ball } from '../../../characters/materials';
 
 /** Where Lulu stands at her desk (she faces +z, toward the camera). */
@@ -15,13 +26,7 @@ export function createOffice() {
   createRoom(scene, { wall: 0xdde6ef, floor: 0xb98b5e });
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0xc8b8a8, 1.1));
-  const key = new THREE.DirectionalLight(0xffe2c0, 2.2); // late sun through the window
-  key.position.set(-5, 8, 7);
-  key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
-  key.shadow.radius = 5;
-  Object.assign(key.shadow.camera, { left: -7, right: 7, top: 8, bottom: -2, near: 1, far: 30 });
-  scene.add(key);
+  addKeyLight(scene, 0xffe2c0, 2.2, { from: [-5, 8, 7], reach: 7, top: 8 }); // late sun through the window
   const fill = new THREE.DirectionalLight(0xc8dcff, 0.6);
   fill.position.set(6, 4, 6);
   scene.add(fill);
@@ -54,13 +59,7 @@ export function createOffice() {
         x += bw + 4;
         i++;
       }
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 10;
-      ctx.strokeRect(0, 0, w, h);
-      ctx.beginPath();
-      ctx.moveTo(w / 2, 0);
-      ctx.lineTo(w / 2, h);
-      ctx.stroke();
+      paintWindowFrame(ctx, w, h);
     },
     { frame: 0xf4f4f4 },
   );

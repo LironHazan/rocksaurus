@@ -461,25 +461,54 @@ export function holdPhone(
   { forward = 0.9, up = 0.1, grip = 0.05, spread = 0.4, typing = false }: HoldOptions = {},
 ): void {
   rig.root.updateMatrixWorld(true);
-  const [l, r] = rig.arms;
+  const facing = rig.root.getWorldQuaternion(new THREE.Quaternion());
+  placePhone(phone, rig.arms, facing, rig.head.getWorldPosition(new THREE.Vector3()), forward, up);
+  pawsOnPhone(phone, rig.arms, t, { height: phone.height, grip, spread, typing });
+}
+
+const UP = new THREE.Vector3(0, 1, 0);
+
+/**
+ * Puts the phone `forward` in front of the middle of the shoulders (along `facing`, the holder's turn) and `up`
+ * (world units), its screen toward `eye`. The holder's world matrices must be up to date.
+ */
+export function placePhone(
+  phone: Phone,
+  arms: readonly THREE.Object3D[],
+  facing: THREE.Quaternion,
+  eye: THREE.Vector3,
+  forward: number,
+  up: number,
+): void {
+  const [l, r] = arms;
   const mid = l!
     .getWorldPosition(new THREE.Vector3())
     .add(r!.getWorldPosition(new THREE.Vector3()))
     .multiplyScalar(0.5);
-  const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(rig.root.getWorldQuaternion(new THREE.Quaternion()));
-  phone.group.position
-    .copy(mid)
-    .addScaledVector(fwd, forward)
-    .add(new THREE.Vector3(0, up, 0));
-  phone.group.lookAt(rig.head.getWorldPosition(new THREE.Vector3()));
+  const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(facing);
+  phone.group.position.copy(mid).addScaledVector(fwd, forward).addScaledVector(UP, up);
+  phone.group.lookAt(eye);
   phone.group.updateMatrixWorld(true);
-  for (const arm of rig.arms) {
+}
+
+/** A thumb's tap while typing: how fast (radians per second), out of step between the paws, and how deep. */
+const TAP = { rate: 22, phase: 1.7, depth: 0.04 } as const;
+
+/**
+ * Both paws on a placed phone's sides, `grip` up from its middle and `spread` apart (fractions of its `height`), so
+ * they don't cover the newest message; thumbs tap while `typing`.
+ */
+export function pawsOnPhone(
+  phone: Phone,
+  arms: readonly THREE.Object3D[],
+  t: number,
+  { height, grip, spread, typing }: { height: number; grip: number; spread: number; typing: boolean },
+): void {
+  for (const arm of arms) {
     const side = sideOf(arm);
-    const tap = typing ? Math.max(0, Math.sin(t * 22 + side * 1.7)) * 0.04 : 0;
+    const tap = typing ? Math.max(0, Math.sin(t * TAP.rate + side * TAP.phase)) * TAP.depth : 0;
     // the phone faces its owner, so its +x is on their right: mirror the side
-    const edge = phone.group.localToWorld(
-      new THREE.Vector3(-side * phone.height * spread, phone.height * grip + tap, 0.02),
-    );
+    const edge = phone.group.localToWorld(new THREE.Vector3(-side * height * spread, height * grip + tap, 0.02));
     reachArm(arm, arm.parent!.worldToLocal(edge));
   }
 }

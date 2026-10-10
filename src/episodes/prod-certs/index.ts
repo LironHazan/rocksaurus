@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { ease, lerp, seg } from '../../engine/math';
 import type { Episode } from '../../engine/types';
 import { cuts, direct, type Shot } from '../../engine/director';
+import { talker } from '../../audio/babble';
 import { idle, resetPose } from '../../characters/rory';
 import { armOf, reachArm, releaseArm, sideOf } from '../../characters/reach';
 import { ORNITHO_SEAT, type OrnithomimusRig } from '../../characters/ornithomimus';
@@ -16,17 +17,7 @@ import { withOutro } from '../outro';
 import { CAPTIONS } from './captions';
 import { createAmazaurus, createEilon, createRorit, createSagish, createTaluzarus } from './cast';
 import { AMAZ_SEAT, BEANBAG, BEANBAG_TOP, FIDGET, createCallBackdrop, createWarRoom } from './sets';
-import {
-  CUE,
-  DURATION,
-  FIX_SCRIPT,
-  LAPTOP_SCRIPT,
-  STATUS_FIXED,
-  STATUS_SCRIPT,
-  clockAt,
-  mouthAt,
-  type Who,
-} from './timeline';
+import { CUE, DURATION, FIX_SCRIPT, LAPTOP_SCRIPT, STATUS_FIXED, STATUS_SCRIPT, clockAt, mouthAt } from './timeline';
 import { FIDGET_STEP, soundtrack } from './sound';
 
 // Beat sheet (video seconds; see timeline.ts for the cues, scripts and lines, captions.ts for the text)
@@ -161,8 +152,7 @@ const episode: Episode = {
       grip(armOf(rig, -1), phone.group.localToWorld(v.set(0, -0.2, -0.05)));
     }
     /** Mouth: whoever's talking babbles; Eilon always smiles. */
-    const talk = (rig: { setMouth(k: number): void }, who: Who, t: number, rest = 0) =>
-      rig.setMouth(Math.max(rest, mouthAt(who, t)));
+    const talk = talker(mouthAt);
     /** Asleep on their side in bed (the slim build): head on the pillow, the blanket over. */
     function asleep(rig: OrnithomimusRig, room: ReturnType<typeof createBedroom>, t: number, scale: number) {
       place(rig, 0.9, BED_TOP + 0.45 * scale, -0.6);

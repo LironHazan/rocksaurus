@@ -6,10 +6,10 @@ import { createLulu, idleLulu, reachLulu, resetLulu as resetLuluPose, walkLulu }
 import { createOrnithomimus, ORNITHO_SEAT } from '../../characters/ornithomimus';
 import { createCeratops } from '../../characters/ceratops';
 import { idle, resetPose } from '../../characters/rory';
-import { armOf, reachArm, releaseArm, sideOf } from '../../characters/reach';
+import { armOf, reachArm, releaseArm } from '../../characters/reach';
 import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
-import { chatView, createPhone, phonePov } from '../../props/phone';
+import { chatView, createPhone, pawsOnPhone, phonePov, placePhone } from '../../props/phone';
 import { createProteinBar } from '../../props/protein-bar';
 import { box, mat } from '../../world/interior';
 import { textTexture } from '../../world/text-texture';
@@ -124,10 +124,6 @@ const episode: Episode = {
     };
     for (const w of ['campus', 'home'] as const) for (const o of CAST[w]) scenes[w].add(o);
 
-    const v = new THREE.Vector3(),
-      w = new THREE.Vector3();
-    const UP = new THREE.Vector3(0, 1, 0);
-
     function resetLulu() {
       resetLuluPose(lulu);
       hair.ponytail.rotation.set(0.1, 0, 0);
@@ -166,18 +162,8 @@ const episode: Episode = {
     /** Holds the phone in both paws in front of her, screen up toward her face; thumbs tap while she types. */
     function holdPhone(t: number, typing: boolean) {
       lulu.root.updateMatrixWorld(true);
-      const [l, r] = lulu.arms;
-      const mid = l!.getWorldPosition(v).add(r!.getWorldPosition(w)).multiplyScalar(0.5);
-      const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(lulu.root.quaternion);
-      phone.group.position.copy(mid).addScaledVector(fwd, 1.15).addScaledVector(UP, 0.9);
-      phone.group.lookAt(lulu.head.getWorldPosition(new THREE.Vector3()));
-      phone.group.updateMatrixWorld(true);
-      for (const arm of lulu.arms) {
-        const side = sideOf(arm);
-        const tap = typing ? Math.max(0, Math.sin(t * 22 + side * 1.7)) * 0.04 : 0;
-        const edge = phone.group.localToWorld(new THREE.Vector3(-side * 0.75 * 0.4, 0.75 * -0.62 + tap, 0.02));
-        reachArm(arm, arm.parent!.worldToLocal(edge));
-      }
+      placePhone(phone, lulu.arms, lulu.root.quaternion, lulu.head.getWorldPosition(new THREE.Vector3()), 1.15, 0.9);
+      pawsOnPhone(phone, lulu.arms, t, { height: phone.height, grip: -0.62, spread: 0.4, typing });
     }
     /** Through Lulu's eyes (her head and neck hidden for the shot): the phone, close. */
     function pov(): Shot {

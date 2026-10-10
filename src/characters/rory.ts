@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
+import { BIG_FOOT, createFoot, mouthSetter } from './parts';
 import { growTail } from './tail';
 import type { CharacterRig } from './types';
 
@@ -48,11 +49,7 @@ export function createRory(colors = RORY_COLORS) {
     thigh.userData.side = s;
     torso.add(thigh);
     thighs.push(thigh);
-    const foot = new THREE.Group();
-    foot.position.set(s * 0.55, 0, 0.3);
-    foot.add(ball(0.4, M.body, [0, 0.2, 0], [1, 0.6, 1.25]));
-    for (let k = -1; k <= 1; k++) foot.add(ball(0.08, M.belly, [k * 0.14, 0.17, 0.48])); // toes
-    foot.userData.side = s;
+    const foot = createFoot(s, M.body, M.belly, [0.55, 0, 0.3], BIG_FOOT);
     squash.add(foot);
     feet.push(foot);
   }
@@ -127,12 +124,7 @@ export function createRory(colors = RORY_COLORS) {
 
   enableShadows(root);
 
-  /** 0 = closed smile, 1 = wide open. */
-  function setMouth(k: number) {
-    smile.visible = k < 0.05;
-    mouth.visible = k >= 0.05;
-    mouth.scale.set(0.6 + 0.4 * k, k, 1);
-  }
+  const setMouth = mouthSetter(smile, mouth);
 
   /** Flip the smile into a frown (sad) and back. */
   function setFrown(on: boolean) {

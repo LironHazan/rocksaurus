@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { box, createRoom, mat, picture, ROUND } from './interior';
+import { addKeyLight, box, createRoom, mat, paintWindowFrame, picture, ROUND } from './interior';
 import { createDrumKit } from '../props/drums';
 import { createShaker } from '../props/shaker';
 
@@ -13,13 +13,7 @@ export function createHome() {
   createRoom(scene, { wall: 0xf3e1d0, floor: 0xa47551 });
 
   scene.add(new THREE.HemisphereLight(0xfff1e0, 0x8a6a50, 1.0));
-  const key = new THREE.DirectionalLight(0xffe0c0, 1.8);
-  key.position.set(3, 9, 8);
-  key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
-  key.shadow.radius = 5;
-  Object.assign(key.shadow.camera, { left: -8, right: 8, top: 9, bottom: -2, near: 1, far: 30 });
-  scene.add(key);
+  const key = addKeyLight(scene, 0xffe0c0, 1.8, { from: [3, 9, 8] });
   const lampLight = new THREE.PointLight(0xffb36b, 8, 9, 1.6);
   lampLight.position.set(-5, 4.5, -1);
   scene.add(lampLight);
@@ -35,13 +29,7 @@ export function createHome() {
       g.addColorStop(1, '#ff9a6b');
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 10;
-      ctx.strokeRect(0, 0, w, h);
-      ctx.beginPath();
-      ctx.moveTo(w / 2, 0);
-      ctx.lineTo(w / 2, h);
-      ctx.stroke();
+      paintWindowFrame(ctx, w, h);
     },
     { frame: 0xffffff },
   );

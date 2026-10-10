@@ -76,22 +76,64 @@ const KEY_SHADOW = { size: 2048, radius: 5 } as const;
 
 /**
  * A room's key light: a directional light from high, front and right, casting soft shadows over the room. `reach`
- * is how far left and right of the middle the shadows go (the room is 16 wide).
+ * is how far left and right of the middle the shadows go (the room is 16 wide), `top` and `bottom` how far up and
+ * down. `from` moves the light (late sun through a window on the left, say).
  */
 export function addKeyLight(
   scene: THREE.Scene,
   color: THREE.ColorRepresentation,
   intensity: number,
-  { reach = 8 } = {},
+  {
+    reach = 8,
+    top = 9,
+    bottom = -2,
+    from = [4, 9, 8],
+  }: { reach?: number; top?: number; bottom?: number; from?: readonly [number, number, number] } = {},
 ): THREE.DirectionalLight {
   const key = new THREE.DirectionalLight(color, intensity);
-  key.position.set(4, 9, 8);
+  key.position.set(...from);
   key.castShadow = true;
   key.shadow.mapSize.set(KEY_SHADOW.size, KEY_SHADOW.size);
   key.shadow.radius = KEY_SHADOW.radius;
-  Object.assign(key.shadow.camera, { left: -reach, right: reach, top: 9, bottom: -2, near: 1, far: 30 });
+  Object.assign(key.shadow.camera, { left: -reach, right: reach, top, bottom, near: 1, far: 30 });
   scene.add(key);
   return key;
+}
+
+/** The white frame and middle bar of a window, painted over the view in a `picture()`'s canvas. */
+export function paintWindowFrame(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 10;
+  ctx.strokeRect(0, 0, w, h);
+  ctx.beginPath();
+  ctx.moveTo(w / 2, 0);
+  ctx.lineTo(w / 2, h);
+  ctx.stroke();
+}
+
+/**
+ * A flat, unlit canvas panel (faces +z) whose content changes: `draw` paints it `px` texels wide, and `repaint()`
+ * paints it again (call it only when what it shows changed).
+ */
+export function livePanel(
+  w: number,
+  h: number,
+  px: number,
+  draw: (ctx: CanvasRenderingContext2D, cw: number, ch: number) => void,
+) {
+  const tex = textTexture(px, Math.round((px * h) / w), draw);
+  const canvas = tex.image;
+  const mesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(w, h),
+    new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }),
+  );
+  return {
+    mesh,
+    repaint() {
+      draw(canvas.getContext('2d')!, canvas.width, canvas.height);
+      tex.needsUpdate = true;
+    },
+  };
 }
 
 /** A flat picture (poster, window view, sign) facing +z. */
@@ -179,25 +221,17 @@ export function createScreen(
 ): Screen {
   let lines: readonly ShownLine[] = [];
   let cursor = false;
-  const draw = (ctx: CanvasRenderingContext2D, cw: number, ch: number) =>
-    drawScreen(ctx, cw, ch, THEMES[theme], header, lines, cursor);
-  const tex = textTexture(px, Math.round((px * h) / w), draw);
-  const canvas = tex.image;
-  const mesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(w, h),
-    new THREE.MeshBasicMaterial({ map: tex, toneMapped: false }),
-  );
+  const panel = livePanel(w, h, px, (ctx, cw, ch) => drawScreen(ctx, cw, ch, THEMES[theme], header, lines, cursor));
   let key = '';
   return {
-    mesh,
+    mesh: panel.mesh,
     show(next, cur) {
       const k = next.map(l => l.text).join('\n') + (cur ? '|' : '');
       if (k === key) return;
       key = k;
       lines = next;
       cursor = cur;
-      draw(canvas.getContext('2d')!, canvas.width, canvas.height);
-      tex.needsUpdate = true;
+      panel.repaint();
     },
   };
 }

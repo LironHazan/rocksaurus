@@ -7,7 +7,7 @@ import { createParasaurolophus, PARIS_COLORS } from '../../characters/parasaurol
 import { createStegosaurus, STEGGY_COLORS } from '../../characters/stegosaurus';
 import { createLulu, idleLulu } from '../../characters/lulu';
 import { createRory, idle, resetPose } from '../../characters/rory';
-import { reachArm, releaseArm, sideOf } from '../../characters/reach';
+import { reachArm, releaseArm } from '../../characters/reach';
 import { ball } from '../../characters/materials';
 import { addCap } from '../../props/cap';
 import { addSunglasses } from '../../props/sunglasses';
@@ -19,7 +19,7 @@ import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
 import { addMohawk } from '../../props/mohawk';
 import { addTattoo } from '../../props/tattoo';
-import { chatView, createPhone, phonePov, type Phone } from '../../props/phone';
+import { chatView, createPhone, pawsOnPhone, phonePov, placePhone, type Phone } from '../../props/phone';
 import { addJersey, HOME_KIT, TREX_BODY } from '../../props/soccer';
 import { createBedroom, BED_TOP } from '../../world/bedroom';
 import { CAPTIONS } from './captions';
@@ -268,7 +268,6 @@ const episode: Episode = {
 
     const v = new THREE.Vector3(),
       w = new THREE.Vector3();
-    const UP = new THREE.Vector3(0, 1, 0);
 
     type Posable = Actor<{ root: THREE.Group; feet: THREE.Object3D[]; arms: THREE.Group[] }>;
     function reset(a: Actor<Parameters<typeof resetPose>[0]>) {
@@ -327,26 +326,13 @@ const episode: Episode = {
       { forward = 0.9, up = 0.1, grip = 0.05, spread = 0.4, typing = false } = {},
     ) {
       a.holder.updateMatrixWorld(true);
-      const [l, r] = a.rig.arms;
-      const mid = l!.getWorldPosition(v).add(r!.getWorldPosition(w)).multiplyScalar(0.5);
-      const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(a.holder.quaternion);
+      // the holder is scaled: its paws are further out, and so is the phone
       const s = a.holder.scale.x;
-      phone.group.position
-        .copy(mid)
-        .addScaledVector(fwd, forward * s)
-        .addScaledVector(UP, up * s);
-      phone.group.lookAt(head.getWorldPosition(new THREE.Vector3()));
-      phone.group.updateMatrixWorld(true);
+      const eye = head.getWorldPosition(new THREE.Vector3());
+      placePhone(phone, a.rig.arms, a.holder.quaternion, eye, forward * s, up * s);
       const box = new THREE.Box3().setFromObject(phone.group, true);
       const tall = Math.max(box.max.y - box.min.y, 0.3); // roughly the phone's height
-      for (const arm of a.rig.arms) {
-        const side = sideOf(arm);
-        const tap = typing ? Math.max(0, Math.sin(t * 22 + side * 1.7)) * 0.04 : 0;
-        // paws on the sides, halfway up, so they don't cover the newest message at the bottom (the phone faces
-        // its owner, so its +x is on their right: mirror the side)
-        const edge = phone.group.localToWorld(new THREE.Vector3(-side * tall * spread, tall * grip + tap, 0.02));
-        reachArm(arm, arm.parent!.worldToLocal(edge));
-      }
+      pawsOnPhone(phone, a.rig.arms, t, { height: tall, grip, spread, typing });
     }
     /** Through the owner's eyes (their head is hidden for the shot): a phone close-up. */
     const HEADS: THREE.Object3D[] = [tikiRig.head, parisRig.head, steggyRig.head, luluRig.head, ...luluRig.neck];

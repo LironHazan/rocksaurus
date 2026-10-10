@@ -1,7 +1,17 @@
 import * as THREE from 'three';
 import { rng } from '../../engine/math';
 import { ball, enableShadows } from '../../characters/materials';
-import { box, createRoom, createWallClock, cylinder, mat, picture, ROUND } from '../../world/interior';
+import {
+  addKeyLight,
+  box,
+  createRoom,
+  createWallClock,
+  cylinder,
+  mat,
+  paintWindowFrame,
+  picture,
+  ROUND,
+} from '../../world/interior';
 import { textTexture } from '../../world/text-texture';
 import { sky } from '../../world/sky';
 import { createSchool, createTree, type SchoolOptions } from '../../world/school';
@@ -156,13 +166,8 @@ export function createTherapy() {
   scene.background = new THREE.Color(0xcfdac6);
   createRoom(scene, { wall: 0xcfdac6, floor: 0xa47652, width: 18, height: 10 });
   scene.add(new THREE.HemisphereLight(0xfff8ec, 0x8a6a50, 1.15));
-  const key = new THREE.DirectionalLight(0xffe7c4, 2.0); // morning sun through the window
-  key.position.set(-6, 8, 7);
-  key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
-  key.shadow.radius = 5;
-  Object.assign(key.shadow.camera, { left: -10, right: 10, top: 10, bottom: -3, near: 1, far: 30 });
-  scene.add(key);
+  // morning sun through the window
+  addKeyLight(scene, 0xffe7c4, 2.0, { from: [-6, 8, 7], reach: 10, top: 10, bottom: -3 });
   const lampLight = new THREE.PointLight(0xffc98a, 8, 9, 1.6);
   lampLight.position.set(5.6, 4.2, -1.6);
   scene.add(lampLight);
@@ -217,13 +222,7 @@ export function createTherapy() {
         ctx.arc(w * (0.1 + i * 0.17), h * 0.85, h * (0.18 + (i % 2) * 0.06), 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 10;
-      ctx.strokeRect(0, 0, w, h);
-      ctx.beginPath();
-      ctx.moveTo(w / 2, 0);
-      ctx.lineTo(w / 2, h);
-      ctx.stroke();
+      paintWindowFrame(ctx, w, h);
     },
     { frame: 0xf4f4f4 },
   );

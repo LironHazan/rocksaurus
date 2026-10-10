@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { plush, glossyEye, shine, blush, matte, ball, enableShadows } from './materials';
+import { createFoot } from './parts';
 import { growTail } from './tail';
 import { textTexture } from '../world/text-texture';
 import { ROUND } from '../world/interior';
@@ -80,11 +81,12 @@ export function createCeratops(
   const feet: THREE.Group[] = [];
   for (const s of [-1, 1]) {
     torso.add(ball(0.46, M.body, [s * 0.5, 0.6, 0.02]));
-    const foot = new THREE.Group();
-    foot.position.set(s * 0.48, 0, 0.3);
-    foot.add(ball(0.36, M.body, [0, 0.18, 0], [1, 0.6, 1.25]));
-    for (let k = -1; k <= 1; k++) foot.add(ball(0.07, M.belly, [k * 0.12, 0.16, 0.43]));
-    foot.userData.side = s;
+    const foot = createFoot(s, M.body, M.belly, [0.48, 0, 0.3], {
+      radius: 0.36,
+      lift: 0.18,
+      stretch: [1, 0.6, 1.25],
+      toe: { radius: 0.07, gap: 0.12, y: 0.16, z: 0.43 },
+    });
     squash.add(foot);
     feet.push(foot);
   }
