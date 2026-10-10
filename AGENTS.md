@@ -2,7 +2,8 @@
 
 Rocksaurus makes YouTube Shorts about a dinosaur rock band: Rory (guitar), Lulu (drums), Tiki Taka (bass), Steggy
 (keys) and Paris (vocals). Each Short is a 3D scene (three.js) with synthesized sound (Web Audio). A React studio
-previews a Short and records it to video. GitHub Pages deploys `main`.
+previews a Short and records it to video; it runs locally only. GitHub Pages deploys `main` as the public site: the
+`/watch` player alone (`npm run build:public`, `src/app/PublicApp.tsx`), with no studio code in it.
 
 ## Commands
 
