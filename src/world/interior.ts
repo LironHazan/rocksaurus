@@ -13,18 +13,35 @@ export function mat(
   return new THREE.MeshStandardMaterial({ color, roughness, ...extra });
 }
 
-/** A box with its base at y = 0 (so `position.y` is where it stands). */
+/**
+ * One geometry per shape and size, shared by every box or cylinder that size: a set is hundreds of them in far fewer
+ * sizes, and every geometry is a separate buffer on the GPU. Shared geometries are never edited (a mesh that needs
+ * its own shape builds its own geometry); disposing one when a Short ends is safe, as the renderer uploads it again
+ * if a later Short uses it.
+ */
+const geometryCache = new Map<string, THREE.BufferGeometry>();
+function shared(key: string, build: () => THREE.BufferGeometry): THREE.BufferGeometry {
+  let g = geometryCache.get(key);
+  if (!g) {
+    g = build();
+    geometryCache.set(key, g);
+  }
+  return g;
+}
+
+/** A box with its base at y = 0 (so `position.y` is where it stands). Boxes the same size share a geometry. */
 export function box(w: number, h: number, d: number, material: THREE.Material): THREE.Mesh {
-  const g = new THREE.BoxGeometry(w, h, d);
-  g.translate(0, h / 2, 0);
+  const g = shared(`box:${w}:${h}:${d}`, () => new THREE.BoxGeometry(w, h, d).translate(0, h / 2, 0));
   const m = new THREE.Mesh(g, material);
   m.castShadow = m.receiveShadow = true;
   return m;
 }
 
+/** A cylinder with its base at y = 0. Cylinders the same size share a geometry. */
 export function cylinder(rTop: number, rBottom: number, h: number, material: THREE.Material, seg = 24): THREE.Mesh {
-  const g = new THREE.CylinderGeometry(rTop, rBottom, h, seg);
-  g.translate(0, h / 2, 0);
+  const g = shared(`cylinder:${rTop}:${rBottom}:${h}:${seg}`, () =>
+    new THREE.CylinderGeometry(rTop, rBottom, h, seg).translate(0, h / 2, 0),
+  );
   const m = new THREE.Mesh(g, material);
   m.castShadow = m.receiveShadow = true;
   return m;
