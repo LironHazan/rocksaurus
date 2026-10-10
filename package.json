@@ -17,7 +17,8 @@
     "lint:boundaries": "depcruise src",
     "lint:dead-code": "fallow dead-code",
     "lint:audit": "fallow audit --base origin/main",
-    "test:e2e": "vite build && playwright test"
+    "test:e2e": "vite build && playwright test",
+    "skills": "npx -y skills@1.7.0 experimental_install"
   },
   "dependencies": {
     "@radix-ui/react-slider": "^1.4.7",

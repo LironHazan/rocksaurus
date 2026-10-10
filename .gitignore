@@ -1,7 +1,10 @@
 node_modules
 dist
 .DS_Store
-.claude
+# Claude Code's local state stays local. The one tracked entry is .claude/skills: a link to .agents/skills, which
+# `npm run skills` restores from skills-lock.json (so Claude Code loads the same pinned skills as other agents).
+.claude/*
+!.claude/skills
 .agents
 test-results
 playwright-report
