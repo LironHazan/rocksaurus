@@ -4,7 +4,8 @@ import type { Location, Shot } from '../../engine/director';
 import { idleLulu } from '../../characters/lulu';
 import { armOf } from '../../characters/reach';
 import { createOmli } from '../../characters/omli';
-import { reachTo, restRig, type TiredLulu } from './pose';
+import { reachTo, type TiredLulu } from './pose';
+import { restRig } from '../../characters/rest';
 import { LULU_SEAT, OMLI_SEAT, createRide } from './road';
 import { BPM, CUE } from './timeline';
 

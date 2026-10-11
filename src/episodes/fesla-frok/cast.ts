@@ -4,8 +4,7 @@ import { createOrnithomimus } from '../../characters/ornithomimus';
 import { createAmazaurus } from '../../characters/amazaurus';
 import type { StegosaurusRig } from '../../characters/stegosaurus';
 import { ball, matte, plush } from '../../characters/materials';
-import { idle, resetPose } from '../../characters/rory';
-import { releaseArm } from '../../characters/reach';
+import { restRig } from '../../characters/rest';
 import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
 import { textTexture } from '../../world/text-texture';
@@ -97,12 +96,7 @@ export function createAmazaurusAtWork(): Amazaurus {
   return {
     rig,
     reset(t) {
-      resetPose(rig);
-      rig.root.position.set(0, 0, 0);
-      rig.squash.rotation.set(0, 0, 0);
-      rig.feet.forEach((f, i) => f.position.copy(feet[i]!));
-      for (const arm of rig.arms) releaseArm(arm);
-      idle(rig, t);
+      restRig(rig, feet, t);
       faceMat.color.copy(teal);
       for (const b of brows) {
         b.position.set(b.userData.side * 0.22, 0.3, 0.47);

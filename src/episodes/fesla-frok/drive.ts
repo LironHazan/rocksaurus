@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { ease, lerp, seg } from '../../engine/math';
 import { cuts, type Location, type Shot } from '../../engine/director';
-import { idle, resetPose } from '../../characters/rory';
+import { restRig } from '../../characters/rest';
 import { ORNITHO_SEAT } from '../../characters/ornithomimus';
-import { armOf, reachArm, releaseArm } from '../../characters/reach';
+import { armOf, reachArm } from '../../characters/reach';
 import { createRorit, RORIT_SCALE } from './cast';
 import { SEAT, createTraffic } from './car';
 import { dashAt, paintDash, type DashView } from './screens';
@@ -89,11 +89,7 @@ export function createDriveLocation(): Location {
   ]);
 
   function poseRorit(t: number) {
-    resetPose(rorit);
-    rorit.squash.rotation.set(0, 0, 0);
-    rorit.feet.forEach((f, i) => f.position.copy(feet[i]!));
-    for (const arm of rorit.arms) releaseArm(arm);
-    idle(rorit, t);
+    restRig(rorit, feet, t);
     ponytail.rotation.set(0.1, 0, 0);
     rorit.root.position.set(SEAT.x, SEAT.y - (ORNITHO_SEAT - 0.05) * RORIT_SCALE, SEAT.z);
     rorit.root.rotation.set(0, FORWARD, 0);
