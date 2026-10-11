@@ -12,19 +12,28 @@ import {
   ROUND,
 } from '../../world/interior';
 import { ball } from '../../characters/materials';
+import { createLaptop } from '../../props/laptop';
+import type { ShownLine } from '../../world/screen-script';
 
 // The Papo Pako Shapeworks open office, 9 AM: rows of cubes with grey fabric walls, a window strip, a whiteboard with
-// the deadline on it. Amazarus's cube is in the middle (open toward us); Lulu's standing desk is off to the right.
+// the deadline on it. Amazaurus's cube is in the middle (open toward us); Lulu's standing desk is off to the right.
 
-/** Amazarus's cube: its walls (x from -W to W, back at z = BACK, the sides reaching forward to FRONT) and height. */
+/** Amazaurus's cube: its walls (x from -W to W, back at z = BACK, the sides reaching forward to FRONT) and height. */
 const CUBE = { w: 3.2, back: -2.4, front: 0.8, height: 3.1 } as const;
+/** The standing desks' height. */
+const DESK_TOP = 1.36;
 /** Where he stands (facing us), and where his monitor hangs on the cube's left wall. */
-export const AMAZARUS_SPOT = new THREE.Vector3(0.2, 0, -0.6);
-const MONITOR = { w: 1.9, h: 1.15, px: 720, at: new THREE.Vector3(-CUBE.w + 0.12, 3.25, -0.6) } as const;
+export const AMAZAURUS_SPOT = new THREE.Vector3(0.2, 0, -0.9);
+/** His standing desk in front of him, with his MacBook on it facing him. */
+const HIS_DESK = new THREE.Vector3(0.2, 0, 0.75);
+/** He's short: his desk is low, so his MacBook's lid stays under his chin; the MacBook a little smaller. */
+const HIS_DESK_TOP = 1.0;
+const MACBOOK_SCALE = 0.75;
+const MONITOR = { w: 1.9, h: 1.15, px: 720, at: new THREE.Vector3(-CUBE.w + 0.12, 2.4, -0.6) } as const;
 /** Lulu's standing desk, and where she stands at it (facing us, a little toward the cube). */
 export const LULU_DESK = new THREE.Vector3(9.5, 0, 0);
 /** Where she stops at his cube with the tea: in the opening, on his right, turned to him. */
-export const LULU_AT_CUBE = new THREE.Vector3(2.6, 0, 1.5);
+export const LULU_AT_CUBE = new THREE.Vector3(2.4, 0, 1.4);
 /** Where she comes from: the aisle, off to the right. */
 export const LULU_AISLE = new THREE.Vector3(8.5, 0, 2.2);
 
@@ -52,6 +61,28 @@ function cube(fabric: THREE.Material, cap: THREE.Material): THREE.Group {
   }
   return g;
 }
+
+/** A standing desk, `w` wide, `d` deep and `height` tall: a top on two legs. Origin on the floor under its middle. */
+function standingDesk(w: number, d: number, height = DESK_TOP): THREE.Group {
+  const g = new THREE.Group();
+  const top = box(w, 0.12, d, mat(0xf2ede4, 0.55));
+  top.position.y = height - 0.06;
+  g.add(top);
+  for (const x of [-1, 1]) {
+    const leg = box(0.1, height - 0.06, d - 0.2, mat(0x2a2a35, 0.5));
+    leg.position.x = x * (w / 2 - 0.2);
+    g.add(leg);
+  }
+  return g;
+}
+
+/** What's on his MacBook: the infra, still pending. */
+const TERMINAL: readonly ShownLine[] = [
+  { text: '$ infra status --env validations', kind: 'prompt' },
+  { text: 'cluster: not provisioned ⏳', kind: 'err' },
+  { text: 'ticket INFRA-101: approved ✅', kind: 'ok' },
+  { text: 'next: open INFRA-102, INFRA-103', kind: 'dim' },
+];
 
 /** A mug of tea: a mug, a handle, the tea, and the tea bag's string and tag hanging over the rim. Origin at its base. */
 export function createMug(colour: number): THREE.Group {
@@ -173,20 +204,33 @@ export function createOffice(paintQueue: (ctx: CanvasRenderingContext2D, w: numb
   glow.position.copy(MONITOR.at).add(new THREE.Vector3(1, 0, 0));
   scene.add(glow);
 
-  // Lulu's standing desk: a laptop and her METAL mug
-  const desk = new THREE.Group();
-  const top = box(3.2, 0.12, 1.3, mat(0xf2ede4, 0.55));
-  top.position.y = 1.3;
-  desk.add(top);
-  for (const x of [-1.4, 1.4]) {
-    const leg = box(0.1, 1.3, 1.1, mat(0x2a2a35, 0.5));
-    leg.position.x = x;
-    desk.add(leg);
+  // his standing desk, and his MacBook (the dark one, as in the war room) facing him, a terminal on it
+  const hisDesk = standingDesk(2.4, 1.0, HIS_DESK_TOP);
+  hisDesk.position.copy(HIS_DESK);
+  const macbook = createLaptop({ header: 'infra', theme: 'terminal', color: 0x2a2a35 });
+  macbook.group.position.set(-0.3, HIS_DESK_TOP, 0);
+  macbook.group.rotation.y = Math.PI - 0.25; // turned a little, so the lid isn't square-on to us
+  macbook.group.scale.setScalar(MACBOOK_SCALE);
+  // stickers on the back of the lid (it's his)
+  for (const [x, z, r, colour] of [
+    [0.35, 0.35, 0.16, 0x4fb6a8],
+    [-0.3, 0.6, 0.12, 0xffd36b],
+    [0.1, 0.75, 0.09, 0xff6f91],
+  ] as const) {
+    const sticker = new THREE.Mesh(new THREE.CircleGeometry(r, 24).rotateX(-Math.PI / 2), mat(colour, 0.6));
+    sticker.position.set(x, 0.056, z);
+    macbook.lid.add(sticker);
   }
+  macbook.screen.show(TERMINAL, true);
+  hisDesk.add(macbook.group);
+  scene.add(hisDesk);
+
+  // Lulu's standing desk: her laptop
+  const desk = standingDesk(3.2, 1.3);
   const laptop = box(1.0, 0.05, 0.7, mat(0xc0c4cc, 0.3, { metalness: 0.6 }));
-  laptop.position.set(-0.4, 1.42, 0);
+  laptop.position.set(-0.4, DESK_TOP + 0.06, 0);
   const lid = box(1.0, 0.7, 0.04, mat(0xc0c4cc, 0.3, { metalness: 0.6 }));
-  lid.position.set(-0.4, 1.45, -0.35);
+  lid.position.set(-0.4, DESK_TOP + 0.09, -0.35);
   lid.rotation.x = -0.25;
   desk.add(laptop, lid);
   desk.position.set(LULU_DESK.x, 0, LULU_DESK.z + 1.6);

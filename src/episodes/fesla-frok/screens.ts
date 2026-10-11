@@ -2,7 +2,7 @@ import { ROUND } from '../../world/interior';
 import { CUE, FROK, PERMISSIONS, PERM_EVERY, ticketsAt } from './timeline';
 
 // What the screens show, as pure functions of t: the Fesla's dash (the map, Frok's install, the calls, Frok's ideas,
-// the ticket counter) and Amazarus's monitor (his ticket queue). Each screen repaints only when its view changes.
+// the ticket counter) and Amazaurus's monitor (his ticket queue). Each screen repaints only when its view changes.
 
 /** The Fesla's dash, at t. */
 export type DashView =
@@ -13,8 +13,8 @@ export type DashView =
   | { kind: 'frok'; text: string; wild: boolean }
   | { kind: 'tickets'; count: number };
 
-/** Amazarus picks up when we cut to his cube; his call with Rorit is still going when Frok cuts in. */
-const AMAZARUS_ON = CUE.amaz[0];
+/** Amazaurus picks up when we cut to his cube; his call with Rorit is still going when Frok cuts in. */
+const AMAZAURUS_ON = CUE.amaz[0];
 
 export function dashAt(t: number): DashView {
   const frok = FROK.find(f => t >= f.from && t < f.to);
@@ -23,12 +23,12 @@ export function dashAt(t: number): DashView {
   if (t < CUE.install) return { kind: 'map' };
   if (t < CUE.dial) return { kind: 'install', ticked: Math.max(0, Math.floor((t - CUE.perms[0]) / PERM_EVERY) + 1) };
   if (t < CUE.answer) return { kind: 'ringing', who: 'Lulu', label: 'Calling… 📞' };
-  if (t >= CUE.waiting && t < AMAZARUS_ON) return { kind: 'ringing', who: 'Amazarus', label: 'Call waiting 📞' };
-  const amazarus = t >= AMAZARUS_ON;
+  if (t >= CUE.waiting && t < AMAZAURUS_ON) return { kind: 'ringing', who: 'Amazaurus', label: 'Call waiting 📞' };
+  const amazaurus = t >= AMAZAURUS_ON;
   return {
     kind: 'call',
-    who: amazarus ? 'Amazarus' : 'Lulu',
-    secs: Math.floor(t - (amazarus ? AMAZARUS_ON : CUE.answer)),
+    who: amazaurus ? 'Amazaurus' : 'Lulu',
+    secs: Math.floor(t - (amazaurus ? AMAZAURUS_ON : CUE.answer)),
   };
 }
 
@@ -192,7 +192,7 @@ function drawTickets(ctx: CanvasRenderingContext2D, w: number, h: number, count:
   ctx.fillText('🎫🎫🎫', w * 0.5, h * 0.72);
   ctx.fillStyle = '#ff9a9a';
   ctx.font = font(w * 0.065, 600);
-  ctx.fillText('Assignee: Amazarus', w * 0.5, h * 0.85);
+  ctx.fillText('Assignee: Amazaurus', w * 0.5, h * 0.85);
 }
 
 /** Paints the dash's view. */
@@ -210,7 +210,7 @@ export function paintDash(ctx: CanvasRenderingContext2D, w: number, h: number, v
   else drawTickets(ctx, w, h, view.count);
 }
 
-/** Amazarus's monitor: his ticket queue, and from CUE.swamped, Frok's flood on top of it. */
+/** Amazaurus's monitor: his ticket queue, and from CUE.swamped, Frok's flood on top of it. */
 export function queueAt(t: number): number {
   return t >= CUE.swamped[0] ? ticketsAt(CUE.flood[1]) : 0;
 }

@@ -15,7 +15,7 @@ import { CUE, FROK, LINES, hazardOn, mouthAt } from './timeline';
 /** She faces the way the car goes (+x). */
 const FORWARD = Math.PI / 2;
 /** Her head, turned to us (-) or to the dash screen (+), radians. */
-const TO_US = -0.55;
+const TO_US = -0.8;
 const TO_SCREEN = 0.6;
 /** How far the screen shot stands back from the glass (screen heights): it fills the frame, captions below. */
 const POV_BACK = 1.75;
@@ -33,7 +33,7 @@ const shotAt = cuts<CarShot>([
   [CUE.dial, 'face'],
   [CUE.sidewalk[0], 'screen'],
   [CUE.sidewalk[1], 'face'],
-  [CUE.waiting, 'screen'], // Amazarus, on call waiting
+  [CUE.waiting, 'screen'], // Amazaurus, on call waiting
   [CUE.waiting + 1, 'face'],
   [CUE.wild[0], 'screen'], // "Tickets? On it!"
   [CUE.flood[0] + 0.3, 'jam'],
@@ -62,7 +62,7 @@ export function createDriveLocation(): Location {
 
   /** Her paws on the wheel, at ten to two (Frok's driving), with a little bob when she talks. */
   function atTheWheel(t: number) {
-    for (const side of [-1, 1] as const) grip(side, fesla.steering.localToWorld(v.set(0.3 * side, 0.25, 0)));
+    for (const side of [-1, 1] as const) grip(side, fesla.grip(side, v));
     if (LINES.some(l => l.who === 'Rorit' && t >= l.from && t < l.to)) rorit.head.rotation.x += Math.sin(t * 7) * 0.05;
   }
   /** FROK, NO!! Paws to her cheeks, eyes wide, beak open; she bounces with the car. */
@@ -79,7 +79,7 @@ export function createDriveLocation(): Location {
     rorit.head.rotation.y = TO_US * 0.5;
     rorit.root.updateMatrixWorld(true);
     grip(-1, onHead(0.05, 0.12, 0.42));
-    grip(1, fesla.steering.localToWorld(v.set(-0.3, 0.25, 0)));
+    grip(1, fesla.grip(1, v));
   }
   const handsAt = cuts<'wheel' | 'panic' | 'facepalm'>([
     [0, 'wheel'],
@@ -118,11 +118,11 @@ export function createDriveLocation(): Location {
     const cam = p.clone().addScaledVector(n, POV_BACK);
     return { cam: [cam.x, cam.y + 0.1, cam.z], look: [p.x, p.y - 0.12, p.z] };
   }
-  /** Rorit, through the canopy: from ahead of the car, on her side. */
+  /** Rorit, through her side window (clear of the window frames), a little ahead of her. */
   function faceShot(close: number): Shot {
     const h = rorit.head.getWorldPosition(v);
     return {
-      cam: [h.x + lerp(5.5, 3.4, close), h.y + lerp(0.6, 0.2, close), h.z + lerp(4.2, 2.4, close)],
+      cam: [h.x + lerp(1.8, 1.1, close), h.y + lerp(0.5, 0.15, close), h.z + lerp(6.0, 3.6, close)],
       look: [h.x, h.y - lerp(0.6, 0.3, close), h.z],
     };
   }

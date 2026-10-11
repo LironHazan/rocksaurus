@@ -15,7 +15,7 @@ const frok = (i: number) => {
 const STATEMENT = { y: 0.85, size: 0.07, color: '#ffe08a' } as const;
 const escalate = said('Lulu', 'Let me escalate. I’m still a manager by title 😂');
 
-export const CAPTIONS: Caption[] = [
+const AT_THE_BOTTOM: Caption[] = [
   title(0.2, 2.6, '🚗 8:30 AM, the highway\nRorit drives to work'),
   sub(CUE.install, CUE.perms[0] + 0.6, 'Her Fesla just got Frok bot 🤖'),
   sub(CUE.perms[0] + 0.8, CUE.dial, 'She gave it permissions to her whole workflow'),
@@ -32,7 +32,7 @@ export const CAPTIONS: Caption[] = [
   line(6),
   line(7),
   line(8),
-  punch(LINES[8]!.from, CUE.amaz[1], 'Amazarus: not so calm anymore 🍅'),
+  punch(LINES[8]!.from, CUE.amaz[1], 'Amazaurus: not so calm anymore 🍅'),
 
   frok(1),
   punch(CUE.flood[0], CUE.flood[1], 'Frok has permissions to everything 🎫🎫🎫'),
@@ -45,3 +45,12 @@ export const CAPTIONS: Caption[] = [
   sub(CUE.give, CUE.tag[0], 'Tea: the original incident response 🤘'),
   frok(2),
 ];
+
+/** This Short's captions go top left, clear of the action at the bottom of each shot: titles, subtitles and lines
+ * high up (the owner's call: above the Shorts safe area, which starts at 0.17), punchlines (written under the
+ * subtitle line, past `PUNCH_LINE`) under them. Heights are fractions of the frame; a caption is centred on its
+ * height. */
+const TOP = 0.12;
+const UNDER = 0.2;
+const PUNCH_LINE = 0.9;
+export const CAPTIONS: Caption[] = AT_THE_BOTTOM.map(c => ({ ...c, y: (c.y ?? 0) > PUNCH_LINE ? UNDER : TOP }));

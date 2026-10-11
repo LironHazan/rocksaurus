@@ -47,7 +47,7 @@ describe('Frok Goes Wild', () => {
     expect(CUE.tag[1]).toBe(DURATION);
   });
 
-  it('cuts to whoever is talking: Rorit in the car, Lulu and Amazarus at the office', () => {
+  it('cuts to whoever is talking: Rorit in the car, Lulu and Amazaurus at the office', () => {
     for (const l of LINES) {
       const mid = (l.from + l.to) / 2;
       expect(whereAt(mid)).toBe(l.who === 'Rorit' ? 'car' : 'office');
@@ -66,7 +66,7 @@ describe('Frok Goes Wild', () => {
 
   it('mouths move only on their own syllables', () => {
     for (const s of SYLLABLES) expect(mouthAt(s.who, s.at + s.dur / 2)).toBeGreaterThan(0.3);
-    expect(mouthAt('Amazarus', CUE.drive[0] + 1)).toBe(0);
+    expect(mouthAt('Amazaurus', CUE.drive[0] + 1)).toBe(0);
   });
 
   it('Frok’s tickets double up to 4,096, one tick per doubling', () => {
@@ -76,7 +76,7 @@ describe('Frok Goes Wild', () => {
     expect(TICKET_TICKS).toHaveLength(Math.log2(TICKETS_MAX));
   });
 
-  it('Amazarus goes red on the call, tomato at the flood, and the tea cools him down', () => {
+  it('Amazaurus goes red on the call, tomato at the flood, and the tea cools him down', () => {
     expect(redAt(CUE.amaz[0])).toBe(0);
     expect(redAt(CUE.amaz[1])).toBeGreaterThan(0.6);
     expect(redAt(CUE.swamped[1])).toBe(1);
@@ -87,7 +87,7 @@ describe('Frok Goes Wild', () => {
     expect(dashAt(0).kind).toBe('map');
     expect(dashAt(CUE.perms[1]).kind).toBe('install');
     expect(dashAt(LINES[0]!.from)).toMatchObject({ kind: 'call', who: 'Lulu' });
-    expect(dashAt(CUE.waiting + 0.5)).toMatchObject({ kind: 'ringing', who: 'Amazarus' });
+    expect(dashAt(CUE.waiting + 0.5)).toMatchObject({ kind: 'ringing', who: 'Amazaurus' });
     expect(dashAt(CUE.flood[0] + 1).kind).toBe('tickets');
     expect(dashAt(CUE.tag[0] + 1).kind).toBe('frok');
   });

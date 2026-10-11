@@ -7,7 +7,7 @@ import { CUE, CUTS, DURATION, HONKS, PERMISSIONS, PERM_EVERY, SYLLABLES, TICKET_
 
 // Natural sound, no music. In the Fesla: the jam's rumble and its horns, the call's rings, Frok's bleeps, the
 // permissions ticking in, and when Frok goes wild, its horn, its hazards and the ticket counter. At the office: the
-// room, keyboards, Amazarus's steam, Lulu's steps and her laugh, the tea.
+// room, keyboards, Amazaurus's steam, Lulu's steps and her laugh, the tea.
 
 type Kind =
   | 'frok'
@@ -51,7 +51,7 @@ function cues(): Cue<Kind>[] {
     ...every(CUE.flood[0], CUE.wild[1], HAZARD_STEP)
       .filter(at => hazardOn(at + 0.01))
       .map(at => ({ at, kind: 'hazard' as const })),
-    // the office: Amazarus boils over, then the flood lands on his screen
+    // the office: Amazaurus boils over, then the flood lands on his screen
     { at: 34.8, kind: 'steam' },
     { at: CUE.swamped[0], kind: 'alert' },
     { at: CUE.swamped[0] + 0.3, kind: 'gasp' },
