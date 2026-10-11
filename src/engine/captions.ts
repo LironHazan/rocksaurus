@@ -15,6 +15,18 @@ const OUTLINE = 0.2; // × size
 const MAX_WIDTH = { left: 0.78, center: 0.86 }; // left-aligned stops short of the Shorts buttons on the right
 const LEFT_MARGIN = 0.07;
 const OUTLINE_COLOUR = '#1b1b2e';
+/** The backdrop box: its padding round the text and its corner radius (× size). */
+const BACKDROP_PAD = 0.35;
+const BACKDROP_RADIUS = 0.4;
+
+/** The backdrop box behind lines `widths` wide (px) at `size`, relative to the caption's anchor (its left edge, or its
+ * centre when centred; vertically, the middle of the lines). */
+export function backdropRect(widths: readonly number[], size: number, left: boolean) {
+  const pad = size * BACKDROP_PAD;
+  const w = Math.max(...widths) + 2 * pad;
+  const h = widths.length * size * LINE_HEIGHT + 2 * pad;
+  return { x: left ? -pad : -w / 2, y: -h / 2, w, h, r: size * BACKDROP_RADIUS };
+}
 
 const backOut = (x: number): number => {
   const k = 1.7; // overshoot
@@ -63,6 +75,17 @@ export function drawCaptions(
     ctx.textAlign = left ? 'left' : 'center';
     ctx.textBaseline = 'middle';
     ctx.lineJoin = 'round';
+    if (c.backdrop) {
+      const box = backdropRect(
+        lines.map(l => ctx.measureText(l).width),
+        size,
+        left,
+      );
+      ctx.fillStyle = c.backdrop;
+      ctx.beginPath();
+      ctx.roundRect(box.x, box.y, box.w, box.h, box.r);
+      ctx.fill();
+    }
     lines.forEach((line, i) => {
       const y = (i - (lines.length - 1) / 2) * size * LINE_HEIGHT;
       ctx.lineWidth = size * OUTLINE;

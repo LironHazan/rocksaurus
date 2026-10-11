@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 import { createLulu, reachLulu, resetLulu, walkLulu } from '../../characters/lulu';
-import { reachArm, releaseArm } from '../../characters/reach';
-import { idle, resetPose } from '../../characters/rory';
-import type { CharacterRig } from '../../characters/types';
+import { reachArm } from '../../characters/reach';
 import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
 
@@ -45,16 +43,6 @@ export function createTiredLulu() {
 }
 
 export type TiredLulu = ReturnType<typeof createTiredLulu>;
-
-/** Any other rig back to neutral, idling, its feet back where they were built. */
-export function restRig(rig: CharacterRig, feet: readonly THREE.Vector3[], t: number, eyesOpen = 1) {
-  resetPose(rig);
-  rig.root.position.set(0, 0, 0);
-  rig.squash.rotation.set(0, 0, 0);
-  rig.feet.forEach((f, i) => f.position.copy(feet[i]!));
-  for (const arm of rig.arms) releaseArm(arm);
-  idle(rig, t, { eyesOpen });
-}
 
 /** A rig's paw to a world point. */
 export function reachTo(arm: THREE.Object3D, world: THREE.Vector3) {

@@ -264,17 +264,48 @@ export function bird(bus: AudioNode, when: number, pitch = 1) {
 
 /** A car driving past: a swell of road noise that drops in pitch as it goes. */
 export function carPass(bus: AudioNode, when: number, len = 2.2) {
-  const src = new AudioBufferSourceNode(ctx, { buffer: noise(), loop: true });
   const f = new BiquadFilterNode(ctx, { type: 'bandpass', frequency: 900, Q: 0.8 });
   f.frequency.setValueAtTime(900, when);
   f.frequency.exponentialRampToValueAtTime(380, when + len);
+  loopedNoise(bus, when, len, f, gain => {
+    gain.setValueAtTime(0, when);
+    gain.linearRampToValueAtTime(0.09, when + len * 0.45);
+    gain.linearRampToValueAtTime(0, when + len);
+  });
+}
+
+/** Looped noise for `len` seconds through `filter`, its loudness shaped by `envelope` (it starts silent). */
+function loopedNoise(
+  bus: AudioNode,
+  when: number,
+  len: number,
+  filter: BiquadFilterNode,
+  envelope: (gain: AudioParam) => void,
+) {
+  const src = new AudioBufferSourceNode(ctx, { buffer: noise(), loop: true });
   const g = new GainNode(ctx, { gain: 0 });
-  g.gain.setValueAtTime(0, when);
-  g.gain.linearRampToValueAtTime(0.09, when + len * 0.45);
-  g.gain.linearRampToValueAtTime(0, when + len);
-  src.connect(f).connect(g).connect(bus);
+  envelope(g.gain);
+  src.connect(filter).connect(g).connect(bus);
   src.start(when);
   src.stop(when + len + 0.05);
+}
+
+const HORN_VOL = 0.05;
+const HORN_EASE_S = 0.006;
+/** A car horn: two muffled square-wave notes a third apart, held `len` seconds. */
+export function horn(bus: AudioNode, when: number, len = 0.3) {
+  const f = new BiquadFilterNode(ctx, { type: 'lowpass', frequency: 1800 });
+  // a quick press and release: the gain eases to the horn's level and, at `len`, back to silence
+  const g = new GainNode(ctx, { gain: 0 });
+  g.gain.setTargetAtTime(HORN_VOL, when, HORN_EASE_S);
+  g.gain.setTargetAtTime(0, when + len, HORN_EASE_S);
+  f.connect(g).connect(bus);
+  for (const hz of [392, 494]) {
+    const o = new OscillatorNode(ctx, { type: 'square', frequency: hz });
+    o.connect(f);
+    o.start(when);
+    o.stop(when + len + 0.05);
+  }
 }
 
 /** Handwriting isn't even: the gaps between strokes cycle through three lengths, their pitch through four. */
@@ -288,16 +319,12 @@ export function scribble(bus: AudioNode, when: number, len = 1) {
 
 /** The espresso machine's steam wand: a hiss with a milky gurgle under it. */
 export function steam(bus: AudioNode, when: number, len = 1.6) {
-  const src = new AudioBufferSourceNode(ctx, { buffer: noise(), loop: true });
-  const f = new BiquadFilterNode(ctx, { type: 'highpass', frequency: 3500 });
-  const g = new GainNode(ctx, { gain: 0 });
-  g.gain.setValueAtTime(0, when);
-  g.gain.linearRampToValueAtTime(0.06, when + 0.1);
-  g.gain.setValueAtTime(0.06, when + len - 0.2);
-  g.gain.linearRampToValueAtTime(0, when + len);
-  src.connect(f).connect(g).connect(bus);
-  src.start(when);
-  src.stop(when + len + 0.05);
+  loopedNoise(bus, when, len, new BiquadFilterNode(ctx, { type: 'highpass', frequency: 3500 }), gain => {
+    gain.setValueAtTime(0, when);
+    gain.linearRampToValueAtTime(0.06, when + 0.1);
+    gain.setValueAtTime(0.06, when + len - 0.2);
+    gain.linearRampToValueAtTime(0, when + len);
+  });
   for (let t = 0.2; t < len - 0.2; t += 0.13) tone(bus, when + t, 'sine', 260, 180, 0.08, 0.025);
 }
 

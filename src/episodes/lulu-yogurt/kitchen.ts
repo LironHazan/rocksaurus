@@ -4,7 +4,8 @@ import type { Location, Shot } from '../../engine/director';
 import { idleLulu } from '../../characters/lulu';
 import { armOf, releaseArm } from '../../characters/reach';
 import type { CharacterRig } from '../../characters/types';
-import { reachTo, restRig, type TiredLulu } from './pose';
+import { reachTo, type TiredLulu } from './pose';
+import { restRig } from '../../characters/rest';
 import {
   BIN,
   CUP_AT,

@@ -1,5 +1,5 @@
 import { browserStandIn } from '../test/browser-stand-in';
-import { drawCaptions, wrapText } from './captions';
+import { backdropRect, drawCaptions, wrapText } from './captions';
 import { FORMATS } from './formats';
 
 const measure = (s: string) => s.length * 10; // 10px per character
@@ -67,5 +67,19 @@ describe('drawCaptions', () => {
     const { ctx, calls } = fakeCtx();
     drawCaptions(ctx, [{ from: 0, to: 2, text: 'hi' }], 3, format);
     expect(calls).toEqual([]);
+  });
+});
+
+describe('backdropRect', () => {
+  it('wraps the widest line and every line, with padding', () => {
+    const box = backdropRect([100, 300], 50, true);
+    expect(box.w).toBeGreaterThan(300);
+    expect(box.h).toBeGreaterThan(2 * 50);
+    expect(box.y).toBe(-box.h / 2); // centred on the lines
+    expect(box.x).toBeLessThan(0); // starts a little left of the text
+  });
+  it('centres on centred captions', () => {
+    const box = backdropRect([200], 40, false);
+    expect(box.x).toBe(-box.w / 2);
   });
 });
