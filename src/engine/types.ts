@@ -25,6 +25,8 @@ export interface Caption {
   /** Font size as a fraction of the frame's short side. */
   size?: number;
   color?: string;
+  /** A rounded box behind the text, in this CSS colour (use some transparency), so it reads over a busy shot. */
+  backdrop?: string;
 }
 
 export type Overlay = (ctx: CanvasRenderingContext2D) => void;

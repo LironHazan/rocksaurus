@@ -51,6 +51,12 @@ const AT_THE_BOTTOM: Caption[] = [
  * subtitle line, past `PUNCH_LINE`) under them. Heights are fractions of the frame; a caption is centred on its
  * height. */
 const TOP = 0.12;
-const UNDER = 0.2;
+const UNDER = 0.225;
 const PUNCH_LINE = 0.9;
-export const CAPTIONS: Caption[] = AT_THE_BOTTOM.map(c => ({ ...c, y: (c.y ?? 0) > PUNCH_LINE ? UNDER : TOP }));
+/** A dark, see-through box behind each caption, so it reads over the street and the office. */
+const BACKDROP = 'rgba(16, 18, 30, 0.62)';
+export const CAPTIONS: Caption[] = AT_THE_BOTTOM.map(c => ({
+  ...c,
+  y: (c.y ?? 0) > PUNCH_LINE ? UNDER : TOP,
+  backdrop: BACKDROP,
+}));
