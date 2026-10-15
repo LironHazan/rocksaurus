@@ -10,6 +10,8 @@ import { textTexture } from '../../world/text-texture';
 // The meeting: Statitezarus, Igarzarus and Dchozaurus share the slim Ornithomimus build (like Taluzarus in Prod
 // Certs); Ogozaurus is a big T-Rex, Tiki Taka's build. Clothes are plain shapes and our own prints: no real logos.
 
+/** Ogozaurus is slimmer than Tiki Taka: his width and depth, scaled. */
+const OGO_SLIM = 0.78;
 /** Statitezarus is short. */
 export const STATITEZARUS_SCALE = 0.72;
 
@@ -90,7 +92,7 @@ export function createStatitezarus(): OrnithomimusRig {
   rig.torso.add(print);
   const band = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.035, 8, 20), matte(0x7b3fe4)); // purple
   band.rotation.x = Math.PI / 2;
-  band.position.y = -0.49; // on the wrist, just above the paw
+  band.position.y = -0.51; // on the wrist, just above the paw
   rig.arms.find(a => a.userData.side === -1)!.add(band);
   tufts(rig, 0x3a2414, [
     [0, 0, 0.17],
@@ -140,6 +142,7 @@ export function createOgozaurus() {
     belly: 0xf8eedf,
     brow: 0xd9bfa0,
   });
+  rig.root.scale.set(OGO_SLIM, 1, OGO_SLIM); // a slimmer build than Tiki Taka
   addGlasses(rig.head, { eyeX: 0.43, eyeY: 0.2, eyeZ: 1.13, yaw: 0.35, rim: 0.2, color: 0x1b1b22 });
   addJersey(rig, rig.posture, TREX_BODY, {
     color: 0x1b1b22,

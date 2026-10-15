@@ -38,8 +38,11 @@ export const SEATS = {
   Lulu: { at: new THREE.Vector3(-3.0, 0, 0.6), yaw: 0.95 },
 } as const;
 /** The door on the left wall (its hinge), and where Ogozaurus walks in from and stops. */
-const DOOR = { hinge: new THREE.Vector3(-8.95, 0, -0.2), width: 2.4 } as const;
-export const OGO_FROM = new THREE.Vector3(-11, 0, 1.0);
+const DOOR = { hinge: new THREE.Vector3(-8.95, 0, -0.4), width: 3.0, height: 5.0 } as const; // sized for a T-Rex
+/** The meeting room's size (createRoom's), and the corridor behind its door. */
+const ROOM = { width: 18, depth: 16, height: 9, back: -6 } as const;
+const CORRIDOR = { length: 6 } as const;
+export const OGO_FROM = new THREE.Vector3(-12.5, 0, 1.1);
 export const OGO_STOP = new THREE.Vector3(-6.3, 0, 1.6);
 
 /** An office chair: a seat, a back, the gas lift and a five-star base. Faces +z; origin on the floor. */
@@ -167,7 +170,7 @@ export function createChatPhone(paint: (ctx: CanvasRenderingContext2D, w: number
 export function createMeetingRoom() {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xe9eef3);
-  createRoom(scene, { wall: 0xe7ecf2, floor: 0x6f7a8e, width: 18, depth: 16, back: -6 });
+  createRoom(scene, { wall: 0xe7ecf2, floor: 0x6f7a8e, ...ROOM });
   scene.add(new THREE.HemisphereLight(0xffffff, 0xb8bcc8, 1.15));
   addKeyLight(scene, 0xfff3e2, 2.0, { from: [5, 11, 9], reach: 10, top: 9 });
 
@@ -244,17 +247,48 @@ export function createMeetingRoom() {
   plant.position.set(7.4, 0, -4.8);
   scene.add(view, clock.group, plant);
 
-  // the door: a frame on the left wall, and the door itself (hinged at its back edge, swings into the room)
-  const frame = box(0.2, 4.0, DOOR.width + 0.3, mat(0xf4f4f4, 0.6));
-  frame.position.set(DOOR.hinge.x, 0, DOOR.hinge.z + DOOR.width / 2);
-  const opening = box(0.22, 3.8, DOOR.width, mat(0x3a3f4a, 0.9)); // the corridor beyond, dark
-  opening.position.set(DOOR.hinge.x - 0.02, 0, DOOR.hinge.z + DOOR.width / 2);
+  // the door: a doorway cut in the left wall (the room's own wall comes out; ours goes round the opening), a frame,
+  // the door itself (hinged at its back edge, swinging into the room), and a dim corridor beyond
+  const leftWall = scene.children.find(o => o instanceof THREE.Mesh && o.position.x === -ROOM.width / 2);
+  if (leftWall) scene.remove(leftWall);
+  const wallMat = mat(0xe7ecf2, 0.95);
+  const { hinge, width: doorWidth, height: doorHeight } = DOOR;
+  const doorEnd = hinge.z + doorWidth;
+  const wallPiece = (z0: number, z1: number, y0: number, y1: number) => {
+    const piece = box(0.12, y1 - y0, z1 - z0, wallMat);
+    piece.position.set(hinge.x - 0.06, y0, (z0 + z1) / 2);
+    scene.add(piece);
+  };
+  wallPiece(ROOM.back, hinge.z, 0, ROOM.height); // behind the doorway
+  wallPiece(doorEnd, ROOM.back + ROOM.depth, 0, ROOM.height); // in front of it
+  wallPiece(hinge.z, doorEnd, doorHeight, ROOM.height); // over it
+  const trim = mat(0xf4f4f4, 0.6);
+  for (const z of [hinge.z - 0.1, doorEnd + 0.1]) {
+    const jamb = box(0.22, doorHeight, 0.2, trim);
+    jamb.position.set(hinge.x, 0, z);
+    scene.add(jamb);
+  }
+  const header = box(0.22, 0.2, doorWidth + 0.4, trim);
+  header.position.set(hinge.x, doorHeight, hinge.z + doorWidth / 2);
+  scene.add(header);
   const door = new THREE.Group();
-  door.position.copy(DOOR.hinge);
-  const leaf = box(0.1, 3.8, DOOR.width, mat(0x8a5a3a, 0.6));
-  leaf.position.set(0.12, 0, DOOR.width / 2);
-  door.add(leaf, ball(0.08, mat(0xd9d9d9, 0.3, { metalness: 0.8 }), [0.22, 1.8, DOOR.width - 0.25]));
-  scene.add(frame, opening, door);
+  door.position.copy(hinge);
+  const leaf = box(0.1, doorHeight, doorWidth, mat(0x8a5a3a, 0.6));
+  leaf.position.set(0.12, 0, doorWidth / 2);
+  door.add(leaf, ball(0.08, mat(0xd9d9d9, 0.3, { metalness: 0.8 }), [0.22, 1.8, doorWidth - 0.25]));
+  scene.add(door);
+  // the corridor: its floor, its far wall, its sides
+  const corridorFloor = box(CORRIDOR.length, 0.02, doorWidth + 3, mat(0x4a5162, 0.9));
+  corridorFloor.position.set(hinge.x - CORRIDOR.length / 2, 0, hinge.z + doorWidth / 2);
+  const corridorWall = mat(0xb9c0cc, 0.95);
+  const far = box(0.12, ROOM.height, doorWidth + 3, corridorWall);
+  far.position.set(hinge.x - CORRIDOR.length, 0, hinge.z + doorWidth / 2);
+  scene.add(corridorFloor, far);
+  for (const z of [hinge.z - 1.5, doorEnd + 1.5]) {
+    const side = box(CORRIDOR.length, ROOM.height, 0.12, corridorWall);
+    side.position.set(hinge.x - CORRIDOR.length / 2, 0, z);
+    scene.add(side);
+  }
 
   return { scene, callMat, call, door };
 }
