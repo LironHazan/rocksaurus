@@ -88,9 +88,9 @@ export function createStatitezarus(): OrnithomimusRig {
   print.position.set(0, 2.15, 0.6);
   print.rotation.x = -0.3; // lying on the chest's curve, not buried in it
   rig.torso.add(print);
-  const band = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.035, 8, 20), matte(0x1b1b22));
+  const band = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.035, 8, 20), matte(0x7b3fe4)); // purple
   band.rotation.x = Math.PI / 2;
-  band.position.y = -0.45;
+  band.position.y = -0.53; // down at the wrist, just above the paw
   rig.arms.find(a => a.userData.side === -1)!.add(band);
   tufts(rig, 0x3a2414, [
     [0, 0, 0.17],
@@ -131,14 +131,14 @@ export function createDchozaurus(): OrnithomimusRig {
   return rig;
 }
 
-/** Ogozaurus: a big pale T-Rex with glasses, in a black football shirt with white shoulder stripes. */
+/** Ogozaurus: a big T-Rex, light beige like Igarzarus, with glasses, in a black football shirt with white shoulder stripes. */
 export function createOgozaurus() {
   const rig = createTyrannosaurus({
     ...TIKI_COLORS,
-    body: 0xf2eee6,
-    stripes: 0xd6cfc2,
-    belly: 0xffffff,
-    brow: 0xe2dccf,
+    body: 0xe6cfb4,
+    stripes: 0xcdb497,
+    belly: 0xf8eedf,
+    brow: 0xd9bfa0,
   });
   addGlasses(rig.head, { eyeX: 0.43, eyeY: 0.2, eyeZ: 1.13, yaw: 0.35, rim: 0.2, color: 0x1b1b22 });
   addJersey(rig, rig.posture, TREX_BODY, {
