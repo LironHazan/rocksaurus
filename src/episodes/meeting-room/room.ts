@@ -9,6 +9,7 @@ import { restRig } from '../../characters/rest';
 import { armOf, reachArm } from '../../characters/reach';
 import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
+import { LAPTOP_SCREEN } from '../../props/laptop';
 import { textTexture } from '../../world/text-texture';
 import { createDchozaurus, createIgarzarus, createOgozaurus, createStatitezarus, STATITEZARUS_SCALE } from './cast';
 import {
@@ -18,13 +19,11 @@ import {
   HOME_CHAIR,
   OGO_FROM,
   OGO_STOP,
-  PHONE,
   SCREEN,
   SEATS,
   createHomeOffice,
   createMeetingRoom,
-  createChatPhone,
-  paintChatList,
+  paintHack,
 } from './sets';
 import { CUE, LINES, mouthAt, postsAt, type Who } from './timeline';
 
@@ -38,8 +37,8 @@ const STEP = 0.4;
 const DOOR_OPEN = 1.4;
 /** How long after each post a pinged phone buzzes, and how long they glance at it (seconds). */
 const GLANCE = 0.9; // (Dchozaurus, at home)
-/** The phone shot stands back this many phone heights: the phone fills the frame, room for captions under it. */
-const PHONE_BACK = 1.35;
+/** The laptop shot stands back this many screen widths: the screen fills the frame's width. */
+const LAPTOP_BACK = 1.95;
 /** A shot of a screen stands back far enough to fill the frame's width with it (× its width). */
 const FILL = 1.9;
 /** How far past the bug line the bug keeps crawling (seconds), and its crawl's period. */
@@ -72,9 +71,8 @@ function questionMark(): THREE.Sprite {
 
 export function createRoomLocation(stage: Stage): Location & { dispose(): void } {
   let posts = 0;
-  const room = createMeetingRoom();
-  const phone = createChatPhone((ctx, w, h) => paintChatList(ctx, w, h, posts));
-  room.scene.add(phone.group);
+  const room = createMeetingRoom((ctx, w, h) => paintHack(ctx, w, h, posts));
+  const { hack } = room;
   const home = createHomeOffice();
   const callTarget = new THREE.RenderTarget(CALL_PX.w, CALL_PX.h);
   // a render target comes out upside down on the screen: sample it flipped
@@ -148,18 +146,13 @@ export function createRoomLocation(stage: Stage): Location & { dispose(): void }
     igar.setMouth(mouthAt('Igarzarus', t));
     igar.head.rotation.y = -0.35; // toward Statitezarus and the screen
     igar.root.updateMatrixWorld(true);
-    phone.group.visible = t >= CUE.posts[0] && t < CUE.tagged[1];
-    if (phone.group.visible) {
-      // his phone, up in front of his face, screen to him: one ping after another
+    if (t >= CUE.posts[0] && t < CUE.tagged[1]) {
+      // at his laptop, "Hack" open: one ping after another; paws on the keys
       igar.head.rotation.set(0.35, 0, 0);
-      igar.root.updateMatrixWorld(true);
-      const face = headOf(igar);
-      phone.group.position.copy(igar.torso.localToWorld(v.set(0, 2.55, 1.05)));
-      phone.group.lookAt(face);
-      phone.group.updateMatrixWorld(true);
+      hack.group.updateMatrixWorld(true);
       for (const side of [-1, 1] as const) {
         const arm = armOf(igar, side);
-        reachArm(arm, arm.parent!.worldToLocal(phone.group.localToWorld(v.set(side * 0.5, -0.6, 0))));
+        reachArm(arm, arm.parent!.worldToLocal(hack.group.localToWorld(hack.key(side * 0.5, 0.6, v))));
       }
     }
     if (lineOf('Igarzarus', t)) {
@@ -274,14 +267,14 @@ export function createRoomLocation(stage: Stage): Location & { dispose(): void }
     const yaw = rig.root.rotation.y + side;
     return { cam: [h.x + Math.sin(yaw) * dist, h.y + 0.3, h.z + Math.cos(yaw) * dist], look: [h.x, h.y - 0.2, h.z] };
   }
-  /** His phone, as he sees it: straight on, filling the frame, his head out of the way. */
-  function phoneShot(): Shot {
-    igar.head.visible = igar.neck.visible = false;
-    phone.group.updateMatrixWorld(true);
-    const p = phone.group.getWorldPosition(new THREE.Vector3());
-    const n = new THREE.Vector3(0, 0, 1).transformDirection(phone.group.matrixWorld);
-    const cam = p.clone().addScaledVector(n, PHONE.h * PHONE_BACK);
-    return { cam: [cam.x, cam.y, cam.z], look: [p.x, p.y - PHONE.h * 0.06, p.z] };
+  /** "Hack" on his laptop, as he sees it: straight on, filling the frame's width, his head out of the way. */
+  function hackShot(): Shot {
+    igar.root.visible = false; // we're him: his body would be between us and the screen
+    hack.screen.updateMatrixWorld(true);
+    const p = hack.screen.getWorldPosition(new THREE.Vector3());
+    const n = new THREE.Vector3(0, 0, 1).transformDirection(hack.screen.matrixWorld);
+    const cam = p.clone().addScaledVector(n, LAPTOP_SCREEN.w * LAPTOP_BACK);
+    return { cam: [cam.x, cam.y, cam.z], look: [p.x, p.y, p.z] };
   }
   const callShot: Shot = { cam: [CALL.x, SCREEN.y, SCREEN.z + CALL.w * FILL], look: [CALL.x, SCREEN.y, SCREEN.z] };
 
@@ -310,7 +303,7 @@ export function createRoomLocation(stage: Stage): Location & { dispose(): void }
       const c = ease(seg(t, CUE.room, CUE.posts[0]));
       return { cam: [lerp(7, 5.5, c), lerp(7, 6.2, c), lerp(14, 12, c)], look: [-0.5, 3.0, -2.5] };
     },
-    chat: () => phoneShot(),
+    chat: () => hackShot(),
     stati: () => ({ cam: [0.7, 3.1, -1.7], look: [0, 2.3, -4.7] }),
     igar: () => close(igar, 3.2, 0.5),
     call: () => callShot,
@@ -325,11 +318,11 @@ export function createRoomLocation(stage: Stage): Location & { dispose(): void }
   return {
     scene: room.scene,
     frame(t) {
-      igar.head.visible = igar.neck.visible = true;
+      igar.root.visible = true;
       const n = postsAt(t);
       if (n !== posts) {
         posts = n;
-        phone.repaint();
+        hack.repaint();
       }
       poseStatitezarus(t);
       poseIgarzarus(t);

@@ -13,7 +13,7 @@ import {
   ROUND,
 } from '../../world/interior';
 import { ball } from '../../characters/materials';
-import { createLaptop } from '../../props/laptop';
+import { createLaptop, laptopWith, LAPTOP_SCREEN } from '../../props/laptop';
 import { createPlant } from '../../props/furniture';
 import { CHANNELS } from './timeline';
 
@@ -24,8 +24,13 @@ import { CHANNELS } from './timeline';
 /** The big screen on the back wall: where it hangs, and its two halves (his design; the call, 4:3). */
 export const SCREEN = { y: 4.7, z: -5.92 } as const;
 const DESIGN = { x: -1.55, w: 4.1, h: 2.7 } as const;
-/** Igarzarus's phone: its screen's size (portrait) and resolution. */
-export const PHONE = { w: 0.9, h: 1.9, px: 540 } as const;
+/** The resolution "Hack" is painted at (texels across). */
+const HACK_PX = 900;
+/** Igarzarus's and Lulu's laptops on the table, each turned to its owner (radians about y). */
+const LAPTOPS = {
+  Igarzarus: { at: new THREE.Vector3(1.05, 0, -0.85), yaw: 1.6 },
+  Lulu: { at: new THREE.Vector3(-1.05, 0, 0.6), yaw: -Math.PI / 2 },
+} as const;
 export const CALL = { x: 2.15, w: 3.0, h: 2.25 } as const;
 /** The table (along z), its top's height. */
 const TABLE = { from: -4.0, to: 2.2, width: 3.2, top: 1.25 } as const;
@@ -106,68 +111,94 @@ function paintDesign(ctx: CanvasRenderingContext2D, w: number, h: number) {
   node(0.71, 0.72, 'agent ×999', '#e5383b');
 }
 
-/** The messenger on Igarzarus's phone (dark mode): his chats, the newest on top, as it is when Statitezarus has
- * posted in `posts` channels. Each post: the same design, the same two tags, one more unread badge. */
-export function paintChatList(ctx: CanvasRenderingContext2D, w: number, h: number, posts: number) {
-  ctx.fillStyle = '#0b141a';
+/** "Hack", the team chat on Igarzarus's laptop (purple sidebar, our own app): his channels, and the one
+ * Statitezarus just posted in, as it is when he has posted in `posts` channels. Each post: the same design, the
+ * same two tags, one more unread channel. */
+export function paintHack(ctx: CanvasRenderingContext2D, w: number, h: number, posts: number) {
+  ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = '#1f2c34';
-  ctx.fillRect(0, 0, w, h * 0.14);
-  ctx.fillStyle = '#e9edef';
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'left';
-  ctx.font = font(w * 0.05, 600);
-  ctx.fillText('9:41', w * 0.07, h * 0.03);
-  ctx.font = font(w * 0.09);
-  ctx.fillText('Chats', w * 0.06, h * 0.095);
-  const row = h * 0.115;
-  for (let i = 0; i < posts; i++) {
-    const channel = CHANNELS[posts - 1 - i]!; // the newest post on top
-    const y = h * 0.15 + i * row;
-    ctx.fillStyle = '#ffd36b';
-    ctx.beginPath();
-    ctx.arc(w * 0.13, y + row / 2, w * 0.075, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#1b1b22';
-    ctx.textAlign = 'center';
-    ctx.font = font(w * 0.08);
-    ctx.fillText('#', w * 0.13, y + row / 2);
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#e9edef';
-    ctx.font = font(w * 0.058);
-    ctx.fillText(`# ${channel}`, w * 0.26, y + row * 0.32);
-    ctx.font = font(w * 0.045, 500);
-    ctx.fillStyle = '#8696a0';
-    ctx.fillText('Statitezarus: 🧩 New design', w * 0.26, y + row * 0.58);
-    ctx.fillStyle = '#ffd36b';
-    ctx.fillText('@Dchozaurus @Igarzarus 🙏', w * 0.26, y + row * 0.8);
-    ctx.fillStyle = '#00a884'; // the unread badge
-    ctx.beginPath();
-    ctx.arc(w * 0.9, y + row * 0.55, w * 0.04, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#0b141a';
-    ctx.textAlign = 'center';
-    ctx.font = font(w * 0.045);
-    ctx.fillText('1', w * 0.9, y + row * 0.56);
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#222d34';
-    ctx.fillRect(w * 0.26, y + row - 1, w * 0.74, 2);
+  // the sidebar: the workspace, then the channels
+  const side = w * 0.32;
+  ctx.fillStyle = '#4a154b';
+  ctx.fillRect(0, 0, side, h);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = font(h * 0.075);
+  ctx.fillText('Hack ▾', side * 0.1, h * 0.09);
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.fillRect(0, h * 0.16, side, 2);
+  const current = Math.max(0, posts - 1);
+  CHANNELS.forEach((c, i) => {
+    const y = h * (0.25 + i * 0.1);
+    const unread = i < posts;
+    if (unread && i === current) {
+      ctx.fillStyle = '#1164a3';
+      ctx.fillRect(0, y - h * 0.045, side, h * 0.09);
+    }
+    ctx.fillStyle = unread ? '#ffffff' : '#c9b8cc';
+    ctx.font = font(h * 0.052, unread ? 800 : 500);
+    ctx.fillText(`# ${c}`, side * 0.1, y);
+    if (unread) {
+      ctx.fillStyle = '#e01e5a';
+      ctx.beginPath();
+      ctx.roundRect(side * 0.8, y - h * 0.03, side * 0.13, h * 0.06, h * 0.03);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = font(h * 0.04);
+      ctx.fillText('1', side * 0.845, y);
+    }
+  });
+  // the channel: its name, and his post
+  const x = side + w * 0.03;
+  ctx.fillStyle = '#1d1c1d';
+  ctx.font = font(h * 0.07);
+  ctx.fillText(`# ${CHANNELS[current]}`, x, h * 0.09);
+  ctx.fillStyle = '#e1e1e1';
+  ctx.fillRect(side, h * 0.16, w - side, 2);
+  if (posts === 0) {
+    ctx.fillStyle = '#616061';
+    ctx.font = font(h * 0.05, 500);
+    ctx.fillText('Statitezarus is typing…', x, h * 0.9);
+    return;
   }
+  ctx.fillStyle = '#a8d46a'; // his avatar
+  ctx.beginPath();
+  ctx.roundRect(x, h * 0.22, h * 0.11, h * 0.11, h * 0.02);
+  ctx.fill();
+  ctx.fillStyle = '#1d1c1d';
+  ctx.font = font(h * 0.055);
+  ctx.fillText('Statitezarus', x + h * 0.14, h * 0.25);
+  ctx.fillStyle = '#616061';
+  ctx.font = font(h * 0.04, 500);
+  ctx.fillText('9:41 AM', x + h * 0.14 + ctx.measureText('Statitezarus  ').width * 1.4, h * 0.25);
+  ctx.fillStyle = '#1d1c1d';
+  ctx.font = font(h * 0.05, 500);
+  ctx.fillText('🧩 New design: Agent Orchestrator v3', x + h * 0.14, h * 0.34);
+  ctx.fillText('Please review 🙏', x + h * 0.14, h * 0.43);
+  // the mentions, highlighted
+  ctx.font = font(h * 0.05, 700);
+  let tx = x + h * 0.14;
+  for (const tag of ['@Dchozaurus', '@Igarzarus']) {
+    const tw = ctx.measureText(tag).width;
+    ctx.fillStyle = '#fff3c4';
+    ctx.fillRect(tx - 4, h * 0.48, tw + 8, h * 0.08);
+    ctx.fillStyle = '#1264a3';
+    ctx.fillText(tag, tx, h * 0.52);
+    tx += tw + 18;
+  }
+  // the message box at the bottom
+  ctx.strokeStyle = '#bbbbbb';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, h * 0.82, w - side - w * 0.06, h * 0.12);
+  ctx.fillStyle = '#868686';
+  ctx.font = font(h * 0.045, 500);
+  ctx.fillText(`Message #${CHANNELS[current]}`, x + w * 0.02, h * 0.88);
 }
 
-/** A phone: a dark rounded body and its screen (a live panel, facing +z). Origin at the screen's centre. */
-export function createChatPhone(paint: (ctx: CanvasRenderingContext2D, w: number, h: number) => void) {
-  const group = new THREE.Group();
-  const body = box(PHONE.w + 0.08, PHONE.h + 0.08, 0.08, mat(0x2c2c30, 0.3, { metalness: 0.5 }));
-  body.position.set(0, -(PHONE.h + 0.08) / 2, -0.05);
-  const screen = livePanel(PHONE.w, PHONE.h, PHONE.px, paint);
-  screen.mesh.position.z = 0.0;
-  group.add(body, screen.mesh);
-  return { group, repaint: screen.repaint };
-}
-
-/** The meeting room, with the big screen's two halves: his design and the call (`callMat`). */
-export function createMeetingRoom() {
+/** The meeting room: the big screen (his design, and the call: `callMat`), the table with the laptops (Igarzarus's
+ * shows "Hack", painted by `paintChat`: `hack`), the chairs, the door. */
+export function createMeetingRoom(paintChat: (ctx: CanvasRenderingContext2D, w: number, h: number) => void) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xe9eef3);
   createRoom(scene, { wall: 0xe7ecf2, floor: 0x6f7a8e, ...ROOM });
@@ -228,6 +259,18 @@ export function createMeetingRoom() {
   laptop.group.scale.setScalar(0.8);
   laptop.group.rotation.y = Math.PI;
   scene.add(laptop.group);
+  // Igarzarus's laptop, with "Hack" open; Lulu's
+  const hackPanel = livePanel(LAPTOP_SCREEN.w, LAPTOP_SCREEN.h, HACK_PX, paintChat);
+  const hack = laptopWith(hackPanel.mesh, 0xc0c4cc);
+  const lulus = createLaptop({ header: 'drums.md', theme: 'document', color: 0x9a7fc9 });
+  for (const [l, who] of [
+    [hack, 'Igarzarus'],
+    [lulus, 'Lulu'],
+  ] as const) {
+    l.group.position.set(LAPTOPS[who].at.x, TABLE.top, LAPTOPS[who].at.z);
+    l.group.rotation.y = LAPTOPS[who].yaw;
+    scene.add(l.group);
+  }
 
   // the window, the clock, a plant
   const view = picture(
@@ -290,7 +333,7 @@ export function createMeetingRoom() {
     scene.add(side);
   }
 
-  return { scene, callMat, call, door };
+  return { scene, callMat, call, door, hack: { ...hack, screen: hackPanel.mesh, repaint: hackPanel.repaint } };
 }
 
 /** The bug on his floor: a little beetle, red with black spots, legs ticking. Origin on the floor, facing +x. */
