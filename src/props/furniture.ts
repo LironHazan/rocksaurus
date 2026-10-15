@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { enableShadows } from '../characters/materials';
+import { ball, enableShadows } from '../characters/materials';
+import { cylinder, mat } from '../world/interior';
 
 function cushion(w: number, h: number, d: number, material: THREE.Material, r = 0.12): THREE.Mesh {
   return new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 4, Math.min(r, h / 2, w / 2, d / 2)), material);
@@ -55,5 +56,23 @@ export function createSeat({ width = 2.4, colour = 0x7a4b8c, legs = 0x4a3020 }: 
       g.add(leg);
     }
   enableShadows(g);
+  return g;
+}
+
+/** Leaves round a potted plant's stem, at this many different heights in turn. */
+const LEAVES = 7;
+const LEAF_TIERS = 3;
+
+/** A potted office plant: a terracotta pot and a clump of leaves. Origin on the floor. */
+export function createPlant(): THREE.Group {
+  const g = new THREE.Group();
+  g.add(cylinder(0.45, 0.35, 0.8, mat(0xe07a5f, 0.8)));
+  const leaf = mat(0x5aa469, 0.7);
+  for (let i = 0; i < LEAVES; i++) {
+    const a = (i / LEAVES) * Math.PI * 2;
+    g.add(
+      ball(0.42, leaf, [Math.cos(a) * 0.35, 1.3 + (i % LEAF_TIERS) * 0.35, Math.sin(a) * 0.35], [0.6, 1.2, 0.6], 16),
+    );
+  }
   return g;
 }

@@ -117,6 +117,15 @@ export function addKeyLight(
   return key;
 }
 
+/** A clear morning sky through a window, blue at the top, pale at the bottom, filling a `picture()`'s canvas. */
+export function paintMorningSky(ctx: CanvasRenderingContext2D, w: number, h: number): void {
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#8cc8ff');
+  g.addColorStop(1, '#e8f4ff');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+}
+
 /** The white frame and middle bar of a window, painted over the view in a `picture()`'s canvas. */
 export function paintWindowFrame(ctx: CanvasRenderingContext2D, w: number, h: number): void {
   ctx.strokeStyle = '#ffffff';

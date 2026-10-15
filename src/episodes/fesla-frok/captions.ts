@@ -1,5 +1,5 @@
 import type { Caption } from '../../engine/types';
-import { title, sub, punch } from '../../engine/subtitles';
+import { title, sub, punch, topLeft } from '../../engine/subtitles';
 import { CUE, FROK, LINES, type Speaker } from './timeline';
 
 const said = (who: Speaker, text: string) => LINES.find(l => l.who === who && l.text === text)!;
@@ -46,17 +46,4 @@ const AT_THE_BOTTOM: Caption[] = [
   frok(2),
 ];
 
-/** This Short's captions go top left, clear of the action at the bottom of each shot: titles, subtitles and lines
- * high up (the owner's call: above the Shorts safe area, which starts at 0.17), punchlines (written under the
- * subtitle line, past `PUNCH_LINE`) under them. Heights are fractions of the frame; a caption is centred on its
- * height. */
-const TOP = 0.12;
-const UNDER = 0.225;
-const PUNCH_LINE = 0.9;
-/** A dark, see-through box behind each caption, so it reads over the street and the office. */
-const BACKDROP = 'rgba(16, 18, 30, 0.62)';
-export const CAPTIONS: Caption[] = AT_THE_BOTTOM.map(c => ({
-  ...c,
-  y: (c.y ?? 0) > PUNCH_LINE ? UNDER : TOP,
-  backdrop: BACKDROP,
-}));
+export const CAPTIONS: Caption[] = topLeft(AT_THE_BOTTOM);

@@ -74,6 +74,16 @@ export const talker =
 export const speakerOf = <W extends string>(lines: readonly SpokenLine<W>[], t: number): W | null =>
   lines.find(l => t >= l.from && t < l.to)?.who ?? null;
 
+/** A cast's talk, from its lines: every syllable, how open each mouth is at t, and who is talking at t. */
+export function speech<W extends string>(lines: readonly SpokenLine<W>[], voices: Record<W, Voice>, seed?: number) {
+  const all = syllables(lines, voices, seed);
+  return {
+    syllables: all,
+    mouthAt: (who: W, t: number) => mouthOf(all, who, t),
+    speakerAt: (t: number): W | null => speakerOf(lines, t),
+  };
+}
+
 /** Sings every syllable, quietly, from episode start `t0`. Each note is built just before it plays (`atTime`). */
 export function playSyllables(bus: AudioNode, t0: number, all: readonly Syllable[], gain = 0.32): void {
   const voices = new GainNode(bus.context, { gain });
