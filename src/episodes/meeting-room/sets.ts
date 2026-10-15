@@ -75,7 +75,7 @@ function officeChair(colour: number): THREE.Group {
 
 const font = (size: number, weight = 700) => `${weight} ${size}px ${ROUND}`;
 
-/** His design, shared on the big screen: the title and a little diagram (a 666-agent army and an orchestrator). */
+/** His design, shared on the big screen: the title and a little diagram (666 agents and an orchestrator). */
 function paintDesign(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.fillStyle = '#f7f8fb';
   ctx.fillRect(0, 0, w, h);

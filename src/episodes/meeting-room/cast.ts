@@ -132,14 +132,14 @@ export function createDchozaurus(): OrnithomimusRig {
   return rig;
 }
 
-/** Ogozaurus: a big T-Rex, light beige like Igarzarus, with glasses, in a black football shirt with white shoulder stripes. */
+/** Ogozaurus: a big plum-purple T-Rex (his drink is the creamy one), with glasses, in a black football shirt with white shoulder stripes. */
 export function createOgozaurus() {
   const rig = createTyrannosaurus({
     ...TIKI_COLORS,
-    body: 0xe6cfb4,
-    stripes: 0xcdb497,
-    belly: 0xf8eedf,
-    brow: 0xd9bfa0,
+    body: 0x8a5cc2,
+    stripes: 0x6d44a3,
+    belly: 0xeadcff,
+    brow: 0x7a4fb5,
   });
   rig.root.scale.set(OGO_SLIM, 1, OGO_SLIM); // a slimmer build than Tiki Taka
   addGlasses(rig.head, { eyeX: 0.43, eyeY: 0.2, eyeZ: 1.13, yaw: 0.35, rim: 0.2, color: 0x1b1b22 });
