@@ -7,12 +7,13 @@ import {
   cylinder,
   livePanel,
   mat,
+  paintMorningSky,
   paintWindowFrame,
   picture,
   ROUND,
 } from '../../world/interior';
-import { ball } from '../../characters/materials';
 import { createLaptop } from '../../props/laptop';
+import { createPlant } from '../../props/furniture';
 import type { ShownLine } from '../../world/screen-script';
 
 // The Papo Pako Shapeworks open office, 9 AM: rows of cubes with grey fabric walls, a window strip, a whiteboard with
@@ -101,18 +102,6 @@ export function createMug(colour: number): THREE.Group {
   return g;
 }
 
-/** A plant in a pot, by the window. */
-function plant(): THREE.Group {
-  const g = new THREE.Group();
-  g.add(cylinder(0.45, 0.35, 0.8, mat(0xe07a5f, 0.8)));
-  const leaf = mat(0x5aa469, 0.7);
-  for (let i = 0; i < 7; i++) {
-    const a = (i / 7) * Math.PI * 2;
-    g.add(ball(0.42, leaf, [Math.cos(a) * 0.35, 1.3 + (i % 3) * 0.35, Math.sin(a) * 0.35], [0.6, 1.2, 0.6], 16));
-  }
-  return g;
-}
-
 export function createOffice(paintQueue: (ctx: CanvasRenderingContext2D, w: number, h: number) => void) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xe9eef3);
@@ -125,11 +114,7 @@ export function createOffice(paintQueue: (ctx: CanvasRenderingContext2D, w: numb
     20,
     3,
     (ctx, w, h) => {
-      const g = ctx.createLinearGradient(0, 0, 0, h);
-      g.addColorStop(0, '#8cc8ff');
-      g.addColorStop(1, '#e8f4ff');
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, w, h);
+      paintMorningSky(ctx, w, h);
       for (let x = 0, i = 0; x < w; i++) {
         const bw = 26 + ((i * 37) % 40);
         const bh = h * (0.3 + ((i * 53) % 40) / 100);
@@ -173,7 +158,7 @@ export function createOffice(paintQueue: (ctx: CanvasRenderingContext2D, w: numb
   clock.group.position.set(6.5, 7.6, -6.9);
   scene.add(clock.group);
   for (const x of [-15, 15]) {
-    const p = plant();
+    const p = createPlant();
     p.position.set(x * 0.95, 0, -5.8);
     scene.add(p);
   }
