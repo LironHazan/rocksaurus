@@ -99,10 +99,10 @@ export function createStatitezarus(): OrnithomimusRig {
   return rig;
 }
 
-/** Igarzarus: pale, in a black shirt. Has one question, and asks it every time. */
+/** Igarzarus: light beige, in a black shirt. Has one question, and asks it every time. */
 export function createIgarzarus(): OrnithomimusRig {
   const rig = dressed(
-    { body: 0xf3efe8, belly: 0xffffff, spots: 0xdcd5c8, beak: 0xffd9b0, eyes: 0x3d7bd9 },
+    { body: 0xe6cfb4, belly: 0xf8eedf, spots: 0xcdb497, beak: 0xffcf9e, eyes: 0x3d7bd9 },
     0x16161c,
     0x2f3542,
   );
