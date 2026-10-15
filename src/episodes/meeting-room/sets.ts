@@ -361,6 +361,56 @@ function createBug() {
   return { group: g, legs };
 }
 
+/** A piña colada from the offsite: a hurricane glass on a short stem with a white rim, full of it (creamy, so you
+ * can't see through), a pineapple slice with its leaves on the rim, a cherry, an open paper umbrella and a straw.
+ * Origin at the glass's foot. */
+export function createPinaColada(): THREE.Group {
+  const g = new THREE.Group();
+  const glass = mat(0xffffff, 0.15, { metalness: 0.1 });
+  // the stem and foot, then the drink in the bowl's shape, then the rim
+  g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.11, 0.02, 20), glass));
+  const stem = cylinder(0.02, 0.02, 0.12, glass, 8);
+  stem.position.y = 0.02;
+  const bowl = [
+    [0.02, 0.0],
+    [0.07, 0.05],
+    [0.11, 0.17],
+    [0.08, 0.3],
+    [0.11, 0.42],
+    [0.0, 0.42],
+  ].map(([x, y]) => new THREE.Vector2(x, y));
+  const drink = new THREE.Mesh(new THREE.LatheGeometry(bowl, 24), mat(0xfff3d6, 0.4));
+  drink.position.y = 0.14;
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.008, 6, 24), glass);
+  rim.rotation.x = Math.PI / 2;
+  rim.position.y = 0.56;
+  g.add(stem, drink, rim);
+  // the pineapple slice on the rim, and its two leaves
+  const slice = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.03, 3), mat(0xf6c445, 0.6));
+  slice.rotation.set(Math.PI / 2, 0, 0);
+  slice.position.set(0.11, 0.58, 0);
+  const leaf = mat(0x3f9a4a, 0.6);
+  for (const tilt of [-0.3, 0.3]) {
+    const l = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.12, 6), leaf);
+    l.position.set(0.17, 0.66, 0);
+    l.rotation.z = -0.5 + tilt;
+    g.add(l);
+  }
+  g.add(slice, ball(0.03, mat(0xd81b3c, 0.3), [-0.05, 0.59, 0.05], [1, 1, 1], 12)); // and a cherry
+  // the paper umbrella, open, on its stick; the straw
+  const stick = cylinder(0.005, 0.005, 0.26, mat(0xe9dcc0, 0.6), 4);
+  stick.position.set(-0.04, 0.5, -0.04);
+  stick.rotation.z = 0.35;
+  const umbrella = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.04, 8), mat(0xff6fa8, 0.6));
+  umbrella.position.set(-0.13, 0.74, -0.04);
+  umbrella.rotation.z = 0.35;
+  const straw = cylinder(0.01, 0.01, 0.3, mat(0xe53935, 0.5), 6);
+  straw.position.set(0.03, 0.46, 0.04);
+  straw.rotation.z = -0.25;
+  g.add(stick, umbrella, straw);
+  return g;
+}
+
 /** Where Dchozaurus sits at home (his chair, facing his webcam at +z), and the bug's patch of floor. */
 export const HOME_CHAIR = new THREE.Vector3(0, 0, 0);
 export const BUG_PATH = { from: -1.4, to: 1.6, z: 1.3 } as const;

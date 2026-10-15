@@ -39,9 +39,10 @@ export const LINES: readonly SpokenLine<Who>[] = [
   { from: 45.8, to: 49.2, who: 'Ogozaurus', text: 'Everything reached prod now? 🚀' },
 ];
 
-/** Each voice, low to high: Ogozaurus big and low, Dchozaurus warm, Igarzarus dry, Statitezarus quick and eager. */
+/** Each voice: Dchozaurus warm, Igarzarus dry, Statitezarus quick and eager, and Ogozaurus, back from the offsite,
+ * the highest of them all (a big T-Rex, delighted). */
 const VOICES: Record<Who, Voice> = {
-  Ogozaurus: { notes: ['G2', 'A2', 'C3', 'D3'], rate: 0.18 },
+  Ogozaurus: { notes: ['C4', 'E4', 'G4', 'A4'], rate: 0.14 },
   Dchozaurus: { notes: ['C3', 'D3', 'F3', 'G3'], rate: 0.14 },
   Igarzarus: { notes: ['D3', 'E3', 'G3', 'A3'], rate: 0.15 },
   Statitezarus: { notes: ['G3', 'A3', 'C4', 'D4'], rate: 0.12 },

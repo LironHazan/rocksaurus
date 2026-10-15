@@ -16,21 +16,24 @@ const OGO_SLIM = 0.78;
 export const STATITEZARUS_SCALE = 0.72;
 
 type OrnithoColors = typeof RORIT_COLORS;
+/** How much roomier their tees are than the rig's fitted clothes (across, up, front to back). */
+const LOOSE = new THREE.Vector3(1.1, 1.02, 1.14);
 /** Where the Ornithomimus mouth sits (head space: its z, and how high, just under the beak). */
 const MOUTH = { z: 0.6, y: -0.15 } as const;
 
 /** An Ornithomimus in work clothes: a shirt (with sleeves), trousers, no lashes. */
 function dressed(colors: Partial<OrnithoColors>, shirt: number, trousers: number): OrnithomimusRig {
   const rig = createOrnithomimus({ ...RORIT_COLORS, ...colors }, { athleisure: false });
-  const cloth = (c: number) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.85 });
+  const cloth = (c: number) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.9, side: THREE.DoubleSide });
   const top = cloth(shirt);
-  rig.clothe(top, 0.12, 0.72);
   rig.clothe(cloth(trousers), 0.72, 1.0);
-  for (const arm of rig.arms) {
-    const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.24, 16), top);
-    sleeve.position.y = -0.06;
-    arm.add(sleeve);
-  }
+  // a relaxed tee, not a second skin: roomier round the body, wide short sleeves, a soft crew collar
+  rig.clothe(top, 0.12, 0.74).scale.multiply(LOOSE);
+  for (const arm of rig.arms) arm.add(ball(0.15, top, [0, -0.1, 0], [1, 1.35, 1], 20)); // short, rounded sleeves
+  const collar = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.04, 8, 24), top);
+  collar.rotation.x = Math.PI / 2;
+  collar.position.set(0, 2.63, 0.02);
+  rig.torso.add(collar);
   // the mouth (open, and the smile) up under the beak, so it opens from it in a close-up rather than hanging below
   for (const part of rig.head.children)
     if (part.position.z === MOUTH.z && part.position.y < MOUTH.y) part.position.y = MOUTH.y;
@@ -87,7 +90,7 @@ export function createStatitezarus(): OrnithomimusRig {
     new THREE.PlaneGeometry(0.46, 0.4),
     new THREE.MeshStandardMaterial({ map: textTexture(256, 220, shield, ['800 40px Fredoka']), transparent: true }),
   );
-  print.position.set(0, 2.15, 0.6);
+  print.position.set(0, 2.15, 0.66);
   print.rotation.x = -0.3; // lying on the chest's curve, not buried in it
   rig.torso.add(print);
   tufts(rig, 0x3a2414, [

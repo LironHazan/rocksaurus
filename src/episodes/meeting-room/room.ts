@@ -22,6 +22,7 @@ import {
   SEATS,
   createHomeOffice,
   createMeetingRoom,
+  createPinaColada,
   paintHack,
 } from './sets';
 import { CUE, LINES, mouthAt, postsAt, type Who } from './timeline';
@@ -31,6 +32,12 @@ import { CUE, LINES, mouthAt, postsAt, type Who } from './timeline';
 
 /** The call's picture: 4:3, sharp enough to fill the frame in a close-up. */
 const CALL_PX = { w: 800, h: 600 } as const;
+/** Ogozaurus, back from the offsite: his jaw a little open in a grin (0..1), and his eyes smiling (a share of
+ * their height). */
+const OGO_GRIN = 0.22;
+const OGO_HAPPY_EYES = 0.7;
+/** His piña colada: cocktail-sized for him (he's big). */
+const DRINK_SCALE = 1.3;
 /** A walk-cycle step (seconds), and the door's swing (radians, into the room). */
 const STEP = 0.4;
 const DOOR_OPEN = 1.4;
@@ -74,6 +81,9 @@ export function createRoomLocation(stage: Stage): Location & { dispose(): void }
   addFlannel(lulu);
   room.scene.add(stati.root, igar.root, ogo.root, lulu.root);
   home.scene.add(dcho.root);
+  const drink = createPinaColada();
+  drink.scale.setScalar(DRINK_SCALE);
+  room.scene.add(drink);
   const feet = new Map([stati, igar, dcho, ogo].map(rig => [rig, rig.feet.map(f => f.position.clone())] as const));
   const rest = (rig: typeof stati | typeof ogo, t: number) => restRig(rig, feet.get(rig)!, t);
 
@@ -170,7 +180,7 @@ export function createRoomLocation(stage: Stage): Location & { dispose(): void }
 
   function poseOgozaurus(t: number) {
     rest(ogo, t);
-    ogo.root.visible = t >= CUE.door;
+    ogo.root.visible = drink.visible = t >= CUE.door;
     room.door.rotation.y = DOOR_OPEN * ease(seg(t, CUE.door, CUE.door + 0.6));
     const k = ease(seg(t, CUE.door + 0.3, CUE.inside));
     ogo.root.position.lerpVectors(OGO_FROM, OGO_STOP, k);
@@ -181,9 +191,20 @@ export function createRoomLocation(stage: Stage): Location & { dispose(): void }
       ogo.root.position.y += Math.abs(Math.sin(p)) * 0.15;
       for (const f of ogo.feet) f.position.y += Math.max(0, Math.sin(p + (f.userData.side > 0 ? 0 : Math.PI))) * 0.35;
     }
-    ogo.setMouth(mouthAt('Ogozaurus', t));
-    if (lineOf('Ogozaurus', t)) {
-      for (const arm of ogo.arms) arm.rotation.set(-1.0, 0, arm.userData.side * 0.9); // tiny arms out: "well?"
+    // all smiles, back from the offsite: a grin (teeth showing), cheeks up, happy eyes
+    ogo.setMouth(Math.max(OGO_GRIN, mouthAt('Ogozaurus', t)));
+    for (const c of ogo.cheeks) c.scale.set(1.3, 1.0, 0.35);
+    for (const e of ogo.eyes) e.scale.y *= OGO_HAPPY_EYES;
+    // his piña colada, in his near paw: held out front, raised a little on his line (cheers)
+    const cheers = lineOf('Ogozaurus', t) ? ease(seg(t, LINES[6]!.from, LINES[6]!.from + 0.4)) : 0;
+    ogo.root.updateMatrixWorld(true);
+    drink.position.copy(ogo.posture.localToWorld(v.set(0.6, lerp(1.3, 1.7, cheers), 1.25)));
+    drink.rotation.set(0, ogo.root.rotation.y, 0);
+    drink.updateMatrixWorld(true);
+    const paw = armOf(ogo, 1);
+    reachArm(paw, paw.parent!.worldToLocal(drink.localToWorld(v.set(0, 0.25, 0))));
+    if (cheers > 0) {
+      armOf(ogo, -1).rotation.set(-1.0, 0, -0.9); // his other tiny arm out: "well?"
       ogo.head.rotation.z = -0.12;
     }
   }
