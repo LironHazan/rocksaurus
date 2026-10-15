@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createOrnithomimus, RORIT_COLORS, type OrnithomimusRig } from '../../characters/ornithomimus';
 import { createTyrannosaurus, TIKI_COLORS } from '../../characters/tyrannosaurus';
-import { ball, matte } from '../../characters/materials';
+import { ball } from '../../characters/materials';
 import { addGlasses } from '../../props/glasses';
 import { addJersey, TREX_BODY } from '../../props/soccer';
 import { ROUND } from '../../world/interior';
@@ -75,7 +75,7 @@ function shield(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.fillText('S', w * 0.5, h * 0.45);
 }
 
-/** Statitezarus: short, a blue superhero tee, a fitness band on his left wrist. Very keen on his design. */
+/** Statitezarus: short, in a blue superhero tee. Very keen on his design. */
 export function createStatitezarus(): OrnithomimusRig {
   const rig = dressed(
     { body: 0xa8d46a, belly: 0xeef8d8, spots: 0x86b84a, beak: 0xffd08a, eyes: 0x5a3a1a },
@@ -90,10 +90,6 @@ export function createStatitezarus(): OrnithomimusRig {
   print.position.set(0, 2.15, 0.6);
   print.rotation.x = -0.3; // lying on the chest's curve, not buried in it
   rig.torso.add(print);
-  const band = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.035, 8, 20), matte(0x7b3fe4)); // purple
-  band.rotation.x = Math.PI / 2;
-  band.position.y = -0.51; // on the wrist, just above the paw
-  rig.arms.find(a => a.userData.side === -1)!.add(band);
   tufts(rig, 0x3a2414, [
     [0, 0, 0.17],
     [0.12, 0.08, 0.13],
