@@ -9,7 +9,7 @@ const line = (i: number) => {
 const [, , , , lastPost] = CUE.posts;
 
 const AT_THE_BOTTOM: Caption[] = [
-  title(0.2, CUE.campus[1] - 0.1, '🏢 Papo Pako Shapeworks\nAnother day at the office'),
+  title(0.2, CUE.campus[1] - 0.1, '🏢 Another day at the office'),
   sub(CUE.room + 0.2, CUE.posts[0] - 0.1, 'Statitezarus, the agentic AI team 🦸'),
   sub(CUE.posts[0], lastPost + 1.2, 'He has a design. He wants reviews.'),
   punch(CUE.posts[1], lastPost + 1.2, 'Posted in #agentic-ai. And #design-review. And…'),
