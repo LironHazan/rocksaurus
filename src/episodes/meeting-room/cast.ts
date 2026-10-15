@@ -90,7 +90,7 @@ export function createStatitezarus(): OrnithomimusRig {
   rig.torso.add(print);
   const band = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.035, 8, 20), matte(0x7b3fe4)); // purple
   band.rotation.x = Math.PI / 2;
-  band.position.y = -0.53; // down at the wrist, just above the paw
+  band.position.y = -0.49; // on the wrist, just above the paw
   rig.arms.find(a => a.userData.side === -1)!.add(band);
   tufts(rig, 0x3a2414, [
     [0, 0, 0.17],
