@@ -2,7 +2,7 @@ import { CAPTIONS } from './captions';
 import { SOUND } from './sound';
 import { CHANNELS, CUE, DURATION, LINES, SYLLABLES, mouthAt, postsAt, speakerAt } from './timeline';
 
-describe('Was It Done?', () => {
+describe('Everything Reached Prod?', () => {
   it('is a Short: under a minute', () => {
     expect(DURATION).toBeLessThanOrEqual(60);
   });

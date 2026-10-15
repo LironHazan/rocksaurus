@@ -6,10 +6,10 @@ import * as fx from '../../audio/foley';
 import { CUE, DURATION, SYLLABLES } from './timeline';
 
 // Natural sound, no music: birds on the campus; in the meeting room, the room's hush, his keys, each post landing
-// (and the phones it pings), Dchozaurus's yelp and his chair, the bug's scuttle, the door, Ogozaurus's big steps,
+// (and the laptops it pings), Dchozaurus's yelp and his chair, the bug's scuttle, the door, Ogozaurus's big steps,
 // and Lulu's "huh?".
 
-type Kind = 'bird' | 'key' | 'post' | 'buzz' | 'sigh' | 'yelp' | 'chair' | 'scuttle' | 'door' | 'stomp' | 'huh';
+type Kind = 'bird' | 'key' | 'post' | 'ping' | 'sigh' | 'yelp' | 'chair' | 'scuttle' | 'door' | 'stomp' | 'huh';
 
 /** Ogozaurus's steps in (one per walk-cycle step, seconds). */
 const STEP = 0.4;
@@ -19,7 +19,7 @@ function cues(): Cue<Kind>[] {
     ...[0.6, 1.7, 2.9, 3.6].map(at => ({ at, kind: 'bird' as const })),
     ...CUE.posts.flatMap(at => [
       { at, kind: 'post' as const },
-      { at: at + 0.2, kind: 'buzz' as const }, // a tag: their phones
+      { at: at + 0.2, kind: 'ping' as const }, // a tag: "Hack" pings on their laptops
     ]),
     { at: CUE.tagged[0] + 0.3, kind: 'sigh' },
     { at: CUE.bug, kind: 'yelp' },
@@ -38,7 +38,10 @@ const PLAYERS: Record<Kind, Player> = {
   bird: (b, w) => fx.bird(b, w, 0.95),
   key: (b, w) => fx.keyTap(quieter(b, 0.5), w),
   post: chatPop,
-  buzz: fx.vibrate,
+  ping: (b, w) => {
+    boop(b, w, 988, 988, 0.07, 0.04); // a two-note chat ping
+    boop(b, w + 0.09, 1319, 1319, 0.1, 0.04);
+  },
   sigh: (b, w) => fx.sigh(b, w, 1.2),
   yelp: (b, w) => ['C5', 'E5', 'G5'].forEach((n, i) => sing(b, w + i * 0.07, n, 'a', 0.35, 0.12)),
   chair: thump,

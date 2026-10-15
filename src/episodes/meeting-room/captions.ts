@@ -25,7 +25,7 @@ const AT_THE_BOTTOM: Caption[] = [
   line(5),
   sub(CUE.door, LINES[6]!.from - 0.1, 'Ogozaurus walks in. Context: zero ⚽'),
   line(6),
-  sub(CUE.confused[0], CUE.confused[1], 'Lulu: …was WHAT done? 😶'),
+  sub(CUE.confused[0], CUE.confused[1], 'Lulu: …WHAT reached prod? 😶'),
   punch(CUE.confused[0] + 1.6, CUE.confused[1], 'Just another day at the office 🤘'),
 ];
 

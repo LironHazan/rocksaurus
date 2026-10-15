@@ -4,7 +4,7 @@ import { speech, type SpokenLine, type Voice } from '../../audio/babble';
 // in 5 different chat channels and tags the same two dinos every time, Dchozaurus and Igarzarus. In the meeting
 // room (Dchozaurus is remote, on the screen), Igarzarus asks what he asks at every opportunity: when can we port it
 // from Ruby to Elm? Dchozaurus: port the tests and guardrails first, will you? Then he jumps: "I have a bug!"
-// Igarzarus: "You, or the 999 agents?" No: there's a bug ON THE FLOOR. Ogozaurus walks in: "Was it done?" Lulu has
+// Igarzarus: "You, or the 999 agents?" No: there's a bug ON THE FLOOR. Ogozaurus walks in: "Everything reached prod now?" Lulu has
 // no idea what's going on. Times are video seconds. No music: natural sound.
 
 export const DURATION = 56; // then the end card, see ../outro.ts
@@ -36,7 +36,7 @@ export const LINES: readonly SpokenLine<Who>[] = [
   { from: 33.4, to: 35.2, who: 'Dchozaurus', text: 'I HAVE A BUG!!' },
   { from: 35.8, to: 38.4, who: 'Igarzarus', text: 'You, or the 999 agents? 🤖' },
   { from: 38.8, to: 42.2, who: 'Dchozaurus', text: 'There’s a bug ON THE FLOOR!! 🪲' },
-  { from: 45.8, to: 48.2, who: 'Ogozaurus', text: 'Was it done?' },
+  { from: 45.8, to: 49.2, who: 'Ogozaurus', text: 'Everything reached prod now? 🚀' },
 ];
 
 /** Each voice, low to high: Ogozaurus big and low, Dchozaurus warm, Igarzarus dry, Statitezarus quick and eager. */
