@@ -75,7 +75,7 @@ function officeChair(colour: number): THREE.Group {
 
 const font = (size: number, weight = 700) => `${weight} ${size}px ${ROUND}`;
 
-/** His design, shared on the big screen: the title and a little diagram (999 agents and an orchestrator). */
+/** His design, shared on the big screen: the title and a little diagram (a 666-agent army and an orchestrator). */
 function paintDesign(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.fillStyle = '#f7f8fb';
   ctx.fillRect(0, 0, w, h);
@@ -108,7 +108,7 @@ function paintDesign(ctx: CanvasRenderingContext2D, w: number, h: number) {
   node(0.38, 0.42, 'orchestrator', '#4b6bd6');
   node(0.05, 0.72, 'agent', '#5bbf8a');
   node(0.38, 0.72, 'agent', '#5bbf8a');
-  node(0.71, 0.72, 'agent ×999', '#e5383b');
+  node(0.71, 0.72, 'agents ×666', '#e5383b');
 }
 
 /** "Hack", the team chat on Igarzarus's laptop (purple sidebar, our own app): his channels, and the one

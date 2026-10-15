@@ -15,7 +15,7 @@ import { CUE, CUTS, DURATION } from './timeline';
 //   13.4–17    the same two tagged every time: Dchozaurus (on the call) rolls his eyes, Igarzarus's phone buzzes
 //   17–24.6    "So… any thoughts?" Igarzarus: "When can we port it from Ruby to Elm?" (every opportunity)
 //   28.2–35.2  Dchozaurus: "Port the tests and guardrails first, will you?" Then he jumps: "I HAVE A BUG!!"
-//   35.8–43.4  Igarzarus: "You, or the 999 agents?" Dchozaurus, up on his chair: "There's a bug ON THE FLOOR!!"
+//   35.8–43.4  Igarzarus: "You, or the 666 agents army?" Dchozaurus, up on his chair: "There's a bug ON THE FLOOR!!"
 //   43.6–49.6  the door: Ogozaurus walks in. "Everything reached prod now?"
 //   49.6–56    Lulu has no idea
 //   then the channel's end card (outro.ts)
