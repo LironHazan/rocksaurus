@@ -10,7 +10,6 @@ import { armOf, reachArm } from '../../characters/reach';
 import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
 import { LAPTOP_SCREEN } from '../../props/laptop';
-import { textTexture } from '../../world/text-texture';
 import { createDchozaurus, createIgarzarus, createOgozaurus, createStatitezarus, STATITEZARUS_SCALE } from './cast';
 import {
   BUG_PATH,
@@ -54,21 +53,6 @@ function sit(rig: OrnithomimusRig, at: THREE.Vector3, yaw: number, scale: number
   rig.dangleFeet(t * 2);
 }
 
-/** A "?" over Lulu's head. */
-function questionMark(): THREE.Sprite {
-  const map = textTexture(128, 128, (ctx, w, h) => {
-    ctx.fillStyle = '#ffd36b';
-    ctx.strokeStyle = '#1b1b2e';
-    ctx.lineWidth = h * 0.06;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = `800 ${h * 0.8}px Fredoka, sans-serif`;
-    ctx.strokeText('?', w / 2, h * 0.55);
-    ctx.fillText('?', w / 2, h * 0.55);
-  });
-  return new THREE.Sprite(new THREE.SpriteMaterial({ map, transparent: true, toneMapped: false }));
-}
-
 export function createRoomLocation(stage: Stage): Location & { dispose(): void } {
   let posts = 0;
   const room = createMeetingRoom((ctx, w, h) => paintHack(ctx, w, h, posts));
@@ -88,8 +72,7 @@ export function createRoomLocation(stage: Stage): Location & { dispose(): void }
   const lulu = createLulu();
   const hair = addPonytail(lulu);
   addFlannel(lulu);
-  const huh = questionMark();
-  room.scene.add(stati.root, igar.root, ogo.root, lulu.root, huh);
+  room.scene.add(stati.root, igar.root, ogo.root, lulu.root);
   home.scene.add(dcho.root);
   const feet = new Map([stati, igar, dcho, ogo].map(rig => [rig, rig.feet.map(f => f.position.clone())] as const));
   const rest = (rig: typeof stati | typeof ogo, t: number) => restRig(rig, feet.get(rig)!, t);
@@ -174,17 +157,14 @@ export function createRoomLocation(stage: Stage): Location & { dispose(): void }
     lulu.setMouth(mouthAt('Lulu', t));
     lulu.head.rotation.y = -0.25;
     const confused = t >= CUE.confused[0];
-    huh.visible = confused;
     if (confused) {
-      // lost: head tilted, eyes blinking, a little shrug, and a "?"
+      // lost: head tilted, eyes blinking, a little shrug
       lulu.head.rotation.z = 0.3 * ease(seg(t, CUE.confused[0], CUE.confused[0] + 0.5));
       lulu.head.rotation.y = 0.2;
       for (const e of lulu.eyes) e.scale.y = Math.abs(Math.sin(t * 2.2)) > 0.97 ? 0.1 : 1;
       lulu.root.updateMatrixWorld(true);
       for (const side of [-1, 1] as const)
         reachLulu(lulu, side, lulu.body.localToWorld(v.set(side * 1.0, 2.0 + Math.sin(t * 3) * 0.05, 0.9)));
-      huh.position.copy(lulu.head.localToWorld(v.set(0.3, 1.3, 0)));
-      huh.scale.setScalar(0.9 + Math.abs(Math.sin(t * 4)) * 0.1);
     }
   }
 
