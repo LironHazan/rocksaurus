@@ -3,7 +3,7 @@ import { ease, lerp, seg } from '../../engine/math';
 import { createRockerRory } from '../../characters/rocker';
 import { idle, resetPose } from '../../characters/rory';
 import { idleLulu, reachLulu, walkLulu } from '../../characters/lulu';
-import { armOf } from '../../characters/reach';
+import { armOf, releaseArm } from '../../characters/reach';
 import { createDrummer } from '../../band/drummer';
 import { guitarHands } from '../../band/guitarist';
 import { bendAt, playedNotes, vibratoAt, type PlayedNote } from '../../audio/blues-guitar';
@@ -87,6 +87,8 @@ export function createLuluOnDrums() {
     root: drummer.root,
     rig: lulu,
     update(t: number) {
+      // let go of whatever her paws reached for last frame (the "shh"): the drumming poses start from a clean arm
+      for (const arm of lulu.arms) releaseArm(arm);
       drummer.update(t);
       lulu.root.rotation.set(0, 0, 0);
       lulu.root.position.copy(seat);

@@ -21,7 +21,7 @@ import { CUE, DURATION, LINES, barAt, chorusBar } from './timeline';
 //   then the channel's end card (outro.ts)
 
 /** How far the close-ups stand off (scene units), in front of what they frame. */
-const CLOSE = { neck: 4.6, face: 4.6, lulu: 4.8 } as const;
+const CLOSE = { neck: 4.6, face: 4.6, lulu: 6.4 } as const;
 
 const episode: Episode = {
   id: 'blues-rehearsal',
@@ -78,7 +78,7 @@ const episode: Episode = {
         const c = ease(seg(t, chorusBar(1), chorusBar(3)));
         return { cam: [0.6, lerp(4.6, 4.2, c), lerp(12.5, 11.5, c)], look: [0.3, 2.5, -0.3] };
       },
-      lulu: () => inFrontOf(lulu.rig.head, lulu.root, CLOSE.lulu, 0.2, 0.3),
+      lulu: () => inFrontOf(lulu.rig.neck[1]!, lulu.root, CLOSE.lulu, 0.25, 0.4), // her face, paws and sticks on the kit
       low: () => ({ cam: [0.4, 1.3, 8.4], look: [0.2, 3.0, -1] }),
       kit: () => inFrontOf(lulu.rig.head, lulu.root, 7.2, -0.25, -0.4), // her and the whole kit, for the fill
     };
