@@ -4,6 +4,7 @@ import type { Episode } from '../engine/types';
 import bandLive from './band-live';
 import bluesRehearsal from './blues-rehearsal';
 import gypsyJazz from './gypsy-jazz';
+import progGroove from './prog-groove';
 import mondayCoffee from './monday-coffee';
 import meetRory from './meet-rory';
 import meetParis from './meet-paris';
@@ -31,7 +32,7 @@ export interface EpisodeFolder {
 }
 
 export const folders: readonly EpisodeFolder[] = [
-  { id: 'the-band', title: 'The Band', episodes: [bandLive, mondayCoffee, bluesRehearsal, gypsyJazz] },
+  { id: 'the-band', title: 'The Band', episodes: [bandLive, mondayCoffee, bluesRehearsal, gypsyJazz, progGroove] },
   { id: 'meet-the-band', title: 'Meet the Band', episodes: [meetRory, meetParis, meetSteggy, meetTiki, meetLulu] },
   { id: 'tiki', title: 'Tiki Taka', episodes: [tikiGolazo, omliAudition] },
   { id: 'paris', title: 'Paris', episodes: [parisRotHotic] },
