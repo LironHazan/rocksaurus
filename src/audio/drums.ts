@@ -1,4 +1,5 @@
 import { audio } from './context';
+import { softClip } from './curves';
 import { rng } from '../engine/math';
 import { drumHits, hitVelocity, type DrumName, type DrumPart } from './drum-patterns';
 import { atTime } from './schedule';
@@ -175,20 +176,12 @@ export { drumHits } from './drum-patterns';
  */
 function drumBus(bus: AudioNode) {
   const drive = new GainNode(ctx, { gain: 1.4 });
-  const sat = new WaveShaperNode(ctx, { curve: softCurve(1.3), oversample: '2x' });
+  const sat = new WaveShaperNode(ctx, { curve: softClip(1.3), oversample: '2x' });
   const comp = new DynamicsCompressorNode(ctx, { threshold: -20, knee: 6, ratio: 4.5, attack: 0.004, release: 0.12 });
   const presence = new BiquadFilterNode(ctx, { type: 'highshelf', frequency: 4500, gain: 3 });
   const level = new GainNode(ctx, { gain: 0.9 });
   drive.connect(sat).connect(comp).connect(presence).connect(level).connect(bus);
   return drive;
-}
-function softCurve(k: number, n = 1024) {
-  const c = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    const x = (i / (n - 1)) * 2 - 1;
-    c[i] = Math.tanh(k * x) / Math.tanh(k);
-  }
-  return c;
 }
 
 // Smooth kit: no square-wave "metal", no saturation or presence lift. Cymbals are soft filtered noise and the

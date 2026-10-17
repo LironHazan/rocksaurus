@@ -1,4 +1,5 @@
 import { audio } from './context';
+import { softClip } from './curves';
 import { midi } from './piano';
 import { pluck } from './guitar';
 import { atTime } from './schedule';
@@ -19,7 +20,7 @@ function createBassAmp(bus: AudioNode) {
     new BiquadFilterNode(ctx, { type: 'highpass', frequency: 35 }),
     new BiquadFilterNode(ctx, { type: 'lowshelf', frequency: 120, gain: 4 }),
     new GainNode(ctx, { gain: 1.4 }),
-    new WaveShaperNode(ctx, { curve: softClip(1.1), oversample: '4x' }), // just a touch of warmth
+    new WaveShaperNode(ctx, { curve: softClip(1.1, BASS_CURVE_RES), oversample: '4x' }), // just a touch of warmth
     new BiquadFilterNode(ctx, { type: 'lowpass', frequency: 900, Q: 0.5 }), // dark, round tone…
     new BiquadFilterNode(ctx, { type: 'lowpass', frequency: 1400, Q: 0.5 }), // …with a steep roll-off (no zing)
     new GainNode(ctx, { gain: 0.55 }),
@@ -27,14 +28,9 @@ function createBassAmp(bus: AudioNode) {
   chain.reduce((a, b) => (a.connect(b), b)).connect(bus);
   return chain[0]!;
 }
-function softClip(k: number, n = 2048) {
-  const c = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    const x = (i / (n - 1)) * 2 - 1;
-    c[i] = Math.tanh(k * x) / Math.tanh(k);
-  }
-  return c;
-}
+
+/** The bass's clip curve resolution (finer than the default: the bass sits in it longer). */
+const BASS_CURVE_RES = 2048;
 
 /**
  * Finger-style bass line, one note at a time.

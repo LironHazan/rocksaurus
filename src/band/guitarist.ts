@@ -10,6 +10,34 @@ import type { Riff } from '../audio/guitar';
 /** The same notes the guitar sound plays (see audio/guitar). */
 export type GuitarPart = Riff;
 
+/** A note for the paws: when it's picked and how high it is. */
+export interface FrettedNote {
+  start: number;
+  midi: number;
+}
+
+/**
+ * Rory's paws on a part's notes: the picking paw dips on every pick (`pick`: how quickly the dip fades, per second),
+ * the fretting paw slides along the neck with the pitch (higher → further from the head). Returns `play(t, picking)`,
+ * which poses the paws (call after resetPose) and gives back the note sounding at t.
+ */
+export function guitarHands<N extends FrettedNote>(
+  rig: ReturnType<typeof createRockerRory>,
+  notes: readonly N[],
+  pick = 16,
+) {
+  const sorted = [...notes].sort((a, b) => a.start - b.start);
+  const picks = sorted.map(n => n.start);
+  const lowest = Math.min(...sorted.map(n => n.midi));
+  const highest = Math.max(...sorted.map(n => n.midi));
+  return (t: number, picking = true): N | null => {
+    const note = latestStarted(sorted, t);
+    const fret = 1 - ((note?.midi ?? lowest) - lowest) / Math.max(1, highest - lowest);
+    playGuitar(rig, { strum: picking ? recentHit(t, picks, pick) : 0, fret });
+    return note;
+  };
+}
+
 /** Rory on guitar: headbangs on the beat, paws on the strings and neck, strums every note, big pose at the end. */
 export function createGuitarist(
   part: GuitarPart,
@@ -19,12 +47,10 @@ export function createGuitarist(
   const root = new THREE.Group();
   root.add(rory.root);
   const eighth = 60 / part.bpm / 2;
-  const notes = part.notes
-    .map(([at, note]) => ({ start: at * eighth, midi: midi(note) }))
-    .sort((a, b) => a.start - b.start);
-  const strums = notes.map(n => n.start);
-  const lowest = Math.min(...notes.map(n => n.midi));
-  const highest = Math.max(...notes.map(n => n.midi));
+  const hands = guitarHands(
+    rory,
+    part.notes.map(([at, note]) => ({ start: at * eighth, midi: midi(note) })),
+  );
 
   return {
     root,
@@ -36,10 +62,7 @@ export function createGuitarist(
       idle(rory, t, { eyesOpen: act === 'idle' ? 1 : 0.14 });
       rory.head.rotation.z = 0.15;
 
-      // the fretting paw slides with the chord (higher chord → further from the head of the guitar)
-      const chord = latestStarted(notes, t)?.midi ?? lowest;
-      const fret = 1 - (chord - lowest) / Math.max(1, highest - lowest);
-      playGuitar(rory, { strum: act === 'play' ? recentHit(t, strums, 16) : 0, fret });
+      hands(t, act === 'play');
 
       if (act === 'play') {
         rory.head.rotation.x += -0.18 + hit * 0.5;
