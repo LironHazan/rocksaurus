@@ -1,15 +1,14 @@
-import * as THREE from 'three';
 import type { Episode } from '../../engine/types';
-import { cuts, direct, type Shot } from '../../engine/director';
+import { cuts, direct, inFrontOf, type Shot } from '../../engine/director';
 import { ease, lerp, seg } from '../../engine/math';
-import { playBluesGuitar } from '../../audio/blues-guitar';
+import { BLUES_TONE, playLeadGuitar } from '../../audio/lead-guitar';
 import { playDrums } from '../../audio/drums';
 import { playBass } from '../../audio/bass';
 import { withOutro } from '../outro';
 import { CAPTIONS } from './captions';
 import { bass, drums, guitar } from './music';
 import { createLuluOnDrums, createRoryOnBlues, createTikiOnBass } from './players';
-import { createRehearsalRoom } from './sets';
+import { createRehearsalRoom } from '../../world/rehearsal-room';
 import { soundtrack } from './sound';
 import { CUE, DURATION, LINES, barAt, chorusBar, secondBar } from './timeline';
 
@@ -39,14 +38,6 @@ const episode: Episode = {
     const lulu = createLuluOnDrums();
     const tiki = createTikiOnBass();
     room.scene.add(rory.rig.root, lulu.root, tiki.root);
-    const at = (o: THREE.Object3D) => o.getWorldPosition(new THREE.Vector3());
-
-    /** In front of whatever `o` is, the way `root` faces, `dist` back, a little to the side and above. */
-    function inFrontOf(o: THREE.Object3D, root: THREE.Object3D, dist: number, side = 0.4, rise = 0.2): Shot {
-      const p = at(o);
-      const yaw = root.rotation.y + side;
-      return { cam: [p.x + Math.sin(yaw) * dist, p.y + rise, p.z + Math.cos(yaw) * dist], look: [p.x, p.y, p.z] };
-    }
 
     type Framing = 'wide' | 'neck' | 'face' | 'pick' | 'sneak' | 'two' | 'lulu' | 'kit' | 'tikiIn' | 'three' | 'tiki';
     const framingAt = cuts<Framing>([
@@ -130,7 +121,7 @@ const episode: Episode = {
   },
 
   audio(bus, t0) {
-    playBluesGuitar(bus, t0, guitar);
+    playLeadGuitar(bus, t0, guitar, BLUES_TONE);
     playDrums(bus, t0, drums, { smooth: true });
     playBass(bus, t0, bass);
     soundtrack(bus, t0);

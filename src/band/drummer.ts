@@ -10,10 +10,15 @@ import type { Activity, Performer, SongClock } from './types';
 import { sideOf } from '../characters/reach';
 
 /**
- * Her arm's swing (rotation about x, radians): raised between hits, the stick up; on the hit, forward and down, so
- * the stick comes down on the drum in front of her. (A positive swing would take the paw down and back, into her lap.)
+ * Each arm's swing (rotation about x, radians), raised between hits and down on the hit, and how far it turns out
+ * (about y): the left stick comes down on the snare in front of her; the right one stops higher and further out,
+ * on the hi-hat, where her right hand plays (lower, it would come down on her own knee). A positive swing would
+ * take the paw down and back, into her lap.
  */
-const STICK = { up: -0.95, down: -0.15 } as const;
+const STICK = {
+  left: { up: -0.95, down: -0.15, out: 0 },
+  right: { up: -1.3, down: -0.68, out: 0.33 },
+} as const;
 
 const LEFT_HAND: DrumName[] = ['snare', 'tom', 'floorTom', 'click'];
 const RIGHT_HAND: DrumName[] = ['hat', 'ride', 'crash', 'china', 'splash', 'click'];
@@ -55,7 +60,10 @@ export function createDrummer(part: DrumPart, clock: SongClock): Performer & { r
       const strike = recentHit(t, s < 0 ? left : right);
       if (counting) arm.rotation.set(lerp(-2.1, -1.6, strike), 0, -s * 0.5);
       else if (act === 'pose') arm.rotation.set(-2.3, 0, -s * 0.3 + Math.sin(t * 8) * 0.1);
-      else arm.rotation.set(lerp(STICK.up, STICK.down, strike), 0, s * 0.15);
+      else {
+        const swing = s < 0 ? STICK.left : STICK.right;
+        arm.rotation.set(lerp(swing.up, swing.down, strike), swing.out, s * 0.15);
+      }
     }
   }
 

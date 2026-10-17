@@ -1,4 +1,5 @@
-import { speech, type SpokenLine, type Voice } from '../../audio/babble';
+import { speech, type SpokenLine } from '../../audio/babble';
+import { TRIO_VOICES, type Trio } from '../../band/voices';
 import { BAR, BEAT, CHORUS_BARS, FINAL_CHORD, INTRO_BARS, LULU_IN, RING, TIKI_IN } from './music';
 
 // 7 PM, the rehearsal room. Rory's early, eyes closed, playing a slow blues in A by himself. Lulu comes in, sees
@@ -33,19 +34,10 @@ export const chorusBar = (n: number) => barAt(INTRO_BARS + n - 1);
 /** The second chorus's bar `n` (from 1). */
 export const secondBar = (n: number) => barAt(INTRO_BARS + CHORUS_BARS + n - 1);
 
-const CAST = ['Rory', 'Lulu', 'Tiki'] as const;
-export type Who = (typeof CAST)[number];
-
-export const LINES: readonly SpokenLine<Who>[] = [
+export const LINES: readonly SpokenLine<Trio>[] = [
   { from: FINAL_CHORD + 1.0, to: FINAL_CHORD + 2.8, who: 'Rory', text: '…How long have you two been there? 😳' },
   { from: FINAL_CHORD + 3.0, to: FINAL_CHORD + 4.6, who: 'Lulu', text: 'Since bar four 😏🥁' },
   { from: FINAL_CHORD + 4.8, to: DURATION - 0.1, who: 'Tiki', text: 'I caught the turnaround 😎' },
 ];
 
-const VOICES: Record<Who, Voice> = {
-  Rory: { notes: ['G3', 'A3', 'C4', 'D4'], rate: 0.13 },
-  Lulu: { notes: ['F3', 'G3', 'A3', 'C4'], rate: 0.17 },
-  Tiki: { notes: ['C3', 'D3', 'F3', 'G3'], rate: 0.15 },
-};
-
-export const { syllables: SYLLABLES, mouthAt } = speech(LINES, VOICES, 61);
+export const { syllables: SYLLABLES, mouthAt } = speech(LINES, TRIO_VOICES, 61);

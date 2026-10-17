@@ -1,5 +1,5 @@
 import { drumHits } from '../../audio/drum-patterns';
-import { bendAt, playedNotes } from '../../audio/blues-guitar';
+import { bendAt, playedNotes } from '../../audio/lead-guitar';
 import { CAPTIONS } from './captions';
 import { SOUND } from './sound';
 import { BAR, BEAT, CHORUS_BARS, FINAL_CHORD, INTRO_BARS, LULU_IN, TIKI_IN, UNIT, bass, drums, guitar } from './music';

@@ -1,6 +1,6 @@
 import type { DrumPart } from '../../audio/drum-patterns';
 import type { BassPart } from '../../audio/bass';
-import type { BluesChord, BluesNote, BluesPart } from '../../audio/blues-guitar';
+import { phrase, type GuitarChord, type LeadNote, type LeadPart } from '../../audio/lead-guitar';
 
 // A slow blues in A, 12/8 at 70 (dotted-quarter) beats a minute: four beats a bar, each split in three (the
 // shuffle's triplet feel), so the grid is triplet eighths, 12 to the bar. Rory plays four bars alone over A
@@ -49,11 +49,7 @@ const Bb9 = ['A#2', 'D4', 'G#4', 'C5'] as const;
 /** The chorus's changes, one chord a bar. */
 const CHANGES = [A9, D9, A9, A9, D9, D9, A9, A9, E9, D9, A9, E9] as const;
 
-/** A phrase, written bar by bar: `at` counts from the start of bar `bar`. */
-const phrase = (bar: number, notes: readonly BluesNote[]): BluesNote[] =>
-  notes.map(([at, note, len, touch]) => [bar * B + at, note, len, touch] as const);
-
-const intro: BluesNote[] = [
+const intro: LeadNote[] = [
   // bar 1: a pickup up the scale into B bent to C♯, held, the vibrato blooming
   ...phrase(0, [
     [6, 'E4', 1],
@@ -87,7 +83,7 @@ const intro: BluesNote[] = [
   ]),
 ];
 
-const chorus: BluesNote[] = [
+const chorus: LeadNote[] = [
   // 1 (A9)
   ...phrase(4, [
     [6, 'A4', 1],
@@ -179,7 +175,7 @@ const chorus: BluesNote[] = [
 ];
 
 /** The second chorus: Rory, up the neck, hotter (bar numbers are the chorus's own, from 1). */
-const second: BluesNote[] = [
+const second: LeadNote[] = [
   // 1 (A9): E bent up to F♯, held, picked bent and let down: Albert, singing over the new bass
   ...phrase(SECOND, [
     [0, 'E5', 3, { bend: 2, bendTime: 0.22, vib: 30 }],
@@ -292,17 +288,17 @@ const second: BluesNote[] = [
 ];
 
 /** The comping: a soft 9th chord on the one of each bar (and on the 3rd beat, now and then), the ending slide. */
-const comping: BluesChord[] = [
+const comping: GuitarChord[] = [
   [0, A9, 4, 0.7], // the very first sound: an A9, letting the room know the key
   [B * 2 + 9, A9, 3, 0.45],
-  ...CHANGES.map((chord, i): BluesChord => [(INTRO_BARS + i) * B, chord, 3, 0.55]),
+  ...CHANGES.map((chord, i): GuitarChord => [(INTRO_BARS + i) * B, chord, 3, 0.55]),
   [(INTRO_BARS + 11) * B + 6, E9, 5, 0.75], // bar 12: on the V, hanging (Tiki's cue)
   [(SECOND + 11) * B + 6, E9, 5, 0.75], // and at the end of the second
   [(SECOND + CHORUS_BARS) * B - 1, Bb9, 1, 0.9], // the ending: B♭9…
   [(SECOND + CHORUS_BARS) * B, A9, Math.round(RING / UNIT), 1], // …into A9, ringing
 ];
 
-export const guitar: BluesPart = { unit: UNIT, notes: [...intro, ...chorus, ...second], chords: comping };
+export const guitar: LeadPart = { unit: UNIT, notes: [...intro, ...chorus, ...second], chords: comping };
 
 /**
  * Lulu's slow shuffle. The drum grid's steps are a quarter of its beat; at 3/4 of our tempo, a step lasts a

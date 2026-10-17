@@ -61,6 +61,17 @@ export function cuts<W extends string>(list: readonly (readonly [number, W])[]):
 }
 
 const flat = new THREE.Vector3();
+const seen = new THREE.Vector3();
+
+/**
+ * A shot of `o` from in front, the way `root` faces: `dist` back, swung `side` radians round it, `rise` above.
+ * Follows `o` wherever it goes (a paw, a head, a guitar), so a close-up stays on it.
+ */
+export function inFrontOf(o: THREE.Object3D, root: THREE.Object3D, dist: number, side = 0.4, rise = 0.2): Shot {
+  const p = o.getWorldPosition(seen);
+  const yaw = root.rotation.y + side;
+  return { cam: [p.x + Math.sin(yaw) * dist, p.y + rise, p.z + Math.cos(yaw) * dist], look: [p.x, p.y, p.z] };
+}
 
 /**
  * A shot of a screen at `pos` facing `normal`, from beside the character who reads it: `angle` swings the camera off

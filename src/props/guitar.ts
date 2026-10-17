@@ -4,6 +4,15 @@ import { ball } from '../characters/materials';
 /** Four strings or fewer is a bass: thicker strings. */
 const BASS_STRINGS = 4;
 
+/** The lower bout: an ellipsoid of this radius, squashed by `scale` (flat front to back). */
+const BOUT = { r: 0.55, scale: [1, 0.95, 0.28] } as const;
+/** How high the lower bout's front stands at (x, y) on the body: where a knob sits on it. */
+function boutFront(x: number, y: number): number {
+  const [sx, sy, sz] = BOUT.scale;
+  const k = 1 - (x / (BOUT.r * sx)) ** 2 - (y / (BOUT.r * sy)) ** 2;
+  return BOUT.r * sz * Math.sqrt(Math.max(0, k));
+}
+
 /**
  * Chunky toy electric guitar. Origin = center of the body, neck points +y.
  *   neck: neck length (1.5 guitar, ~2.1 bass) · strings: 6 guitar, 4 bass
@@ -15,7 +24,7 @@ export function createGuitar({ color = 0xe63946, neck: neckLen = 1.5, strings = 
   const metal = new THREE.MeshStandardMaterial({ color: 0xd8d8e0, roughness: 0.25, metalness: 1 });
 
   const g = new THREE.Group();
-  g.add(ball(0.55, gloss, [0, 0, 0], [1, 0.95, 0.28])); // lower bout
+  g.add(ball(BOUT.r, gloss, [0, 0, 0], [...BOUT.scale])); // lower bout
   g.add(ball(0.42, gloss, [0, 0.52, 0], [1, 0.9, 0.28])); // upper bout
   g.add(ball(0.3, white, [0.12, -0.05, 0.1], [1, 0.8, 0.15])); // pickguard
   for (const y of [-0.15, 0.2]) {
@@ -27,19 +36,26 @@ export function createGuitar({ color = 0xe63946, neck: neckLen = 1.5, strings = 
     p.position.set(0, y, 0.16);
     g.add(p);
   }
-  for (let i = 0; i < 2; i++) g.add(ball(0.05, metal, [0.3, -0.3 - i * 0.14, 0.15], [1, 1, 0.6], 12)); // knobs
+  // knobs, sunk into the body's curve (not floating off it)
+  for (const [x, y] of [
+    [0.3, -0.2],
+    [0.24, -0.34],
+  ] as const)
+    g.add(ball(0.05, metal, [x, y, boutFront(x, y)], [1, 1, 0.6], 12));
 
   const nutY = 0.65 + neckLen - 0.02;
   const neck = new THREE.Mesh(new THREE.BoxGeometry(0.16, neckLen, 0.08), wood);
   neck.position.set(0, 0.65 + neckLen / 2, 0.04);
   g.add(neck);
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.36, 0.08), gloss);
+  const headW = 0.26;
+  const head = new THREE.Mesh(new THREE.BoxGeometry(headW, 0.36, 0.08), gloss);
   head.position.set(0, nutY + 0.17, 0.04);
   g.add(head);
+  // tuners: buttons on the headstock's face, in two rows inside its edges
   const perSide = Math.ceil(strings / 2);
   for (const s of [-1, 1])
     for (let i = 0; i < perSide; i++)
-      g.add(ball(0.035, metal, [s * 0.17, nutY + 0.05 + i * (0.27 / perSide), 0.06], [1, 1, 1], 10)); // tuners
+      g.add(ball(0.03, metal, [s * (headW / 2 - 0.045), nutY + 0.07 + i * (0.25 / perSide), 0.085], [1, 1, 0.6], 10));
 
   // bridge, nut and six strings running from the bridge up the neck to the headstock
   const black = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 });
