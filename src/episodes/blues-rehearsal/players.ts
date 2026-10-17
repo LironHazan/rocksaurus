@@ -5,11 +5,12 @@ import { idle, resetPose } from '../../characters/rory';
 import { idleLulu, reachLulu, walkLulu } from '../../characters/lulu';
 import { armOf, releaseArm } from '../../characters/reach';
 import { createDrummer } from '../../band/drummer';
+import { createBassist } from '../../band/bassist';
 import { guitarHands } from '../../band/guitarist';
 import { bendAt, playedNotes, vibratoAt, type PlayedNote } from '../../audio/blues-guitar';
-import { BEAT, FINAL_CHORD, drums, guitar } from './music';
+import { BEAT, FINAL_CHORD, bass, drums, guitar } from './music';
 import { CUE, mouthAt } from './timeline';
-import { KIT_SPOT, LULU_FROM, RORY_SPOT } from './sets';
+import { KIT_SPOT, LULU_FROM, RORY_SPOT, TIKI_PATH, TIKI_SPOT } from './sets';
 
 // The two of them, playing along to the notes they play (music.ts), so every pick, bend and shake lands on the sound.
 
@@ -111,6 +112,51 @@ export function createLuluOnDrums() {
       lulu.root.updateMatrixWorld(true);
       reachLulu(lulu, 1, lulu.face.localToWorld(v.set(0, -0.25, 0.85)));
       lulu.setMouth(0);
+    },
+  };
+}
+
+/** Tiki Taka's big, quiet steps (seconds a step). */
+const TIKI_STEP = 0.5;
+
+/** Where along his way in he is at k (0..1): two straight legs, the same pace all the way. */
+function along(path: readonly THREE.Vector3[], k: number, out: THREE.Vector3): THREE.Vector3 {
+  const legs = path.slice(1).map((p, i) => p.distanceTo(path[i]!));
+  let d = k * legs.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < legs.length; i++) {
+    if (d <= legs[i]! || i === legs.length - 1)
+      return out.lerpVectors(path[i]!, path[i + 1]!, Math.min(1, d / legs[i]!));
+    d -= legs[i]!;
+  }
+  return out.copy(path.at(-1)!);
+}
+
+/** Tiki Taka, bass on: in quietly along the back wall during the first chorus, then walking the bass under the
+ * second. */
+export function createTikiOnBass() {
+  const playing = (t: number) => t >= CUE.tikiIn - BEAT && t < FINAL_CHORD + BEAT;
+  const bassist = createBassist(bass, { beat: BEAT, activity: t => (playing(t) ? 'play' : 'idle') });
+  const tiki = bassist.rig;
+  const ahead = new THREE.Vector3();
+  return {
+    root: bassist.root,
+    rig: tiki,
+    update(t: number) {
+      bassist.update(t);
+      bassist.root.visible = t >= CUE.tiki[0];
+      tiki.setMouth(Math.max(0, mouthAt('Tiki', t)));
+      const k = ease(seg(t, CUE.tiki[0], CUE.tiki[1]));
+      along(TIKI_PATH, k, bassist.root.position);
+      if (k >= 1) {
+        bassist.root.rotation.y = TIKI_SPOT.yaw;
+        return;
+      }
+      // facing the way he walks, big soft steps
+      along(TIKI_PATH, Math.min(1, k + 0.02), ahead);
+      bassist.root.rotation.y = Math.atan2(ahead.x - bassist.root.position.x, ahead.z - bassist.root.position.z);
+      const p = (Math.PI * (t - CUE.tiki[0])) / TIKI_STEP;
+      bassist.root.position.y = Math.abs(Math.sin(p)) * 0.1;
+      for (const f of tiki.feet) f.position.y = Math.max(0, Math.sin(p + (f.userData.side > 0 ? 0 : Math.PI))) * 0.3;
     },
   };
 }

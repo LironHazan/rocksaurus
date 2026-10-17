@@ -2,18 +2,21 @@ import { drumHits } from '../../audio/drum-patterns';
 import { bendAt, playedNotes } from '../../audio/blues-guitar';
 import { CAPTIONS } from './captions';
 import { SOUND } from './sound';
-import { BAR, BEAT, CHORUS_BARS, FINAL_CHORD, INTRO_BARS, LULU_IN, UNIT, drums, guitar } from './music';
+import { BAR, BEAT, CHORUS_BARS, FINAL_CHORD, INTRO_BARS, LULU_IN, TIKI_IN, UNIT, bass, drums, guitar } from './music';
+import { bassTimes } from '../../audio/bass';
 import { CUE, DURATION, LINES } from './timeline';
 
+/** YouTube Shorts can run up to three minutes (seconds). */
+const SHORTS_MAX_S = 180;
 /** Triplet eighths to a bar of 12/8. */
 const STEPS = 12;
 /** How far a time is from the nearest triplet eighth (in triplet eighths). */
 const offGrid = (t: number) => Math.abs(t / UNIT - Math.round(t / UNIT));
 
 describe('Slow Blues in A', () => {
-  it('is a Short: under a minute, ending on the ringing chord and two lines', () => {
-    expect(DURATION).toBeLessThanOrEqual(60);
-    expect(FINAL_CHORD).toBeCloseTo((INTRO_BARS + CHORUS_BARS) * BAR);
+  it('is a Short (up to three minutes now), ending on the ringing chord and the lines', () => {
+    expect(DURATION).toBeLessThanOrEqual(SHORTS_MAX_S);
+    expect(FINAL_CHORD).toBeCloseTo((INTRO_BARS + 2 * CHORUS_BARS) * BAR);
     expect(LINES[0]!.from).toBeGreaterThan(FINAL_CHORD);
   });
 
@@ -65,5 +68,19 @@ describe('Slow Blues in A', () => {
 
   it('the room is heard the whole way through', () => {
     for (let t = 0; t < DURATION; t += 0.5) expect(SOUND.beds.some(b => t >= b.from && t < b.to)).toBe(true);
+  });
+});
+
+describe('Tiki Taka on bass', () => {
+  it('comes in on his pickup, on the triplet grid, and plays to the last chord', () => {
+    const times = bassTimes(bass);
+    expect(Math.min(...times)).toBeCloseTo(TIKI_IN);
+    for (const t of times) expect(offGrid(t)).toBeCloseTo(0, 6);
+    expect(Math.max(...times)).toBeCloseTo(FINAL_CHORD);
+  });
+
+  it('walks in before he plays', () => {
+    expect(CUE.tiki[1]).toBeLessThan(CUE.tikiIn);
+    expect(CUE.tiki[0]).toBeGreaterThan(CUE.in);
   });
 });

@@ -10,6 +10,10 @@ export const RORY_SPOT = { at: new THREE.Vector3(-1.7, 0, 0.8), yaw: 0.3 } as co
 export const KIT_SPOT = { at: new THREE.Vector3(2.4, 0, -1.2), yaw: -0.45 } as const;
 /** Where Lulu comes in from (the front right, out of shot at first), on her way to the kit. */
 export const LULU_FROM = new THREE.Vector3(7.0, 0, 3.8);
+/** Where Tiki Taka plays (between them, a step back, turned to Rory), and his way in: from the back left, along
+ * the back wall behind the amp, then forward to his spot. */
+export const TIKI_SPOT = { at: new THREE.Vector3(0.5, 0, -1.4), yaw: -0.2 } as const;
+export const TIKI_PATH = [new THREE.Vector3(-8.5, 0, -2.8), new THREE.Vector3(-1.0, 0, -2.9), TIKI_SPOT.at] as const;
 
 /** The room's foam: a grid of tiles on the back wall, `cols` × `rows`, each this big. */
 const FOAM = { cols: 7, rows: 4, size: 1.3, gap: 0.12 } as const;
