@@ -7,10 +7,11 @@ import { armOf, releaseArm } from '../../characters/reach';
 import { createDrummer } from '../../band/drummer';
 import { createBassist } from '../../band/bassist';
 import { guitarHands } from '../../band/guitarist';
-import { bendAt, playedNotes, vibratoAt, type PlayedNote } from '../../audio/blues-guitar';
+import { BLUES_TONE, bendAt, playedNotes, vibratoAt, type PlayedNote } from '../../audio/lead-guitar';
 import { BEAT, FINAL_CHORD, bass, drums, guitar } from './music';
 import { CUE, mouthAt } from './timeline';
-import { KIT_SPOT, LULU_FROM, RORY_SPOT, TIKI_PATH, TIKI_SPOT } from './sets';
+import { KIT_SPOT, RORY_SPOT, TIKI_SPOT } from '../../world/rehearsal-room';
+import { LULU_FROM, TIKI_PATH } from './sets';
 
 // The two of them, playing along to the notes they play (music.ts), so every pick, bend and shake lands on the sound.
 
@@ -45,7 +46,7 @@ export function createRoryOnBlues() {
   function feel(note: PlayedNote | null, t: number) {
     const sounding = note && t <= note.end + HOLD_S ? note : null;
     const bend = sounding ? bendAt(sounding, t) : 0;
-    const shake = sounding ? vibratoAt(sounding, t) : 0;
+    const shake = sounding ? vibratoAt(sounding, t, BLUES_TONE) : 0;
     neckPaw.rotation.x -= bend * BEND_PUSH;
     neckPaw.rotation.z += shake * VIB_PAW;
     rory.head.rotation.x = -0.12 - bend * BEND_HEAD;

@@ -33,13 +33,15 @@ export function createGuitar({ color = 0xe63946, neck: neckLen = 1.5, strings = 
   const neck = new THREE.Mesh(new THREE.BoxGeometry(0.16, neckLen, 0.08), wood);
   neck.position.set(0, 0.65 + neckLen / 2, 0.04);
   g.add(neck);
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.36, 0.08), gloss);
+  const headW = 0.26;
+  const head = new THREE.Mesh(new THREE.BoxGeometry(headW, 0.36, 0.08), gloss);
   head.position.set(0, nutY + 0.17, 0.04);
   g.add(head);
+  // tuners: buttons on the headstock's face, in two rows inside its edges
   const perSide = Math.ceil(strings / 2);
   for (const s of [-1, 1])
     for (let i = 0; i < perSide; i++)
-      g.add(ball(0.035, metal, [s * 0.17, nutY + 0.05 + i * (0.27 / perSide), 0.06], [1, 1, 1], 10)); // tuners
+      g.add(ball(0.03, metal, [s * (headW / 2 - 0.045), nutY + 0.07 + i * (0.25 / perSide), 0.085], [1, 1, 0.6], 10));
 
   // bridge, nut and six strings running from the bridge up the neck to the headstock
   const black = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 });
