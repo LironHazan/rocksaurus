@@ -9,6 +9,12 @@ import { beatPulse, recentHit } from './timing';
 import type { Performer, SongClock } from './types';
 import { sideOf } from '../characters/reach';
 
+/**
+ * Her arm's swing (rotation about x, radians): raised between hits, the stick up; on the hit, forward and down, so
+ * the stick comes down on the drum in front of her. (A positive swing would take the paw down and back, into her lap.)
+ */
+const STICK = { up: -0.95, down: -0.15 } as const;
+
 const LEFT_HAND: DrumName[] = ['snare', 'tom', 'floorTom', 'click'];
 const RIGHT_HAND: DrumName[] = ['hat', 'ride', 'crash', 'china', 'splash', 'click'];
 
@@ -59,7 +65,7 @@ export function createDrummer(part: DrumPart, clock: SongClock): Performer & { r
         if (counting)
           arm.rotation.set(lerp(-2.1, -1.6, strike), 0, -s * 0.5); // sticks up, clicking
         else if (act === 'pose') arm.rotation.set(-2.3, 0, -s * 0.3 + Math.sin(t * 8) * 0.1);
-        else arm.rotation.set(lerp(-0.6, 0.35, strike), 0, s * 0.15);
+        else arm.rotation.set(lerp(STICK.up, STICK.down, strike), 0, s * 0.15);
       }
       lulu.feet.find(f => f.userData.side > 0)!.position.y = (1 - recentHit(t, kicks, 12)) * 0.12;
       lulu.setMouth(act === 'pose' ? 1 : act === 'play' ? recentHit(t, snares, 8) * 0.6 : 0);
