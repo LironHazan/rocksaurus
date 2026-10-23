@@ -15,21 +15,21 @@ import { ASKERS, CUE, CUTS, DURATION, LINES, SYLLABLES } from './timeline';
 
 // Beat sheet (video seconds; timeline.ts has the cues and lines)
 //   0–3.4      Lulu at her desk, typing to her agent
-//   3.4–25     three dinos, one after another, the same question: "what's an AI agent?" By the third, a sign
+//   3.4–25     Rorit, Silvi and Omli, one after another, the same question: "what's an AI agent?" By the third, a sign
 //   25–30      finally: focus mode
 //   30–36      meanwhile, Yashinozarus: npm audit, critical, "Hm. Critical. Again"
 //   36–40.6    his message lands on Lulu's screen: upgrade Node.js, no fixes for deprecated versions
 //   40.6–46.4  she's on the latest since three weeks ago: one patch, 1,284 tests green, all environments patched
 //   46.4–50    her reply on his screen. "Impressive"
-//   50–56      Statitezarus is back: "Sorry, one more: what's an AGENT?" Her head goes down on the desk
+//   50–56      Rorit is back: "Sorry, one more: what's an AGENT?" Her head goes down on the desk
 //   then the channel's end card (outro.ts)
 
 /** The screen shows its last lines: as many as fit. */
 const SCREEN_LINES = 8;
 /** How far the close-ups stand off. */
-const CLOSE = { lulu: 5.6, asker: 5.0, ogo: 7.0, yashi: 4.4 } as const;
-/** The sign's place on her monitor: up on the bezel's top-left corner, in the monitor's space. */
-const SIGN_ON_MONITOR = [-0.75, 0.32, 0.04] as const;
+const CLOSE = { lulu: 5.6, asker: 5.0, big: 7.0, yashi: 4.4 } as const;
+/** The sign's place on her monitor: taped to its back, facing whoever comes to her desk (in the monitor's space). */
+const SIGN_ON_MONITOR = [0, -0.5, -0.13] as const;
 
 const episode: Episode = {
   id: 'node-cve',
@@ -47,6 +47,7 @@ const episode: Episode = {
     corner.scene.add(yashi.rig.root);
     const sign = createSign();
     sign.position.set(...SIGN_ON_MONITOR);
+    sign.rotation.y = Math.PI; // facing out the back
     office.monitor.add(sign);
     const screenNormal = new THREE.Vector3();
     const screenAt = (m: THREE.Object3D) => m.getWorldPosition(new THREE.Vector3());
@@ -84,12 +85,13 @@ const episode: Episode = {
       asker: t => {
         const a = askers.at(t) ?? ASKERS[0];
         const rig = askers.rigs[a.who];
-        return inFrontOf(rig.head, rig.root, a.who === 'Ogozaurus' ? CLOSE.ogo : CLOSE.asker, 0.4, 0.1); // from her far side, clear of her head
+        return inFrontOf(rig.head, rig.root, a.who === 'Omli' ? CLOSE.big : CLOSE.asker, 0.4, 0.1); // from her far side, clear of her head
       },
       lulu: () => inFrontOf(lulu.rig.head, lulu.rig.root, CLOSE.lulu, -0.5, -0.2), // from her left: her monitor is on her right
       // close and from the side: her head is right in front of it
       screen: () => overShoulder(screenAt(office.monitor), normalOf(office.monitor), 1.85, -0.45, -0.55),
-      sign: () => overShoulder(sign.getWorldPosition(new THREE.Vector3()), normalOf(office.monitor), 1.6, 0, 0.1),
+      sign: () =>
+        overShoulder(sign.getWorldPosition(new THREE.Vector3()), normalOf(office.monitor).negate(), 1.8, 0, 0.1),
     };
 
     type YashiShot = 'desk' | 'screen' | 'face';

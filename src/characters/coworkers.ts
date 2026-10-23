@@ -1,12 +1,14 @@
 import * as THREE from 'three';
 import { createOrnithomimus, RORIT_COLORS, type OrnithomimusRig } from './ornithomimus';
 import { createTyrannosaurus, TIKI_COLORS } from './tyrannosaurus';
+import { createCeratops } from './ceratops';
 import { createStegosaurus, STEGGY_COLORS, type StegosaurusRig } from './stegosaurus';
 import { ball } from './materials';
 import { addGlasses } from '../props/glasses';
 import { addJersey, TREX_BODY } from '../props/soccer';
 import { addBandTee } from '../props/band-tee';
 import { addShortHair } from '../props/short-hair';
+import { addPonytail } from '../props/ponytail';
 import { ROUND } from '../world/interior';
 import { textTexture } from '../world/text-texture';
 import type { Voice } from '../audio/babble';
@@ -158,6 +160,24 @@ export function createOgozaurus() {
   return rig;
 }
 
+/** Rorit is small (but very fit). */
+export const RORIT_SCALE = 0.85;
+/** Rorit's work look: a coral blazer over her mint (no gym kit today), her blond ponytail. */
+export function createRorit() {
+  const rig = createOrnithomimus(undefined, { athleisure: false });
+  rig.root.scale.setScalar(RORIT_SCALE);
+  rig.clothe(new THREE.MeshPhysicalMaterial({ color: 0xff7a6b, roughness: 0.6, sheen: 0.5 }), 0.12, 0.72);
+  const hair = addPonytail(rig, { color: 0xf2d36b, scrunchie: 0x4ee6ff, seed: 3 });
+  return { rig, ponytail: hair.ponytail };
+}
+
+/** Silvi, Fun & Wellbeing: her pink striped shirt and lanyard, her straight black ponytail. */
+export function createSilvi() {
+  const rig = createCeratops();
+  const hair = addPonytail(rig, { color: 0x15121a, scrunchie: 0xff6fa8, seed: 11 });
+  return { rig, ponytail: hair.ponytail };
+}
+
 /** His tee: black, the band's name in white across it (plain lettering, not the band's logo). */
 const METAL_TEE = 0x141416;
 
@@ -184,12 +204,16 @@ export function createYashinozarus(): StegosaurusRig {
 }
 
 /** How they sound when they talk (babble): Dchozaurus warm, Igarzarus dry, Statitezarus quick and eager, Ogozaurus
- * (a big T-Rex, delighted) the highest of them all, Yashinozarus low and unhurried; and Lulu. */
+ * (a big T-Rex, delighted) the highest of them all, Yashinozarus low and unhurried, Rorit bright and quick, Silvi
+ * sunny, Omli deep; and Lulu. */
 export const OFFICE_VOICES = {
   Ogozaurus: { notes: ['C4', 'E4', 'G4', 'A4'], rate: 0.14 },
   Dchozaurus: { notes: ['C3', 'D3', 'F3', 'G3'], rate: 0.14 },
   Igarzarus: { notes: ['D3', 'E3', 'G3', 'A3'], rate: 0.15 },
   Statitezarus: { notes: ['G3', 'A3', 'C4', 'D4'], rate: 0.12 },
   Yashinozarus: { notes: ['A2', 'C3', 'D3', 'E3'], rate: 0.17 },
+  Rorit: { notes: ['F4', 'G4', 'A4', 'C5'], rate: 0.12 },
+  Silvi: { notes: ['C4', 'D4', 'E4', 'G4'], rate: 0.15 },
+  Omli: { notes: ['F2', 'G2', 'A2', 'C3'], rate: 0.16 },
   Lulu: { notes: ['F3', 'G3', 'A3', 'C4'], rate: 0.17 },
 } as const satisfies Record<string, Voice>;

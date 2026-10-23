@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { createLulu, resetLulu, walkLulu } from '../../characters/lulu';
-import { createOrnithomimus } from '../../characters/ornithomimus';
 import { createAmazaurus } from '../../characters/amazaurus';
 import type { StegosaurusRig } from '../../characters/stegosaurus';
 import { ball, matte, plush } from '../../characters/materials';
@@ -162,12 +161,5 @@ export function createOfficeLulu() {
 }
 export type OfficeLulu = ReturnType<typeof createOfficeLulu>;
 
-/** Rorit's work look: a coral blazer over her mint (no gym kit today), her blond ponytail. */
-export const RORIT_SCALE = 0.85;
-export function createRorit() {
-  const rig = createOrnithomimus(undefined, { athleisure: false });
-  rig.root.scale.setScalar(RORIT_SCALE);
-  rig.clothe(new THREE.MeshPhysicalMaterial({ color: 0xff7a6b, roughness: 0.6, sheen: 0.5 }), 0.12, 0.72);
-  const hair = addPonytail(rig, { color: 0xf2d36b, scrunchie: 0x4ee6ff, seed: 3 });
-  return { rig, ponytail: hair.ponytail };
-}
+// Rorit's work look is shared now (she's at the office in more than one Short)
+export { createRorit, RORIT_SCALE } from '../../characters/coworkers';

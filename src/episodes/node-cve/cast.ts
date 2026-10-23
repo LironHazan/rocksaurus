@@ -2,13 +2,8 @@ import * as THREE from 'three';
 import { ease, lerp, seg } from '../../engine/math';
 import { cuts } from '../../engine/director';
 import { createLulu, idleLulu, reachLulu, resetLulu } from '../../characters/lulu';
-import {
-  STATITEZARUS_SCALE,
-  createIgarzarus,
-  createOgozaurus,
-  createStatitezarus,
-  createYashinozarus,
-} from '../../characters/coworkers';
+import { createRorit, createSilvi, createYashinozarus } from '../../characters/coworkers';
+import { createOmli } from '../../characters/omli';
 import { restRig } from '../../characters/rest';
 import { armOf, reachArm } from '../../characters/reach';
 import type { CharacterRig } from '../../characters/types';
@@ -23,8 +18,9 @@ import { ASKERS, CUE, LINES, mouthAt } from './timeline';
 
 // Who does what, as a function of t: Lulu at her desk, the askers walking up and away, Yashinozarus at his.
 
-/** Where the askers come in from (off to her right), and where they stop by her desk. */
-const ENTRY = new THREE.Vector3(9, 0, 3.2);
+/** Where the askers come in from (the hallway: front right, past the open side of the room, never through a wall),
+ * and where they stop by her desk. */
+const ENTRY = new THREE.Vector3(5.6, 0, 10);
 const BY_DESK = new THREE.Vector3(3.4, 0, 0.7);
 /** A walking step (seconds), its bob and how high a foot lifts. */
 const STEP = 0.42;
@@ -112,13 +108,12 @@ function walk(rig: CharacterRig, from: THREE.Vector3, to: THREE.Vector3, t0: num
   for (const f of rig.feet) f.position.y += Math.max(0, Math.sin(p + (f.userData.side > 0 ? 0 : Math.PI))) * LIFT;
 }
 
-/** The three askers: each walks up, asks, waits for the answer, and walks off. */
+/** The three askers (Rorit, Silvi, Omli): each walks up, asks, waits for the answer, and walks off. */
 export function createAskers() {
-  const rigs = {
-    Statitezarus: createStatitezarus(),
-    Igarzarus: createIgarzarus(),
-    Ogozaurus: createOgozaurus(),
-  };
+  const rorit = createRorit();
+  const silvi = createSilvi();
+  const rigs = { Rorit: rorit.rig, Silvi: silvi.rig, Omli: createOmli() };
+  const ponytails = [rorit.ponytail, silvi.ponytail];
   const feet = new Map(Object.values(rigs).map(r => [r, r.feet.map(f => f.position.clone())]));
   /** Facing Lulu from beside her desk. */
   const toLulu = Math.atan2(DESK_SPOT.x - BY_DESK.x, DESK_SPOT.z - BY_DESK.z);
@@ -128,11 +123,11 @@ export function createAskers() {
     at: (t: number) => ASKERS.find(a => t >= a.walk[1] && t < a.leave[0]) ?? null,
     update(t: number) {
       for (const rig of Object.values(rigs)) rig.root.visible = false;
+      for (const p of ponytails) p.rotation.set(0.1, 0, Math.sin(t * 2) * 0.05);
       for (const a of ASKERS) {
         if (t < a.walk[0] || t >= a.leave[1]) continue;
         const rig = rigs[a.who];
         restRig(rig, feet.get(rig)!, t);
-        if (rig === rigs.Statitezarus) rig.root.scale.setScalar(STATITEZARUS_SCALE);
         rig.root.visible = true;
         rig.root.rotation.y = toLulu;
         if (t < a.leave[0]) walk(rig, ENTRY, BY_DESK, a.walk[0], a.walk[1], t);
