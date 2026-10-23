@@ -1,14 +1,19 @@
 import * as THREE from 'three';
-import { createOrnithomimus, RORIT_COLORS, type OrnithomimusRig } from '../../characters/ornithomimus';
-import { createTyrannosaurus, TIKI_COLORS } from '../../characters/tyrannosaurus';
-import { ball } from '../../characters/materials';
-import { addGlasses } from '../../props/glasses';
-import { addJersey, TREX_BODY } from '../../props/soccer';
-import { ROUND } from '../../world/interior';
-import { textTexture } from '../../world/text-texture';
+import { createOrnithomimus, RORIT_COLORS, type OrnithomimusRig } from './ornithomimus';
+import { createTyrannosaurus, TIKI_COLORS } from './tyrannosaurus';
+import { createStegosaurus, STEGGY_COLORS, type StegosaurusRig } from './stegosaurus';
+import { ball } from './materials';
+import { addGlasses } from '../props/glasses';
+import { addJersey, TREX_BODY } from '../props/soccer';
+import { addBandTee } from '../props/band-tee';
+import { addShortHair } from '../props/short-hair';
+import { ROUND } from '../world/interior';
+import { textTexture } from '../world/text-texture';
+import type { Voice } from '../audio/babble';
 
-// The meeting: Statitezarus, Igarzarus and Dchozaurus share the slim Ornithomimus build (like Taluzarus in Prod
-// Certs); Ogozaurus is a big T-Rex, Tiki Taka's build. Clothes are plain shapes and our own prints: no real logos.
+// Lulu's coworkers at Papo Pako Shapeworks. Statitezarus, Igarzarus and Dchozaurus share the slim Ornithomimus build
+// (like Taluzarus in Prod Certs); Ogozaurus is a big T-Rex, Tiki Taka's build; Yashinozarus, the architect, a
+// Stegosaurus. Clothes are plain shapes and our own prints: no real logos.
 
 /** Ogozaurus is slimmer than Tiki Taka: his width and depth, scaled. */
 const OGO_SLIM = 0.78;
@@ -152,3 +157,39 @@ export function createOgozaurus() {
   });
   return rig;
 }
+
+/** His tee: black, the band's name in white across it (plain lettering, not the band's logo). */
+const METAL_TEE = 0x141416;
+
+/**
+ * Yashinozarus: the distinguished architect, master of all trades, always the smartest dino in the room. A slate-green
+ * Stegosaurus with steel-grey plates, grey hair and a grey moustache, square glasses, and a Metallica tee.
+ */
+export function createYashinozarus(): StegosaurusRig {
+  const rig = createStegosaurus({
+    ...STEGGY_COLORS,
+    body: 0x7fa38f,
+    belly: 0xe4eee6,
+    plates: 0x8a929c,
+    plateTips: 0xc4cad2,
+    cheeks: 0xd99a9a,
+    bowTie: METAL_TEE, // under the tee's collar: gone
+    eyes: 0x3a5a8a,
+    mustache: 0xb9bcc2,
+  });
+  addBandTee(rig, { text: 'METALLICA', color: METAL_TEE, ink: '#e8e8ea', font: "'Cinzel'" });
+  addShortHair(rig, { color: 0xb4b7bd, length: 0.34, seed: 21 });
+  addGlasses(rig.head, { eyeX: 0.22, eyeY: 0.1, eyeZ: 0.52, rim: 0.15, color: 0x1b1b22, frames: 'square' });
+  return rig;
+}
+
+/** How they sound when they talk (babble): Dchozaurus warm, Igarzarus dry, Statitezarus quick and eager, Ogozaurus
+ * (a big T-Rex, delighted) the highest of them all, Yashinozarus low and unhurried; and Lulu. */
+export const OFFICE_VOICES = {
+  Ogozaurus: { notes: ['C4', 'E4', 'G4', 'A4'], rate: 0.14 },
+  Dchozaurus: { notes: ['C3', 'D3', 'F3', 'G3'], rate: 0.14 },
+  Igarzarus: { notes: ['D3', 'E3', 'G3', 'A3'], rate: 0.15 },
+  Statitezarus: { notes: ['G3', 'A3', 'C4', 'D4'], rate: 0.12 },
+  Yashinozarus: { notes: ['A2', 'C3', 'D3', 'E3'], rate: 0.17 },
+  Lulu: { notes: ['F3', 'G3', 'A3', 'C4'], rate: 0.17 },
+} as const satisfies Record<string, Voice>;

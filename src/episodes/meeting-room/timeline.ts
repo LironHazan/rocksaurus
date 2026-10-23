@@ -1,4 +1,5 @@
-import { speech, type SpokenLine, type Voice } from '../../audio/babble';
+import { speech, type SpokenLine } from '../../audio/babble';
+import { OFFICE_VOICES } from '../../characters/coworkers';
 
 // Another day at Papo Pako Shapeworks. Statitezarus, from the agentic AI team, wants his design reviewed: he posts it
 // in 5 different chat channels and tags the same two dinos every time, Dchozaurus and Igarzarus. In the meeting
@@ -39,17 +40,7 @@ export const LINES: readonly SpokenLine<Who>[] = [
   { from: 45.8, to: 49.2, who: 'Ogozaurus', text: 'Everything reached prod now? 🚀' },
 ];
 
-/** Each voice: Dchozaurus warm, Igarzarus dry, Statitezarus quick and eager, and Ogozaurus, back from the offsite,
- * the highest of them all (a big T-Rex, delighted). */
-const VOICES: Record<Who, Voice> = {
-  Ogozaurus: { notes: ['C4', 'E4', 'G4', 'A4'], rate: 0.14 },
-  Dchozaurus: { notes: ['C3', 'D3', 'F3', 'G3'], rate: 0.14 },
-  Igarzarus: { notes: ['D3', 'E3', 'G3', 'A3'], rate: 0.15 },
-  Statitezarus: { notes: ['G3', 'A3', 'C4', 'D4'], rate: 0.12 },
-  Lulu: { notes: ['F3', 'G3', 'A3', 'C4'], rate: 0.17 },
-};
-
-export const { syllables: SYLLABLES, mouthAt, speakerAt } = speech(LINES, VOICES, 57);
+export const { syllables: SYLLABLES, mouthAt, speakerAt } = speech(LINES, OFFICE_VOICES, 57);
 
 /** Where we are: the campus, then the meeting room. */
 export type Where = 'campus' | 'room';

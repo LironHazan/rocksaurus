@@ -10,7 +10,13 @@ import { armOf, reachArm } from '../../characters/reach';
 import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
 import { LAPTOP_SCREEN } from '../../props/laptop';
-import { createDchozaurus, createIgarzarus, createOgozaurus, createStatitezarus, STATITEZARUS_SCALE } from './cast';
+import {
+  createDchozaurus,
+  createIgarzarus,
+  createOgozaurus,
+  createStatitezarus,
+  STATITEZARUS_SCALE,
+} from '../../characters/coworkers';
 import {
   BUG_PATH,
   CALL,
