@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ease, lerp, seg } from '../../engine/math';
 import { cuts } from '../../engine/director';
-import { createLulu, idleLulu, reachLulu, resetLulu } from '../../characters/lulu';
+import { createLulu, idleLulu, reachLulu, resetLulu, walkLulu } from '../../characters/lulu';
 import { createRorit, createSilvi, createYashinozarus } from '../../characters/coworkers';
 import { createOmli } from '../../characters/omli';
 import { restRig } from '../../characters/rest';
@@ -26,6 +26,14 @@ const BY_DESK = new THREE.Vector3(3.4, 0, 0.7);
 const STEP = 0.42;
 const BOB = 0.12;
 const LIFT = 0.3;
+/** At his desk: where she walks in from (the open front of his corner) and where she stands, beside him, and his
+ * monitor, which she looks at. */
+const CORNER_ENTRY = new THREE.Vector3(4.8, 0, 9.5);
+const BESIDE_HIM = new THREE.Vector3(2.1, 0, 0.2);
+const HIS_MONITOR = new THREE.Vector3(-1.55, 2.35, 1.75);
+/** Her walk over: a step (seconds) and how big. */
+const LULU_STEP = 0.5;
+const LULU_STRIDE = 0.8;
 /** Lulu's head turned to whoever's at her desk (radians), and to her monitor. */
 const TO_ASKER = 0.7;
 const TO_MONITOR = 0.5;
@@ -46,9 +54,9 @@ const moodAt = cuts<keyof typeof MOODS>([
   [0, 'plain'],
   [CUE.focus[0], 'focused'],
   [CUE.ping + 0.4, 'shocked'],
-  [CUE.patch[0], 'plain'],
-  [CUE.patch[0] + 1.1, 'smug'],
-  [CUE.facePlant, 'plain'],
+  [CUE.walkOver[0], 'plain'],
+  [LINES[7]!.from, 'smug'],
+  [CUE.back, 'plain'],
 ]);
 
 const at = (who: string, t: number) => LINES.find(l => l.who === who && t >= l.from && t < l.to);
@@ -79,13 +87,26 @@ export function createLuluAtDesk() {
     lulu.setMouth(Math.max(mouthAt('Lulu', t), mood.mouth));
   }
 
+  /** At his desk: walking over from the front of his corner, then beside him, looking at his screen. */
+  function visiting(t: number) {
+    const k = ease(seg(t, CUE.walkOver[0], CUE.walkOver[1]));
+    lulu.root.position.lerpVectors(CORNER_ENTRY, BESIDE_HIM, k);
+    const to = k < 1 ? BESIDE_HIM : HIS_MONITOR;
+    lulu.root.rotation.y = Math.atan2(to.x - lulu.root.position.x, to.z - lulu.root.position.z);
+    walkLulu(lulu, (t - CUE.walkOver[0]) / LULU_STEP, k > 0 && k < 1 ? LULU_STRIDE : 0, hair.ponytail);
+  }
+
   return {
     rig: lulu,
     update(t: number, sign: THREE.Object3D, asking: boolean) {
       resetLulu(lulu);
       hair.ponytail.rotation.set(0.1, 0, 0);
-      lulu.root.position.copy(DESK_SPOT);
       face(t);
+      if (t >= CUE.walkOver[0] && t < CUE.back) {
+        visiting(t);
+        return;
+      }
+      lulu.root.position.copy(DESK_SPOT);
       lulu.head.rotation.y = asking ? TO_ASKER : TO_MONITOR;
       typing(t);
       // the third time, she just points at the sign

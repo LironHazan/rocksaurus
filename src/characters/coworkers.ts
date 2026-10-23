@@ -178,12 +178,43 @@ export function createSilvi() {
   return { rig, ponytail: hair.ponytail };
 }
 
-/** His tee: black, the band's name in white across it (plain lettering, not the band's logo). */
-const METAL_TEE = 0x141416;
+/** His tee: Kubernetes blue, and its print's ink. */
+const K8S_TEE = 0x326ce5;
+const K8S_INK = '#ffffff';
+/** The wheel on his tee: how many spokes (a helm, steering the containers), and its size (share of the print's height). */
+const HELM = { spokes: 7, size: 0.4 } as const;
+
+/** His tee's print: a ship's wheel and "k8s" beside it (our own drawing, not the project's logo). */
+function k8sPrint(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  const r = h * HELM.size;
+  const cx = w * 0.27;
+  const cy = h / 2;
+  ctx.strokeStyle = K8S_INK;
+  ctx.fillStyle = K8S_INK;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = r * 0.16;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r * 0.72, 0, Math.PI * 2); // the rim
+  ctx.stroke();
+  for (let i = 0; i < HELM.spokes; i++) {
+    const a = (i / HELM.spokes) * Math.PI * 2 - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a) * r * 0.2, cy + Math.sin(a) * r * 0.2);
+    ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); // a spoke, out past the rim to a handle
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2); // the hub
+  ctx.fill();
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.font = `700 ${h * 0.62}px ${ROUND}`;
+  ctx.fillText('k8s', w * 0.47, cy);
+}
 
 /**
  * Yashinozarus: the distinguished architect, master of all trades, always the smartest dino in the room. A slate-green
- * Stegosaurus with steel-grey plates, grey hair and a grey moustache, square glasses, and a Metallica tee.
+ * Stegosaurus with steel-grey plates, grey hair, square glasses, and a k8s tee.
  */
 export function createYashinozarus(): StegosaurusRig {
   const rig = createStegosaurus({
@@ -193,11 +224,11 @@ export function createYashinozarus(): StegosaurusRig {
     plates: 0x8a929c,
     plateTips: 0xc4cad2,
     cheeks: 0xd99a9a,
-    bowTie: METAL_TEE, // under the tee's collar: gone
+    bowTie: K8S_TEE, // under the tee's collar: gone
     eyes: 0x3a5a8a,
-    mustache: 0xb9bcc2,
+    mustache: null,
   });
-  addBandTee(rig, { text: 'METALLICA', color: METAL_TEE, ink: '#e8e8ea', font: "'Cinzel'" });
+  addBandTee(rig, { text: 'k8s', color: K8S_TEE, print: k8sPrint, aspect: 0.4 });
   addShortHair(rig, { color: 0xb4b7bd, length: 0.34, seed: 21 });
   addGlasses(rig.head, { eyeX: 0.22, eyeY: 0.1, eyeZ: 0.52, rim: 0.15, color: 0x1b1b22, frames: 'square' });
   return rig;

@@ -15,8 +15,18 @@ describe('Another Day, Another Node.js CVE', () => {
     for (let i = 1; i < LINES.length; i++) expect(LINES[i]!.from).toBeGreaterThanOrEqual(LINES[i - 1]!.to);
   });
 
-  it('the story runs in order: the sign, focus, the CVE, the patch, the reply, the face plant', () => {
-    const order = [CUE.sign, CUE.focus[0], CUE.yashi[0], CUE.ping, CUE.patch[0], CUE.reply[0], CUE.facePlant];
+  it('the story runs in order: the sign, focus, the CVE, his DM, the walk over, the patch, back, the face plant', () => {
+    const order = [
+      CUE.sign,
+      CUE.focus[0],
+      CUE.yashi[0],
+      CUE.dm,
+      CUE.ping,
+      CUE.walkOver[0],
+      CUE.patch[0],
+      CUE.back,
+      CUE.facePlant,
+    ];
     for (let i = 1; i < order.length; i++) expect(order[i]!).toBeGreaterThan(order[i - 1]!);
     expect(CUE.facePlant).toBeLessThan(DURATION);
   });

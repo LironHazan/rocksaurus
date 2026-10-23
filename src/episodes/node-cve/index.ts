@@ -17,11 +17,12 @@ import { ASKERS, CUE, CUTS, DURATION, LINES, SYLLABLES } from './timeline';
 //   0–3.4      Lulu at her desk, typing to her agent
 //   3.4–25     Rorit, Silvi and Omli, one after another, the same question: "what's an AI agent?" By the third, a sign
 //   25–30      finally: focus mode
-//   30–36      meanwhile, Yashinozarus: npm audit, critical, "Hm. Critical. Again"
-//   36–40.6    his message lands on Lulu's screen: upgrade Node.js, no fixes for deprecated versions
-//   40.6–46.4  she's on the latest since three weeks ago: one patch, 1,284 tests green, all environments patched
-//   46.4–50    her reply on his screen. "Impressive"
-//   50–56      Rorit is back: "Sorry, one more: what's an AGENT?" Her head goes down on the desk
+//   30–34.4    meanwhile, Yashinozarus: npm audit, critical, "Hm. Critical. Again"
+//   34.4–36    he DMs her on Hack: come over
+//   36–39.4    it lands on Lulu's screen: upgrade Node.js, no fixes for deprecated versions
+//   39.4–50.6  she walks over to his desk; they patch it together: she's been on the latest for three weeks, one
+//              install, 1,284 tests green, all environments patched. "Impressive"
+//   50.6–57    back at her desk, Rorit is back: "Sorry, one more: what's an AGENT?" Her head goes down on the desk
 //   then the channel's end card (outro.ts)
 
 /** The screen shows its last lines: as many as fit. */
@@ -70,11 +71,9 @@ const episode: Episode = {
       [CUE.focus[0] + 2.6, 'lulu'],
       [CUE.ping, 'screen'],
       [CUE.ping + 2.2, 'lulu'],
-      [CUE.patch[0], 'screen'],
-      [CUE.patch[0] + 4.0, 'lulu'],
-      [ASKERS[3].walk[0], 'wide'],
-      [LINES[8]!.from, 'asker'],
-      [LINES[8]!.to, 'lulu'],
+      [CUE.back, 'wide'],
+      [LINES[9]!.from, 'asker'],
+      [LINES[9]!.to, 'lulu'],
     ]);
     const LULU_SHOTS: Record<LuluShot, (t: number) => Shot> = {
       wide: t => {
@@ -94,13 +93,16 @@ const episode: Episode = {
         overShoulder(sign.getWorldPosition(new THREE.Vector3()), normalOf(office.monitor).negate(), 1.8, 0, 0.1),
     };
 
-    type YashiShot = 'desk' | 'screen' | 'face';
+    type YashiShot = 'desk' | 'screen' | 'face' | 'arrive' | 'lulu';
     const yashiShotAt = cuts<YashiShot>([
       [0, 'desk'],
       [CUE.yashi[0] + 1.4, 'screen'],
       [LINES[6]!.from, 'face'],
-      [CUE.reply[0], 'screen'],
-      [LINES[7]!.from, 'face'],
+      [CUE.dm, 'screen'], // his DM to her
+      [CUE.walkOver[0], 'arrive'],
+      [LINES[7]!.from, 'lulu'],
+      [CUE.patch[0], 'screen'], // the patch, together
+      [LINES[8]!.from, 'face'],
     ]);
     const YASHI_SHOTS: Record<YashiShot, (t: number) => Shot> = {
       desk: t => {
@@ -109,6 +111,8 @@ const episode: Episode = {
       },
       screen: () => overShoulder(screenAt(corner.monitor), normalOf(corner.monitor), 1.4, -0.3, 0.6), // past his head
       face: () => inFrontOf(yashi.rig.head, yashi.rig.root, CLOSE.yashi, 0.2, 0.1),
+      arrive: () => ({ cam: [5.6, 4.8, 11.5], look: [0.8, 2.8, 0.6] }), // she walks in, over to him
+      lulu: () => inFrontOf(lulu.rig.head, lulu.rig.root, CLOSE.lulu, 0.6, -0.2),
     };
 
     return direct(
@@ -116,10 +120,12 @@ const episode: Episode = {
       {
         lulu: {
           scene: office.scene,
+          cast: [lulu.rig.root], // she walks over to his desk, and back
           frame(t) {
             sign.visible = t >= CUE.sign;
             office.clock.set(10, 40 + t / 2);
             askers.update(t);
+            lulu.rig.root.visible = true;
             lulu.update(t, sign, askers.at(t) !== null);
             office.screen.show(linesAt(LULU_SCRIPT, t).slice(-SCREEN_LINES), true);
             office.scene.updateMatrixWorld(true);
@@ -128,8 +134,11 @@ const episode: Episode = {
         },
         yashi: {
           scene: corner.scene,
+          cast: [lulu.rig.root],
           frame(t) {
             yashi.update(t);
+            lulu.update(t, sign, false);
+            lulu.rig.root.visible = t >= CUE.walkOver[0]; // she's only here once she's walked over
             corner.screen.show(linesAt(YASHI_SCRIPT, t).slice(-SCREEN_LINES), true);
             corner.scene.updateMatrixWorld(true);
             return YASHI_SHOTS[yashiShotAt(t)](t);

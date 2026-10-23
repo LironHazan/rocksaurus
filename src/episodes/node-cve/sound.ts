@@ -5,13 +5,14 @@ import { keystrokes } from '../../world/screen-script';
 import { LULU_SCRIPT, YASHI_SCRIPT } from './terminal';
 import { ASKERS, CUE, CUTS, DURATION } from './timeline';
 
-// No music: the office. Its hush, their keys, the askers' steps, his message landing (twice: it's critical), her
-// reply landing on his screen, and her head on the desk.
+// No music: the office. Its hush, their keys, the askers' steps, his DM sent and landing (twice: it's critical),
+// her steps over to his desk, and her head on the desk.
 
 type Kind = 'key' | 'step' | 'alert' | 'reply' | 'thud';
 
-/** The askers' steps (seconds apart). */
+/** The askers' steps, and Lulu's on her way over (seconds apart). */
 const STEP = 0.42;
+const LULU_STEP = 0.5;
 
 /** Whether t is in a scene at `where` (keys only sound in the room you're in). */
 const shownAt = (t: number, where: (typeof CUTS)[number][1]) => CUTS.findLast(([at]) => at <= t)?.[1] === where;
@@ -28,7 +29,8 @@ function cues(): Cue<Kind>[] {
       .map(at => ({ at, kind: 'step' as const })),
     { at: CUE.ping, kind: 'alert' },
     { at: CUE.ping + 0.5, kind: 'alert' },
-    { at: CUE.reply[0] + 0.3, kind: 'reply' },
+    { at: CUE.dm + 1.6, kind: 'reply' }, // his DM, sent
+    ...every(CUE.walkOver[0], CUE.walkOver[1], LULU_STEP).map(at => ({ at, kind: 'step' as const })),
     { at: CUE.facePlant + 0.5, kind: 'thud' },
   ];
 }

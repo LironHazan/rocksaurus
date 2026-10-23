@@ -2,19 +2,20 @@ import { speech, type SpokenLine } from '../../audio/babble';
 import { OFFICE_VOICES } from '../../characters/coworkers';
 
 // Another day at Papo Pako Shapeworks. Lulu tries to work; three dinos come by her desk, one after the other, with the
-// same entry-level AI question (Rorit, Silvi, Omli). By the third she has made a sign. Then, finally, focus… until Yashinozarus, the
-// architect, finds a critical npm vulnerability: upgrade Node.js, no fixes for deprecated versions. Lucky for her,
-// Lulu upgraded every environment to the latest three weeks ago: one patch, green tests, done. Then Rorit is
+// same entry-level AI question (Rorit, Silvi, Omli). By the third she has made a sign. Then, finally, focus… until
+// Yashinozarus, the architect, finds a critical npm vulnerability (upgrade Node.js, no fixes for deprecated versions)
+// and DMs her on Hack: come over. She walks over to his desk, and they do the upgrade together. Lucky for them, she
+// upgraded every environment to the latest three weeks ago: one patch, green tests, done. Back at her desk, Rorit is
 // back with one more question. Times are video seconds. No music: the office.
 
-export const DURATION = 56; // then the end card, see ../outro.ts
+export const DURATION = 57; // then the end card, see ../outro.ts
 
 /** Who walks up to her desk, in order, and when: walking in, then walking off. */
 export const ASKERS = [
   { who: 'Rorit', walk: [3.4, 5.0], leave: [9.4, 10.8] },
   { who: 'Silvi', walk: [10.4, 12.0], leave: [16.4, 17.8] },
   { who: 'Omli', walk: [17.4, 19.2], leave: [23.8, 25.2] },
-  { who: 'Rorit', walk: [50.0, 51.4], leave: [DURATION + 1, DURATION + 2] }, // back, one more time
+  { who: 'Rorit', walk: [51.0, 52.2], leave: [DURATION + 1, DURATION + 2] }, // back, one more time
 ] as const;
 
 export const CUE = {
@@ -22,16 +23,19 @@ export const CUE = {
   sign: 17.0,
   /** Her focus mode. */
   focus: [25.0, 30.0],
-  /** Meanwhile, Yashinozarus at his desk. */
+  /** Meanwhile, Yashinozarus at his desk: the audit, then his DM to her. */
   yashi: [30.0, 36.0],
-  /** His message lands on her screen. */
+  dm: 34.4,
+  /** His DM lands on her screen. */
   ping: 36.0,
-  /** She checks: already on the latest. One patch, tests, done. */
-  patch: [40.6, 46.4],
-  /** Back at his desk, her reply. */
-  reply: [46.4, 50.0],
+  /** She walks over to his desk… */
+  walkOver: [39.4, 42.2],
+  /** …and they patch it together, on his screen. */
+  patch: [45.2, 49.0],
+  /** Back at her desk. */
+  back: 50.6,
   /** The last question: her head goes down onto the desk. */
-  facePlant: 54.4,
+  facePlant: 55.4,
 } as const;
 
 export const LINES: readonly SpokenLine<keyof typeof OFFICE_VOICES>[] = [
@@ -41,9 +45,10 @@ export const LINES: readonly SpokenLine<keyof typeof OFFICE_VOICES>[] = [
   { from: 14.6, to: 16.2, who: 'Lulu', text: '…A loop. With tools.' },
   { from: 19.4, to: 21.4, who: 'Omli', text: 'Bro. What’s an AI agent? 💪' },
   { from: 21.6, to: 23.6, who: 'Lulu', text: 'IT’S. A. LOOP. WITH. TOOLS. 😤' },
-  { from: 33.4, to: 35.4, who: 'Yashinozarus', text: 'Hm. Critical. Again 🧐' },
-  { from: 47.6, to: 49.4, who: 'Yashinozarus', text: 'Impressive 🧐' },
-  { from: 51.6, to: 54.2, who: 'Rorit', text: 'Sorry, one more: what’s an AGENT? 🤖' },
+  { from: 32.8, to: 34.2, who: 'Yashinozarus', text: 'Hm. Critical. Again 🧐' },
+  { from: 42.6, to: 45.0, who: 'Lulu', text: 'Relax. Everything’s been on latest for 3 weeks 😎' },
+  { from: 49.2, to: 50.5, who: 'Yashinozarus', text: 'Impressive 🧐' },
+  { from: 52.4, to: 55.0, who: 'Rorit', text: 'Sorry, one more: what’s an AGENT? 🤖' },
 ];
 
 export const { syllables: SYLLABLES, mouthAt } = speech(LINES, OFFICE_VOICES, 26);
@@ -54,6 +59,6 @@ export const CUTS: readonly (readonly [number, Where])[] = [
   [0, 'lulu'],
   [CUE.yashi[0], 'yashi'],
   [CUE.yashi[1], 'lulu'],
-  [CUE.reply[0], 'yashi'],
-  [CUE.reply[1], 'lulu'],
+  [CUE.walkOver[0], 'yashi'],
+  [CUE.back, 'lulu'],
 ];

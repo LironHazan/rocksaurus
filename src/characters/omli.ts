@@ -25,6 +25,11 @@ export function createOmli() {
   // the tee goes on the leaning upper body (the posture), where the T-Rex's body is
   const shirted: FittedRig = { ...rig, torso: rig.posture, fit: { torso: TREX_BODY, head: [1, 1, 1] } };
   addBandTee(shirted, { text: 'PANTERA', font: "'Metal Mania'", color: tee, ink: '#ece6da' });
+  // the T-Rex's back stripes stand off the skin further than the tee does, and poke through it (a torn shirt, from
+  // behind); they're all under the tee anyway
+  for (const part of rig.posture.children)
+    if (part instanceof THREE.Mesh && part.material instanceof THREE.MeshStandardMaterial)
+      if (part.material.color.getHex() === OMLI_COLORS.stripes) part.visible = false;
   const cloth = new THREE.MeshStandardMaterial({ color: tee, roughness: 0.95 });
   for (const s of [-1, 1]) {
     rig.posture.add(ball(0.4, cloth, [s * 0.42, 2.1, 0.8], [1, 0.75, 0.5])); // pecs
