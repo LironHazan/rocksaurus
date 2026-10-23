@@ -1,14 +1,21 @@
 import * as THREE from 'three';
-import { createOrnithomimus, RORIT_COLORS, type OrnithomimusRig } from '../../characters/ornithomimus';
-import { createTyrannosaurus, TIKI_COLORS } from '../../characters/tyrannosaurus';
-import { ball } from '../../characters/materials';
-import { addGlasses } from '../../props/glasses';
-import { addJersey, TREX_BODY } from '../../props/soccer';
-import { ROUND } from '../../world/interior';
-import { textTexture } from '../../world/text-texture';
+import { createOrnithomimus, RORIT_COLORS, type OrnithomimusRig } from './ornithomimus';
+import { createTyrannosaurus, TIKI_COLORS } from './tyrannosaurus';
+import { createCeratops } from './ceratops';
+import { createStegosaurus, STEGGY_COLORS, type StegosaurusRig } from './stegosaurus';
+import { ball } from './materials';
+import { addGlasses } from '../props/glasses';
+import { addJersey, TREX_BODY } from '../props/soccer';
+import { addBandTee } from '../props/band-tee';
+import { addShortHair } from '../props/short-hair';
+import { addPonytail } from '../props/ponytail';
+import { ROUND } from '../world/interior';
+import { textTexture } from '../world/text-texture';
+import type { Voice } from '../audio/babble';
 
-// The meeting: Statitezarus, Igarzarus and Dchozaurus share the slim Ornithomimus build (like Taluzarus in Prod
-// Certs); Ogozaurus is a big T-Rex, Tiki Taka's build. Clothes are plain shapes and our own prints: no real logos.
+// Lulu's coworkers at Papo Pako Shapeworks. Statitezarus, Igarzarus and Dchozaurus share the slim Ornithomimus build
+// (like Taluzarus in Prod Certs); Ogozaurus is a big T-Rex, Tiki Taka's build; Yashinozarus, the architect, a
+// Stegosaurus. Clothes are plain shapes and our own prints: no real logos.
 
 /** Ogozaurus is slimmer than Tiki Taka: his width and depth, scaled. */
 const OGO_SLIM = 0.78;
@@ -152,3 +159,92 @@ export function createOgozaurus() {
   });
   return rig;
 }
+
+/** Rorit is small (but very fit). */
+export const RORIT_SCALE = 0.85;
+/** Rorit's work look: a coral blazer over her mint (no gym kit today), her blond ponytail. */
+export function createRorit() {
+  const rig = createOrnithomimus(undefined, { athleisure: false });
+  rig.root.scale.setScalar(RORIT_SCALE);
+  rig.clothe(new THREE.MeshPhysicalMaterial({ color: 0xff7a6b, roughness: 0.6, sheen: 0.5 }), 0.12, 0.72);
+  const hair = addPonytail(rig, { color: 0xf2d36b, scrunchie: 0x4ee6ff, seed: 3 });
+  return { rig, ponytail: hair.ponytail };
+}
+
+/** Silvi, Fun & Wellbeing: her pink striped shirt and lanyard, her straight black ponytail. */
+export function createSilvi() {
+  const rig = createCeratops();
+  const hair = addPonytail(rig, { color: 0x15121a, scrunchie: 0xff6fa8, seed: 11 });
+  return { rig, ponytail: hair.ponytail };
+}
+
+/** His tee: Kubernetes blue, and its print's ink. */
+const K8S_TEE = 0x326ce5;
+const K8S_INK = '#ffffff';
+/** The wheel on his tee: how many spokes (a helm, steering the containers), and its size (share of the print's height). */
+const HELM = { spokes: 7, size: 0.4 } as const;
+
+/** His tee's print: a ship's wheel and "k8s" beside it (our own drawing, not the project's logo). */
+function k8sPrint(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  const r = h * HELM.size;
+  const cx = w * 0.27;
+  const cy = h / 2;
+  ctx.strokeStyle = K8S_INK;
+  ctx.fillStyle = K8S_INK;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = r * 0.16;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r * 0.72, 0, Math.PI * 2); // the rim
+  ctx.stroke();
+  for (let i = 0; i < HELM.spokes; i++) {
+    const a = (i / HELM.spokes) * Math.PI * 2 - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a) * r * 0.2, cy + Math.sin(a) * r * 0.2);
+    ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); // a spoke, out past the rim to a handle
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2); // the hub
+  ctx.fill();
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.font = `700 ${h * 0.62}px ${ROUND}`;
+  ctx.fillText('k8s', w * 0.47, cy);
+}
+
+/**
+ * Yashinozarus: the distinguished architect, master of all trades, always the smartest dino in the room. A slate-green
+ * Stegosaurus with steel-grey plates, grey hair, square glasses, and a k8s tee.
+ */
+export function createYashinozarus(): StegosaurusRig {
+  const rig = createStegosaurus({
+    ...STEGGY_COLORS,
+    body: 0x7fa38f,
+    belly: 0xe4eee6,
+    plates: 0x8a929c,
+    plateTips: 0xc4cad2,
+    cheeks: 0xd99a9a,
+    bowTie: K8S_TEE, // under the tee's collar: gone
+    eyes: 0x3a5a8a,
+    mustache: null,
+  });
+  addBandTee(rig, { text: 'k8s', color: K8S_TEE, print: k8sPrint, aspect: 0.4 });
+  addShortHair(rig, { color: 0xb4b7bd, length: 0.34, seed: 21 });
+  addGlasses(rig.head, { eyeX: 0.22, eyeY: 0.1, eyeZ: 0.52, rim: 0.15, color: 0x1b1b22, frames: 'square' });
+  return rig;
+}
+
+/** How they sound when they talk (babble): Dchozaurus warm, Igarzarus dry, Statitezarus quick and eager, Ogozaurus
+ * (a big T-Rex, delighted) the highest of them all, Yashinozarus low and unhurried, Rorit bright and quick, Silvi
+ * sunny, Omli deep; and Lulu. */
+export const OFFICE_VOICES = {
+  Ogozaurus: { notes: ['C4', 'E4', 'G4', 'A4'], rate: 0.14 },
+  Dchozaurus: { notes: ['C3', 'D3', 'F3', 'G3'], rate: 0.14 },
+  Igarzarus: { notes: ['D3', 'E3', 'G3', 'A3'], rate: 0.15 },
+  Statitezarus: { notes: ['G3', 'A3', 'C4', 'D4'], rate: 0.12 },
+  Yashinozarus: { notes: ['A2', 'C3', 'D3', 'E3'], rate: 0.17 },
+  Rorit: { notes: ['F4', 'G4', 'A4', 'C5'], rate: 0.12 },
+  Silvi: { notes: ['C4', 'D4', 'E4', 'G4'], rate: 0.15 },
+  Omli: { notes: ['F2', 'G2', 'A2', 'C3'], rate: 0.16 },
+  Lulu: { notes: ['F3', 'G3', 'A3', 'C4'], rate: 0.17 },
+} as const satisfies Record<string, Voice>;
