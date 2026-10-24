@@ -214,7 +214,7 @@ function k8sPrint(ctx: CanvasRenderingContext2D, w: number, h: number) {
 
 /**
  * Yashinozarus: the distinguished architect, master of all trades, always the smartest dino in the room. A slate-green
- * Stegosaurus with steel-grey plates, grey hair, square glasses, and a k8s tee.
+ * Stegosaurus with steel-grey plates, short salt-and-pepper hair, square glasses, and a k8s tee.
  */
 export function createYashinozarus(): StegosaurusRig {
   const rig = createStegosaurus({
@@ -229,7 +229,7 @@ export function createYashinozarus(): StegosaurusRig {
     mustache: null,
   });
   addBandTee(rig, { text: 'k8s', color: K8S_TEE, print: k8sPrint, aspect: 0.4 });
-  addShortHair(rig, { color: 0xb4b7bd, length: 0.34, seed: 21 });
+  addShortHair(rig, { color: 0x5e6066, length: 0.2, seed: 21 }); // short, salt-and-pepper: grey at the edges, not old
   addGlasses(rig.head, { eyeX: 0.22, eyeY: 0.1, eyeZ: 0.52, rim: 0.15, color: 0x1b1b22, frames: 'square' });
   return rig;
 }

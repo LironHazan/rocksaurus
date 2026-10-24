@@ -7,10 +7,10 @@ import { createOffice } from '../../world/lulu-office';
 import { withOutro } from '../outro';
 import { CAPTIONS } from './captions';
 import { createAskers, createLuluAtDesk, createYashiAtDesk } from './cast';
-import { createArchitectCorner, createSign } from './sets';
+import { createArchitectCorner, createHackWindow, createSign } from './sets';
 import { SOUND } from './sound';
 import { playSyllables } from '../../audio/babble';
-import { LULU_SCRIPT, YASHI_SCRIPT } from './terminal';
+import { LULU_SCRIPT, YASHI_SCRIPT, dmAt } from './terminal';
 import { ASKERS, CUE, CUTS, DURATION, LINES, SYLLABLES } from './timeline';
 
 // Beat sheet (video seconds; timeline.ts has the cues and lines)
@@ -25,6 +25,8 @@ import { ASKERS, CUE, CUTS, DURATION, LINES, SYLLABLES } from './timeline';
 //   50.6–57    back at her desk, Rorit is back: "Sorry, one more: what's an AGENT?" Her head goes down on the desk
 //   then the channel's end card (outro.ts)
 
+/** Hack sits this far in front of the terminal it covers. */
+const HACK_IN_FRONT = new THREE.Vector3(0, 0, 0.005);
 /** How long the shot of the sign holds when she's just put it up (seconds): long enough to read it. */
 const SIGN_HOLD_S = 1.2;
 /** The screen shows its last lines: as many as fit. */
@@ -52,6 +54,17 @@ const episode: Episode = {
     sign.position.set(...SIGN_ON_MONITOR);
     sign.rotation.y = Math.PI; // facing out the back
     office.monitor.add(sign);
+    // Hack, open over each terminal for the DM: the same size, a hair in front of it
+    const hackOver = (screen: THREE.Mesh, other: 'Yashinozarus' | 'Lulu') => {
+      const size =
+        screen.geometry instanceof THREE.PlaneGeometry ? screen.geometry.parameters : { width: 1, height: 1 };
+      const hack = createHackWindow(size.width, size.height, other);
+      hack.mesh.position.copy(screen.position).add(HACK_IN_FRONT);
+      screen.parent!.add(hack.mesh);
+      return hack;
+    };
+    const luluHack = hackOver(office.screen.mesh, 'Yashinozarus');
+    const yashiHack = hackOver(corner.screen.mesh, 'Lulu');
     const screenNormal = new THREE.Vector3();
     const screenAt = (m: THREE.Object3D) => m.getWorldPosition(new THREE.Vector3());
     const normalOf = (m: THREE.Object3D) => screenNormal.set(0, 0, 1).applyQuaternion(m.quaternion);
@@ -73,7 +86,8 @@ const episode: Episode = {
       [CUE.focus[0], 'screen'],
       [CUE.focus[0] + 2.6, 'lulu'],
       [CUE.ping, 'screen'],
-      [CUE.ping + 2.2, 'lulu'],
+      [CUE.ping + 2.8, 'lulu'], // after her "On my way"
+
       [CUE.back, 'wide'],
       [LINES[10]!.from, 'asker'],
       [LINES[10]!.to, 'lulu'],
@@ -132,6 +146,8 @@ const episode: Episode = {
             lulu.rig.root.visible = true;
             lulu.update(t, sign, askers.at(t) !== null);
             office.screen.show(linesAt(LULU_SCRIPT, t).slice(-SCREEN_LINES), true);
+            luluHack.mesh.visible = t >= CUE.ping && t < CUE.walkOver[0];
+            luluHack.show(dmAt(t));
             office.scene.updateMatrixWorld(true);
             return LULU_SHOTS[luluShotAt(t)](t);
           },
@@ -144,6 +160,8 @@ const episode: Episode = {
             lulu.update(t, sign, false);
             lulu.rig.root.visible = t >= CUE.walkOver[0]; // she's only here once she's walked over
             corner.screen.show(linesAt(YASHI_SCRIPT, t).slice(-SCREEN_LINES), true);
+            yashiHack.mesh.visible = t >= CUE.dm && t < CUE.walkOver[0];
+            yashiHack.show(dmAt(t));
             corner.scene.updateMatrixWorld(true);
             return YASHI_SHOTS[yashiShotAt(t)](t);
           },
