@@ -29,7 +29,7 @@ const AT_THE_BOTTOM: Caption[] = [
   line(7),
   punch(LINES[7]!.from + 0.4, LINES[7]!.to, 'Plot twist: she upgraded every environment 3 weeks ago 😎'),
   line(8),
-  sub(LINES[8]!.to + 0.1, LINES[9]!.from - 0.1, 'Images rebuilt. Rolled out. Done 🐳'),
+  sub(LINES[8]!.to + 0.1, LINES[9]!.from - 0.1, 'Images rebuilt. Rolled out to EKS 🐳'),
   punch(LINES[8]!.to + 0.4, LINES[9]!.from - 0.1, 'Painful? Not today 🛡️'),
   line(9),
   line(10),

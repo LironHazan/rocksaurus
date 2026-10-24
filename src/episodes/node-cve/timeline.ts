@@ -48,7 +48,7 @@ export const LINES: readonly SpokenLine<keyof typeof OFFICE_VOICES>[] = [
   { from: 32.8, to: 34.2, who: 'Yashinozarus', text: 'Hm. Critical. Again 🧐' },
   { from: 42.6, to: 45.0, who: 'Lulu', text: 'Relax. Everything’s been on latest for 3 weeks 😎' },
   { from: 45.2, to: 47.8, who: 'Yashinozarus', text: 'I’m upgrading the images with the patch 🐳' },
-  { from: 49.2, to: 50.5, who: 'Yashinozarus', text: 'Impressive 🧐' },
+  { from: 49.2, to: 50.5, who: 'Yashinozarus', text: 'Done ✅' },
   { from: 52.4, to: 55.0, who: 'Rorit', text: 'Sorry, one more: what’s an AGENT? 🤖' },
 ];
 

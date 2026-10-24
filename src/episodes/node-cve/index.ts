@@ -21,7 +21,7 @@ import { ASKERS, CUE, CUTS, DURATION, LINES, SYLLABLES } from './timeline';
 //   34.4–36    he DMs her on Hack: come over
 //   36–39.4    it lands on Lulu's screen: upgrade Node.js, no fixes for deprecated versions
 //   39.4–50.6  she walks over to his desk; they patch it together: she's been on the latest for three weeks, one
-//              patched base image: he rebuilds the images and rolls them out to EKS, green. "Impressive"
+//              patched base image: he rebuilds the images and rolls them out to EKS, green. "Done"
 //   50.6–57    back at her desk, Rorit is back: "Sorry, one more: what's an AGENT?" Her head goes down on the desk
 //   then the channel's end card (outro.ts)
 
