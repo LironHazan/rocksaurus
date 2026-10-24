@@ -20,7 +20,7 @@ const AT_THE_BOTTOM: Caption[] = [
   line(5),
   sub(CUE.focus[0], CUE.focus[1], 'Finally. Focus mode 🎧'),
   punch(CUE.focus[0] + 1.2, CUE.focus[1], 'Deep work. Flow state. Nothing can stop her now…'),
-  title(CUE.yashi[0] + 0.1, LINES[6]!.from - 0.1, '🧠 Yashinozarus\nDistinguished architect. Master of all trades'),
+  title(CUE.yashi[0] + 0.1, LINES[6]!.from - 0.1, '🧠 Yashinozarus\nThe Distinguished of them all'),
   line(6),
   sub(CUE.dm, CUE.yashi[1], 'He DMs Lulu on Hack 💬'),
   sub(CUE.ping + 0.2, CUE.walkOver[0] - 0.1, '🚨 Critical npm vulnerability. Upgrade Node.js'),
