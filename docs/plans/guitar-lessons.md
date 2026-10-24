@@ -8,9 +8,26 @@ Status: **plan, not approved.** Nothing is built yet. The open decisions are at 
 
 ## Goals
 
-- Each lesson is a short that teaches one concept a guitarist can use, with correct tab.
+- Each lesson teaches one concept a guitarist can use, with correct tab, in a musical setting.
 - The tab and the sound come from the same data, so what you see is what you hear.
 - A viewer can pause the Short and play along from the tab on screen.
+
+## How each lesson teaches
+
+Taught from the research (see Sources). The lessons follow these rules:
+
+1. **Sound before names.** The groove plays first with no labels. The viewer hears the mood, then Rory names it.
+2. **A mode lives in a context.** Every mode arrives over a chord or a groove, never as a bare shape. A mode is defined
+   by its *characteristic note* against that chord (Dorian: the raised 6th over a minor chord). The lesson points at
+   that note.
+3. **One mode per groove.** Stay in one mode over a vamp so the viewer can hear it, without tracking chord changes.
+   This is the Berklee PULSE approach. The chord-by-chord approach comes after, in the batch on progressions.
+4. **Shape comes last.** The tab shows the fretboard shape only after the viewer knows the sound. Each shape is
+   played over a drone or the groove, not alone.
+5. **Ear and theory together.** Each lesson asks the viewer to hear the note before reading it. A later "name that
+   mode" Short tests it.
+6. **Tie it back to the band.** Each lesson uses a riff or a groove the band already plays (for example the gypsy-jazz
+   and blues episodes), so the theory lands in a song a viewer knows from the channel.
 
 ## Constraints from the repo
 
@@ -57,15 +74,15 @@ Decisions this layout makes (see Open decisions):
 
 ## Architecture
 
-| Piece                 | Where                                                                                       | Why                                                                                                                                                        |
-| --------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Theory data (pure)    | `src/theory/` : notes, tuning, intervals, scales, modes, chord shapes, inversions           | No dependencies, so it can be unit-tested in isolation.                                                                                                    |
-| Tab stave overlay     | `src/engine/tab-stave.ts`                                                                   | Alongside `captions.ts` and `subtitles.ts`: a 2D overlay drawn from `t`. Takes a `Tab` (strings, bars, notes) and returns a draw function.                |
-| Fretboard prop        | `src/props/fretboard.ts`                                                                    | A neck with frets and string positions, so the camera can show the hand on the right string and fret.                                                    |
-| Fretting hand         | `src/characters/` (extend `rocker.ts`) or a new `src/band/` helper                          | Today `guitarist.ts` picks a fret from pitch along the neck. A lesson needs an exact string and fret. See Risks.                                           |
-| Lesson template       | `src/lessons/` (shared; band layer)                                                         | Turns a lesson's `Tab` into the timeline (note times, bars), the tab overlay and the fretting-hand targets. Each lesson supplies data only.               |
-| Lesson episodes       | `src/episodes/guitar-lessons/<lesson>/`                                                     | One per lesson: its tab data, captions, and its beat sheet.                                                                                                |
-| Registration          | `src/episodes/index.ts`                                                                     | New folder: `{ id: 'guitar-lessons', title: "Rory's Guitar Lessons", episodes: [...] }`.                                                                   |
+| Piece              | Where                                                             | Why                                                                                                                                             |
+| ------------------ | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Theory data (pure) | `src/theory/`: notes, tuning, intervals, scales, modes, chords    | No dependencies, so it can be unit-tested in isolation.                                                                                         |
+| Tab stave overlay  | `src/engine/tab-stave.ts`                                         | Alongside `captions.ts` and `subtitles.ts`: a 2D overlay drawn from `t`. Takes a `Tab` (strings, bars, notes) and returns a draw function.     |
+| Fretboard prop     | `src/props/fretboard.ts`                                          | A neck with frets and string positions, so the camera can show the hand on the right string and fret.                                          |
+| Fretting hand      | `src/characters/` (extend `rocker.ts`) or a new `src/band/` helper | Today `guitarist.ts` picks a fret from pitch along the neck. A lesson needs an exact string and fret. See Risks.                              |
+| Lesson template    | `src/lessons/` (shared; band layer)                               | Turns a lesson's `Tab` into the timeline (note times, bars), the tab overlay and the fretting-hand targets. Each lesson supplies data only.     |
+| Lesson episodes    | `src/episodes/guitar-lessons/<lesson>/`                           | One per lesson: its tab data, captions, and its beat sheet.                                                                                     |
+| Registration       | `src/episodes/index.ts`                                           | New folder: `{ id: 'guitar-lessons', title: "Rory's Guitar Lessons", episodes: [...] }`.                                                        |
 
 Before any code is written, check the layers against `.dependency-cruiser.cjs`
 (`features → episodes → band → characters, props, world → engine → audio`). `src/lessons/` must sit at the band layer,
@@ -76,7 +93,7 @@ and `src/theory/` must import nothing. `npm run lint:boundaries` decides this, n
 A lesson's tab is literal data, written by hand, the same way the other Shorts keep their note tables.
 
 ```ts
-// one note: [beat, string, fret] — string 1 = high e, 6 = low E; fret 0 = open
+// one note: [beat, string, fret, len?] — string 1 = high e, 6 = low E; fret 0 = open
 type TabNote = readonly [beat: number, string: number, fret: number, len?: number];
 ```
 
@@ -88,36 +105,47 @@ Two guarantees, both checked in Vitest, not by eye:
 2. **The sound matches the tab.** The notes are scheduled from the same `TabNote` list (through `playRiff` or
    `playLeadGuitar`), so a test checks that the scheduled MIDI pitches equal the pitches of the tab.
 
-## Syllabus (first batch: 8 lessons)
+## Syllabus (first batch: 7 lessons)
 
-Each Short is about 45 to 55 s, plus the outro. Units are ordered so each one builds on the last.
+Each Short is about 45 to 55 s, plus the outro. The order builds from the minor world the band already lives in, then
+moves to the modes, and ends on chords.
 
-| #   | Short                    | Concept                                                    | Tab shows                                                                 | Lulu            |
-| --- | ------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------------- | --------------- |
-| 1   | Reading tab              | Strings, frets, the beat grid, the playhead                | An open-string pattern with one fret up                                   | cameo           |
-| 2   | Minor pentatonic         | The five-note box, the shape you'll use most               | Box 1 in A, up and down                                                   | drums           |
-| 3   | Natural minor            | Aeolian: W H W W H W W                                     | A minor, two octaves, one position                                        | cameo           |
-| 4   | Harmonic minor           | Raised 7th, the augmented 2nd                              | A harmonic minor; the gap is labelled                                     | drums           |
-| 5   | Melodic minor            | Raised 6th and 7th going up, natural going down            | Ascending and descending lines, both written                              | cameo           |
-| 6   | Dorian                   | Minor with a raised 6th: the sound of Santana and Miles    | A Dorian in one position, a ii–IV bass line under it                      | drums           |
-| 7   | Lydian and Mixolydian    | Raised 4th; flat 7th over a major chord                    | Two short licks, the same shape with one note moved                       | cameo           |
-| 8   | Chord inversions         | Root, 1st and 2nd inversion of a major triad                | Three voicings of C on the same strings, with the bass note marked        | drums           |
+| #   | Short                 | Context (the groove the viewer hears first)                  | Characteristic note / idea                   | Tab shows                                          | Lulu    |
+| --- | --------------------- | ------------------------------------------------------------ | -------------------------------------------- | -------------------------------------------------- | ------- |
+| 1   | Minor pentatonic      | Rory's rock riff over an Am vamp, the one he already plays   | Five notes, no 2nd or 6th                    | Box 1 in A, up and down, over the vamp             | drums   |
+| 2   | Natural minor         | A sad minor verse over Am, one chord                         | Home minor: W H W W H W W                    | A minor, one position                              | cameo   |
+| 3   | Dorian                | An Am7 funk vamp                                             | The raised 6th (F♯ over Am)                  | A Dorian in one position, over the vamp            | drums   |
+| 4   | Harmonic minor        | A gypsy cadence: E7 → Am, the minor-key "sting"              | The raised 7th (G♯) and the gap of an aug. 2nd | A harmonic minor; the gap is labelled             | cameo   |
+| 5   | Melodic minor         | An Am(maj7) vamp, a jazz line that climbs and falls          | Raised 6th and 7th going up, natural going down | Ascending and descending lines, both written     | drums   |
+| 6   | Mixolydian and Lydian | G7 vamp (Mixolydian: the flat 7th); C → D vamp (Lydian: the raised 4th) | Flat 7th over major; raised 4th over major   | Two short lines, one note moved between them     | cameo   |
+| 7   | Chord inversions      | I–IV–V in C, the same chord played three ways                | Root, 1st and 2nd inversion of a major triad | Three voicings of C on the same strings, bass marked | drums   |
 
-Later batches, not in this plan: Phrygian, Locrian and the other modes; barre chords; drop-2 voicings; sevenths
-and their inversions; the blues scale; bends and vibrato as techniques; ii–V–I and modal interchange. Each one reuses
-the same template, so a new lesson is data plus a beat sheet.
+Drums under lessons 1, 3, 5 and 7; cameo in 2, 4 and 6.
+
+### Suggested next batch (not in batch 1)
+
+These come from the research and from the band's existing work. Each one needs a groove first, as above.
+
+- **Phrygian**, over an E power-chord groove: the metal sound, with the flat 2nd as its characteristic note. It fits
+  a metal band better than any other mode.
+- **Phrygian dominant** (harmonic minor's 5th mode), over E7: the flamenco-Spanish sound from lesson 4's cadence.
+- **Blues scale in a 12-bar blues**, tied to the blues-rehearsal episode.
+- **ii–V–I with arpeggios**, the chord-by-chord approach, after the one-mode-per-groove lessons.
+- **"Name that mode" ear test**: the viewer hears a groove, then guesses, then sees the answer. The research points to
+  this as the final step of the series.
 
 ## Lesson template (each Short)
 
-Same shape each time, so a viewer knows the rhythm of the series:
+Same shape each time, so a viewer knows the rhythm of the series. Sound comes before names:
 
-| Time (s)   | What happens                                                                               |
-| ---------- | ------------------------------------------------------------------------------------------ |
-| 0 – 2      | Title card, top-left: `🎸 Lesson 6 · Dorian`                                               |
-| 2 – 6      | Rory explains the idea in one caption; the tab fades in                                    |
-| 6 – 40     | Rory plays it at a slow tempo; the playhead moves across the tab; camera on the fretting hand |
-| 40 – 46    | Lulu or Tiki joins (drums or a line), or the lesson ends on a chord                       |
-| 46 – end   | A punchline (metal joke); `withOutro`                                                       |
+| Time (s)   | What happens                                                                                  |
+| ---------- | --------------------------------------------------------------------------------------------- |
+| 0 – 2      | Title card, top-left: `🎸 Lesson 3 · Dorian`                                                  |
+| 2 – 8      | The groove plays with no labels; the camera is on the band. No tab yet.                       |
+| 8 – 12     | Rory names the characteristic note; the tab fades in with the groove                          |
+| 12 – 40    | Rory plays the mode over the groove, slowly; the playhead moves across the tab; camera on the fretting hand |
+| 40 – 46    | Lulu or Tiki joins (drums or a line), or the lesson ends on a chord                           |
+| 46 – end   | A punchline (metal joke); `withOutro`                                                         |
 
 ## Risks
 
@@ -133,6 +161,8 @@ Same shape each time, so a viewer knows the rhythm of the series:
    so the new episodes add a few seconds to `npm run check`. Keep the scenes shared where possible.
 5. **Public deploy.** `main` deploys the `/watch` player to GitHub Pages, so the lessons go public when merged. See the
    open decisions.
+6. **Research is thin.** The pedagogy sources found are mostly practitioner advice and small studies. The plan follows
+   them where they agree, and the lessons should be checked against the viewers' responses once the first ones are out.
 
 ## Phases
 
@@ -141,13 +171,31 @@ Same shape each time, so a viewer knows the rhythm of the series:
    pixels). Screenshot it in DevTools at 1080 × 1920.
 3. **Fretting hand.** Exact string and fret, with the fretboard prop. Test: for each tab note, the hand's target
    matches the string and fret.
-4. **Pilot: lesson 2, Minor pentatonic.** One full Short end to end: scene, tab, sound, captions, outro, tests.
+4. **Pilot: lesson 1, Minor pentatonic.** One full Short end to end: scene, tab, sound, captions, outro, tests.
    Review it by ear and on screen before building the rest. This is the check that the template works.
-5. **The other seven lessons**, each with its tests, and the folder registered in `src/episodes/index.ts`.
+5. **The other six lessons**, each with its tests, and the folder registered in `src/episodes/index.ts`.
 6. **Checks.** `npm run check`, `npm run build`, `npm run test:e2e`, then a look at the watch page through
    `npm run build:public`.
 
 Each phase is a separate commit on a branch. Nothing is pushed or opened as a PR until you say so.
+
+## Sources
+
+Pedagogy research for the "How each lesson teaches" section. Mostly practitioner sources and small studies; no
+controlled comparison of teaching methods for guitar modes was found.
+
+- Context over bare patterns: [Practice with context (mt4e)](https://mt4e.substack.com/p/practice-with-context);
+  [The Best Way To Practice Guitar Scale](https://fachords.com/practice-scale-in-context). Both argue scale shapes
+  without musical reference lead to aimless playing.
+- Drone and root reference: [Guitar Scales In Context](https://staff.deervalley.com/default.aspx/u32BAF/244531/Guitar%20Scales%20In%20Context%20A%20Practical%20Encyclopaedi.pdf).
+- One mode over a groove, Dorian as the characteristic-note example: [Berklee PULSE, Dorian lesson](https://pulse.berklee.edu/content/public/pub_unit_assets/lessons/lesson10_dorian/Improvisation_Dorian_Lesson.pdf).
+- Dorian's colour is the major 6th, and modes are used over chord qualities:
+  [Fretjam, Basic Dorian Mode Theory](https://fretjam.com/dorian-mode-guitar.html); [Premier Guitar, The Modes Part 2](https://www.premierguitar.com/articles/The_Modes_Part_2).
+- Ear and theory taught together: Peter Vandemoortele's root-motion study (harmonic ear training works best alongside
+  basic theory), reported in [Aural Skills Pedagogy: From Academic Research To The Everyday Classroom (Beckman, Texas
+  State)](https://digital.library.txstate.edu/items/be0c84b4-c5cc-4388-8cda-84536ed687fd/full).
+- Tension to watch: Premier Guitar's chord-by-chord approach and Berklee's one-mode-per-groove approach are both in
+  use. The plan uses one-mode-per-groove first, then chord-by-chord.
 
 ## Open decisions
 
@@ -159,12 +207,12 @@ These are the choices the plan can't make alone. Each has a recommendation.
    drop the subtitles and use only the tab.
 3. **Sound.** The house rule is natural sound only, except where the band plays. A lesson is the band playing, so
    synthesized guitar, bass and drums fit. Confirm you're fine with that exception.
-4. **Lulu.** Drums under lessons 2, 4, 6 and 8, and a cameo in the others. *Recommended.* The alternative is no drums
+4. **Lulu.** Drums under lessons 1, 3, 5 and 7, and a cameo in the others. *Recommended.* The alternative is no drums
    at all, which keeps the lessons about the guitar.
 5. **Public.** The lessons go on `main` and are visible on the public `/watch` page. *Recommended, since they are
    Shorts.* The alternative is to keep them studio-only until the first batch is reviewed.
-6. **First batch.** Eight lessons as listed above. *Recommended.* The alternative is a pilot of one lesson, reviewed
-   before the rest is planned.
+6. **First batch.** Seven lessons as listed above. *Recommended.* Or add Phrygian from the suggested batch now, since
+   it is the most useful mode for a metal band.
 7. **Length.** 45 to 55 s of story, plus the outro. *Recommended.*
 
 Once these are decided, phase 1 starts.
