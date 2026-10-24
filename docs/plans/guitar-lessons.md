@@ -96,12 +96,40 @@ and `src/theory/` must import nothing. `npm run lint:boundaries` decides this, n
 
 ## The tab data
 
-A lesson's tab is literal data, written by hand, the same way the other Shorts keep their note tables.
+Every lesson's tab is complete and correct, checked by code. A hand-written tab is not trusted on its own: in a check script
+run while writing this plan, a hand-drafted A Dorian tab put an F on a string where A Dorian has none. The check caught it. So the tab is
+produced and verified in code, then stored as literal data (the same way the other Shorts keep their note tables).
 
 ```ts
 // one note: [beat, string, fret, len?] — string 1 = high e, 6 = low E; fret 0 = open
 type TabNote = readonly [beat: number, string: number, fret: number, len?: number];
 ```
+
+### The tab standard
+
+Every lesson's tab must meet all of these. A test fails the build if one doesn't.
+
+1. **Every note is in the named scale or chord.** Each pitch, from string and fret in standard tuning, is a note of
+   the lesson's scale or chord. Nothing else appears.
+2. **Every note of the scale is shown.** A scale tab covers all its notes, at least once, within the lesson's range.
+   A chord tab shows every chord tone the lesson names.
+3. **The characteristic note is marked.** The note that defines the mode (for example the raised 6th of Dorian) is
+   flagged in the data, and the overlay highlights it when Rory names it.
+4. **It is playable.** Within any one position, the fret span is at most 4 frets, and frets above 12 are not used.
+   Each note has one fingering in the shape the lesson names.
+5. **Sound and tab agree.** The notes Rory plays are the tab's notes, at the tab's beats. A test checks the scheduled
+   MIDI pitches and beats.
+6. **Stated range and direction.** Each lesson says its range (one octave, two) and whether it is ascending,
+   descending or both, so the test knows what to check.
+
+### How the tab is made
+
+1. **Generate, don't draft.** A script in `src/theory/` (or a one-off in `scripts/`) takes the lesson's scale, root,
+   position and range and produces the candidate fingering. Fingerings follow the rules above.
+2. **Verify.** The Vitest checks in the standard run on that output. Any failure is a bug in the generator or the spec.
+3. **Freeze.** The verified output is pasted into the lesson's `music.ts` as literal data. Later edits to the tab are
+   checked again by the same tests.
+4. **Ear check.** Each tab is played back once and listened to against the groove before the lesson is marked done.
 
 Two guarantees, both checked in Vitest, not by eye:
 
@@ -224,7 +252,8 @@ Same shape each time, so a viewer knows the rhythm of the series. Sound comes be
 ## Phases
 
 1. **Theory core.** `src/theory/`: intervals, the major scale, the three families of modes, triads, sevenths,
-   inversions, tuning. Vitest for each formula.
+   inversions, tuning. Vitest for each formula. Then the tab generator and the tab-standard checks, tested first on
+   lesson 2, the major scale.
 2. **Tab stave and diagram overlays.** `src/engine/tab-stave.ts` and `src/engine/diagram.ts`: draw from `t`, with a
    snapshot test of the drawn commands (not pixels). Screenshot them in DevTools at 1080 × 1920.
 3. **Fretting hand.** Exact string and fret, with the fretboard prop. Test: for each tab note, the hand's target
