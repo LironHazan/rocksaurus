@@ -18,6 +18,7 @@ import luluOnCall from './lulu-on-call';
 import luluYogurt from './lulu-yogurt';
 import feslaFrok from './fesla-frok';
 import meetingRoom from './meeting-room';
+import nodeCve from './node-cve';
 import officeBesties from './office-besties';
 import prodCerts from './prod-certs';
 import steggyMatcha from './steggy-matcha';
@@ -36,7 +37,7 @@ export const folders: readonly EpisodeFolder[] = [
   { id: 'meet-the-band', title: 'Meet the Band', episodes: [meetRory, meetParis, meetSteggy, meetTiki, meetLulu] },
   { id: 'tiki', title: 'Tiki Taka', episodes: [tikiGolazo, omliAudition] },
   { id: 'paris', title: 'Paris', episodes: [parisRotHotic] },
-  { id: 'lulu', title: 'Lulu', episodes: [luluOnCall, officeBesties, luluYogurt, feslaFrok, meetingRoom] },
+  { id: 'lulu', title: 'Lulu', episodes: [luluOnCall, officeBesties, luluYogurt, feslaFrok, meetingRoom, nodeCve] },
   { id: 'steggy', title: 'Steggy', episodes: [steggyMatcha] },
   { id: 'rory', title: 'Rory', episodes: [roryPizza, roryFriday, roryRocks] },
   { id: 'papo-pako', title: 'Papo Pako Shapeworks', episodes: [prodCerts] },
