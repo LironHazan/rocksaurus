@@ -21,7 +21,7 @@ import { ASKERS, CUE, CUTS, DURATION, LINES, SYLLABLES } from './timeline';
 //   34.4–36    he DMs her on Hack: come over
 //   36–39.4    it lands on Lulu's screen: upgrade Node.js, no fixes for deprecated versions
 //   39.4–50.6  she walks over to his desk; they patch it together: she's been on the latest for three weeks, one
-//              install, 1,284 tests green, all environments patched. "Impressive"
+//              patched base image: he rebuilds the images and rolls them out to EKS, green. "Impressive"
 //   50.6–57    back at her desk, Rorit is back: "Sorry, one more: what's an AGENT?" Her head goes down on the desk
 //   then the channel's end card (outro.ts)
 
@@ -72,8 +72,8 @@ const episode: Episode = {
       [CUE.ping, 'screen'],
       [CUE.ping + 2.2, 'lulu'],
       [CUE.back, 'wide'],
-      [LINES[9]!.from, 'asker'],
-      [LINES[9]!.to, 'lulu'],
+      [LINES[10]!.from, 'asker'],
+      [LINES[10]!.to, 'lulu'],
     ]);
     const LULU_SHOTS: Record<LuluShot, (t: number) => Shot> = {
       wide: t => {
@@ -101,8 +101,9 @@ const episode: Episode = {
       [CUE.dm, 'screen'], // his DM to her
       [CUE.walkOver[0], 'arrive'],
       [LINES[7]!.from, 'lulu'],
-      [CUE.patch[0], 'screen'], // the patch, together
-      [LINES[8]!.from, 'face'],
+      [LINES[8]!.from, 'face'], // "I'm upgrading the images with the patch"
+      [LINES[8]!.to, 'screen'], // the images, rebuilt and rolled out
+      [LINES[9]!.from, 'face'],
     ]);
     const YASHI_SHOTS: Record<YashiShot, (t: number) => Shot> = {
       desk: t => {

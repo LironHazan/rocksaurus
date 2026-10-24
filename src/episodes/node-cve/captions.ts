@@ -27,10 +27,12 @@ const AT_THE_BOTTOM: Caption[] = [
   punch(CUE.ping + 1.0, CUE.walkOver[0] - 0.1, 'No fixes for deprecated versions 💀'),
   sub(CUE.walkOver[0], LINES[7]!.from - 0.1, 'Lulu heads over. They’ll fix it together 🤝'),
   line(7),
-  sub(CUE.patch[0], CUE.patch[1], 'Plot twist: she upgraded every environment to latest 3 weeks ago 😎'),
-  punch(CUE.patch[0] + 1.6, CUE.patch[1], 'Painful? Not today 🛡️'),
+  punch(LINES[7]!.from + 0.4, LINES[7]!.to, 'Plot twist: she upgraded every environment 3 weeks ago 😎'),
   line(8),
+  sub(LINES[8]!.to + 0.1, LINES[9]!.from - 0.1, 'Images rebuilt. Rolled out. Done 🐳'),
+  punch(LINES[8]!.to + 0.4, LINES[9]!.from - 0.1, 'Painful? Not today 🛡️'),
   line(9),
+  line(10),
   sub(CUE.facePlant, DURATION, 'Another day. Another CVE. Another “what’s an agent” 🔁'),
 ];
 

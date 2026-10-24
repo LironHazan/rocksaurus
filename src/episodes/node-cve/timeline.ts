@@ -30,7 +30,7 @@ export const CUE = {
   ping: 36.0,
   /** She walks over to his desk… */
   walkOver: [39.4, 42.2],
-  /** …and they patch it together, on his screen. */
+  /** …and they patch it together, on his screen: he upgrades the images with the patched Node.js. */
   patch: [45.2, 49.0],
   /** Back at her desk. */
   back: 50.6,
@@ -47,6 +47,7 @@ export const LINES: readonly SpokenLine<keyof typeof OFFICE_VOICES>[] = [
   { from: 21.6, to: 23.6, who: 'Lulu', text: 'IT’S. A. LOOP. WITH. TOOLS. 😤' },
   { from: 32.8, to: 34.2, who: 'Yashinozarus', text: 'Hm. Critical. Again 🧐' },
   { from: 42.6, to: 45.0, who: 'Lulu', text: 'Relax. Everything’s been on latest for 3 weeks 😎' },
+  { from: 45.2, to: 47.8, who: 'Yashinozarus', text: 'I’m upgrading the images with the patch 🐳' },
   { from: 49.2, to: 50.5, who: 'Yashinozarus', text: 'Impressive 🧐' },
   { from: 52.4, to: 55.0, who: 'Rorit', text: 'Sorry, one more: what’s an AGENT? 🤖' },
 ];

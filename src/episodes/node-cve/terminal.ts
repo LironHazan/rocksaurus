@@ -25,7 +25,7 @@ export const YASHI_SCRIPT: readonly ScriptLine[] = [
   { at: CUE.dm, text: '› hack @lulu critical CVE. come over?', kind: 'prompt', cps: 24 },
   { at: CUE.patch[0], text: '› node -v', kind: 'prompt', cps: 10 },
   { at: CUE.patch[0] + 0.9, text: 'v26.1.0 · latest, since 3 weeks ago 😎', kind: 'ok' },
-  { at: CUE.patch[0] + 1.5, text: '› nvm install 26.1.1 && npm test', kind: 'prompt', cps: 24 },
-  { at: CUE.patch[0] + 3.0, text: '✓ 1,284 tests passed', kind: 'ok' },
-  { at: CUE.patch[0] + 3.6, text: '✓ All environments patched 🛡️', kind: 'ok' },
+  { at: CUE.patch[0] + 1.5, text: '› FROM node:26.1.1 · rebuild images', kind: 'prompt', cps: 24 },
+  { at: CUE.patch[0] + 3.0, text: '✓ 14 images built & pushed 🐳', kind: 'ok' },
+  { at: CUE.patch[0] + 3.6, text: '✓ Rolled out to EKS · tests green 🛡️', kind: 'ok' },
 ];
