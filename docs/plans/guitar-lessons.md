@@ -121,11 +121,19 @@ Every lesson's tab must meet all of these. A test fails the build if one doesn't
    MIDI pitches and beats.
 6. **Stated range and direction.** Each lesson says its range (one octave, two) and whether it is ascending,
    descending or both, so the test knows what to check.
+7. **It is a guitar tab, in several positions.** The tab is six-string guitar in standard tuning (E A D G B E), with
+   fret numbers on each string, and never bass or any other tuning. A scale or mode lesson shows **at least three
+   positions** on the neck, each one a fingering that covers the whole scale. A chord lesson shows **at least three
+   voicings** on different string sets. The overlay names each position on screen (for example "Position 1 · fret 5"),
+   and the position changes at a beat the viewer can see.
+8. **The positions agree.** Every position is the same scale or chord. The test checks that the set of pitch classes
+   is identical across positions, so a shape can't drift off the scale when it moves.
 
 ### How the tab is made
 
 1. **Generate, don't draft.** A script in `src/theory/` (or a one-off in `scripts/`) takes the lesson's scale, root,
-   position and range and produces the candidate fingering. Fingerings follow the rules above.
+   the positions to cover and the range, and produces the candidate fingering for each position. Fingerings follow the
+   rules above.
 2. **Verify.** The Vitest checks in the standard run on that output. Any failure is a bug in the generator or the spec.
 3. **Freeze.** The verified output is pasted into the lesson's `music.ts` as literal data. Later edits to the tab are
    checked again by the same tests.
@@ -145,16 +153,17 @@ right, and that each family's seven modes are the seven rotations of its parent 
 ## Curriculum
 
 Each Short is about 45 to 55 s, plus the outro. The series is 38 Shorts in five batches. Each batch depends only on the
-ones before it.
+ones before it. Every Short's tab follows the tab standard: a guitar tab in at least three positions (or voicings), so
+the "Tab shows" column below names what each position covers.
 
 ### Batch 1: foundations (7 Shorts)
 
 | #   | Short                         | Context (the groove or example)                                  | Idea                                                                                              | Tab / diagram                                          | Lulu  |
 | --- | ----------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ----- |
-| 1   | Intervals                     | Two notes over an A drone: m3, M3, P5, the octave                | The 12 notes, half and whole steps; interval names by ear                                         | Two-note shapes on adjacent strings                    | cameo |
-| 2   | The major scale               | A C major vamp                                                   | W W H W W W H: the parent of every mode in this series                                            | One-octave box, two positions                          | drums |
+| 1   | Intervals                     | Two notes over an A drone: m3, M3, P5, the octave                | The 12 notes, half and whole steps; interval names by ear                                         | Each interval shown at three places on the neck         | cameo |
+| 2   | The major scale               | A C major vamp                                                   | W W H W W W H: the parent of every mode in this series                                            | Three positions across the neck, one octave each       | drums |
 | 3   | Scale degrees and modes       | The same seven notes started on D, over a Dm chord               | Degrees 1–7 and their names; a mode is the major scale started on a different degree               | The major scale on one string set, from each degree     | cameo |
-| 4   | Diatonic triads               | I–IV–V–vi in C                                                   | The chord built on each degree: I ii iii IV V vi vii°; functions tonic, subdominant, dominant      | Triad shapes on three strings                          | drums |
+| 4   | Diatonic triads               | I–IV–V–vi in C                                                   | The chord built on each degree: I ii iii IV V vi vii°; functions tonic, subdominant, dominant      | Each chord shown in three voicings on different strings | drums |
 | 5   | Diatonic sevenths             | A I–vi–IV–V loop with sevenths                                   | Maj7, m7, dom7, m7♭5 on each degree                                                               | Seventh shapes                                         | cameo |
 | 6   | Keys and the circle of fifths | One groove played in G, then in F                                | Key signatures; relative keys (C ↔ Am); why keys sit a fifth apart                                | Diagram: the circle, no tab                            | drums |
 | 7   | Cadences                      | The endings of songs: V–I, IV–I, V–vi, I–V                       | How a phrase ends; what the ear expects next                                                      | Chord shapes, no scale                                 | cameo |
@@ -165,13 +174,13 @@ Pilot: lesson 2, the major scale.
 
 | #   | Short                    | Context (the groove or example)                                          | Characteristic note / idea                          | Tab shows                                             | Lulu  |
 | --- | ------------------------ | ------------------------------------------------------------------------ | --------------------------------------------------- | ----------------------------------------------------- | ----- |
-| 8   | Natural minor            | A sad minor verse over Am, one chord                                     | Home minor: W H W W H W W (Aeolian)                 | A minor, one position                                 | cameo |
-| 9   | Minor pentatonic         | Rory's rock riff over an Am vamp, the one he already plays               | Five notes: no 2nd, no 6th                          | Box 1 in A, up and down, over the vamp                | drums |
-| 10  | Dorian                   | An Am7 funk vamp                                                         | The raised 6th (F♯ over Am)                         | A Dorian in one position, over the vamp               | cameo |
-| 11  | Mixolydian               | A G7 vamp                                                                | The flat 7th over a major chord                     | One position, over the vamp                           | drums |
-| 12  | Lydian                   | A C → D vamp                                                             | The raised 4th over a major chord                   | One position, over the vamp                           | cameo |
-| 13  | Phrygian                 | An E power-chord groove, the metal sound                                 | The flat 2nd over a minor chord                     | One position, over the groove                         | drums |
-| 14  | Locrian                  | A half-diminished chord with nothing to resolve to                       | The flat 5th: why Locrian is rare as a home key     | One position, over the chord                          | cameo |
+| 8   | Natural minor            | A sad minor verse over Am, one chord                                     | Home minor: W H W W H W W (Aeolian)                 | A minor, three positions across the neck              | cameo |
+| 9   | Minor pentatonic         | Rory's rock riff over an Am vamp, the one he already plays               | Five notes: no 2nd, no 6th                          | Five box positions in A, up and down, over the vamp   | drums |
+| 10  | Dorian                   | An Am7 funk vamp                                                         | The raised 6th (F♯ over Am)                         | A Dorian in three positions, over the vamp            | cameo |
+| 11  | Mixolydian               | A G7 vamp                                                                | The flat 7th over a major chord                     | Three positions, over the vamp                        | drums |
+| 12  | Lydian                   | A C → D vamp                                                             | The raised 4th over a major chord                   | Three positions, over the vamp                        | cameo |
+| 13  | Phrygian                 | An E power-chord groove, the metal sound                                 | The flat 2nd over a minor chord                     | Three positions, over the groove                      | drums |
+| 14  | Locrian                  | A half-diminished chord with nothing to resolve to                       | The flat 5th: why Locrian is rare as a home key     | Three positions, over the chord                       | cameo |
 | 15  | Harmonic minor           | A gypsy cadence: E7 → Am, the minor-key "sting"                          | Raised 7th (G♯) and the gap of an augmented 2nd     | A harmonic minor; the gap is labelled                 | drums |
 | 16  | Melodic minor            | An Am(maj7) vamp, a jazz line that climbs and falls                      | Raised 6th and 7th going up, natural going down     | Ascending and descending lines, both written          | cameo |
 | 17  | Chord inversions         | I–IV–V in C, the same chord played three ways                            | Root, 1st and 2nd inversion of a major triad        | Three voicings of C on the same strings, bass marked  | drums |
