@@ -25,12 +25,14 @@ import { ASKERS, CUE, CUTS, DURATION, LINES, SYLLABLES } from './timeline';
 //   50.6–57    back at her desk, Rorit is back: "Sorry, one more: what's an AGENT?" Her head goes down on the desk
 //   then the channel's end card (outro.ts)
 
+/** How long the shot of the sign holds when she's just put it up (seconds): long enough to read it. */
+const SIGN_HOLD_S = 1.2;
 /** The screen shows its last lines: as many as fit. */
 const SCREEN_LINES = 8;
 /** How far the close-ups stand off. */
 const CLOSE = { lulu: 5.6, asker: 5.0, big: 7.0, yashi: 4.4 } as const;
 /** The sign's place on her monitor: taped to its back, facing whoever comes to her desk (in the monitor's space). */
-const SIGN_ON_MONITOR = [0, -0.5, -0.13] as const;
+const SIGN_ON_MONITOR = [0, -0.3, -0.13] as const; // above the top of its pole
 
 const episode: Episode = {
   id: 'node-cve',
@@ -62,10 +64,11 @@ const episode: Episode = {
       [ASKERS[0].leave[0], 'wide'],
       [LINES[2]!.from, 'asker'],
       [LINES[3]!.from, 'lulu'],
-      [CUE.sign - 0.4, 'sign'],
-      [ASKERS[2].walk[0], 'wide'],
+      [CUE.sign, 'sign'], // a beat on it: it has to be read
+      [CUE.sign + SIGN_HOLD_S, 'wide'],
       [LINES[4]!.from, 'asker'],
       [LINES[5]!.from, 'lulu'],
+      [LINES[5]!.from + 0.8, 'sign'], // she points at it, mid-sentence
       [ASKERS[2].leave[0], 'wide'],
       [CUE.focus[0], 'screen'],
       [CUE.focus[0] + 2.6, 'lulu'],
@@ -90,7 +93,7 @@ const episode: Episode = {
       // close and from the side: her head is right in front of it
       screen: () => overShoulder(screenAt(office.monitor), normalOf(office.monitor), 1.85, -0.45, -0.55),
       sign: () =>
-        overShoulder(sign.getWorldPosition(new THREE.Vector3()), normalOf(office.monitor).negate(), 1.8, 0, 0.1),
+        overShoulder(sign.getWorldPosition(new THREE.Vector3()), normalOf(office.monitor).negate(), 2.4, 0.15, 0.12),
     };
 
     type YashiShot = 'desk' | 'screen' | 'face' | 'arrive' | 'lulu';

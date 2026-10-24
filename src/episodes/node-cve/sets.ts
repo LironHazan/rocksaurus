@@ -164,8 +164,8 @@ export function createArchitectCorner() {
 /** The sign Lulu tapes to her monitor after the second time: a yellow sticky note, in marker. */
 export function createSign(): THREE.Group {
   return picture(
-    0.95,
-    0.62,
+    1.25,
+    0.82,
     (ctx, w, h) => {
       ctx.fillStyle = '#ffe36b';
       ctx.fillRect(0, 0, w, h);

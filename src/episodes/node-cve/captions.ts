@@ -14,7 +14,7 @@ const AT_THE_BOTTOM: Caption[] = [
   sub(LINES[1]!.to + 0.1, LINES[2]!.from - 0.1, 'Interruption #1 ✅'),
   line(2),
   line(3),
-  sub(CUE.sign - 0.3, LINES[4]!.from - 0.1, 'She made a sign 🪧'),
+  sub(CUE.sign, LINES[4]!.from - 0.1, 'She made a sign 🪧'),
   punch(CUE.sign + 0.4, LINES[4]!.from - 0.1, 'Interruption #3 incoming…'),
   line(4),
   line(5),
