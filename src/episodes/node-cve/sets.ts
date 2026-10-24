@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { addKeyLight, box, createRoom, createScreen, cylinder, mat, picture, ROUND } from '../../world/interior';
 
-// Yashinozarus's corner: a long desk, his keyboard, one big monitor turned to him, a whiteboard of boxes and arrows
-// behind him (every system in the company, drawn by him), and a poster. And the sign Lulu tapes to her monitor.
+// Yashinozarus's corner: a long desk, his keyboard, one big monitor turned to him, a whiteboard behind him (the
+// whole backend, drawn by him: VPC, EKS, Kafka, Postgres), and a poster. And the sign Lulu tapes to her monitor.
 
 /** His desk: its top's height and where its front edge is (he sits behind it at the origin, facing +z). */
 const DESK = { top: 1.35, z: 1.75, width: 3.6, depth: 1.1 } as const;
@@ -13,54 +13,85 @@ const MONITOR = { at: new THREE.Vector3(-1.55, 2.35, 1.75), w: 1.9, h: 1.15, fac
 
 const font = (size: number, weight = 700) => `${weight} ${size}px ${ROUND}`;
 
-/** The whiteboard: every system in the company, boxes and arrows, in his tidy hand; one box circled in red. */
+/** The whiteboard: the company's backend in his tidy hand. The internet comes in through a load balancer to a VPC;
+ * inside it an EKS cluster runs the services on k8s, which talk to Kafka and Postgres. The Node.js services are
+ * circled in red: today's CVE. Positions are shares of the board. */
 function paintWhiteboard(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.fillStyle = '#fbfbf8';
   ctx.fillRect(0, 0, w, h);
-  ctx.strokeStyle = '#2b4a8a';
-  ctx.fillStyle = '#2b4a8a';
-  ctx.lineWidth = w * 0.006;
-  ctx.font = font(w * 0.034, 600);
+  const ink = '#2b4a8a';
+  ctx.strokeStyle = ink;
+  ctx.fillStyle = ink;
+  ctx.lineWidth = w * 0.004;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  const boxes = [
-    [0.2, 0.22, 'gateway'],
-    [0.5, 0.22, 'auth'],
-    [0.8, 0.22, 'billing'],
-    [0.2, 0.55, 'checkout'],
-    [0.5, 0.55, 'node services'],
-    [0.8, 0.55, 'agents ×666'],
-    [0.5, 0.85, 'npm 📦'],
-  ] as const;
-  for (const [x, y, label] of boxes) {
-    ctx.strokeRect(w * (x - 0.12), h * (y - 0.08), w * 0.24, h * 0.16);
-    ctx.fillText(label, w * x, h * y);
-  }
-  for (const [a, b] of [
-    [0, 3],
-    [1, 4],
-    [2, 5],
-    [3, 4],
-    [4, 6],
-    [5, 4],
-  ] as const) {
-    const [x1, y1] = boxes[a]!;
-    const [x2, y2] = boxes[b]!;
+  const rect = (x: number, y: number, bw: number, bh: number) => ctx.strokeRect(w * x, h * y, w * bw, h * bh);
+  const label = (x: number, y: number, text: string, size = 0.026, weight = 600) => {
+    ctx.font = font(w * size, weight);
+    ctx.fillText(text, w * x, h * y);
+  };
+  const arrow = (x1: number, y1: number, x2: number, y2: number) => {
     ctx.beginPath();
-    ctx.moveTo(w * x1, h * (y1 + 0.08));
-    ctx.lineTo(w * x2, h * (y2 - 0.08));
+    ctx.moveTo(w * x1, h * y1);
+    ctx.lineTo(w * x2, h * y2);
     ctx.stroke();
-  }
-  // the one that matters today
-  ctx.strokeStyle = '#d63a3a';
-  ctx.lineWidth = w * 0.008;
-  ctx.beginPath();
-  ctx.ellipse(w * 0.5, h * 0.85, w * 0.17, h * 0.11, 0, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.fillStyle = '#2b4a8a';
-  ctx.font = font(w * 0.04);
+    const a = Math.atan2(h * (y2 - y1), w * (x2 - x1));
+    const head = w * 0.012;
+    ctx.beginPath();
+    ctx.moveTo(w * x2, h * y2);
+    ctx.lineTo(w * x2 - head * Math.cos(a - 0.5), h * y2 - head * Math.sin(a - 0.5));
+    ctx.lineTo(w * x2 - head * Math.cos(a + 0.5), h * y2 - head * Math.sin(a + 0.5));
+    ctx.closePath();
+    ctx.fill();
+  };
+
   ctx.textAlign = 'left';
-  ctx.fillText('ARCHITECTURE v47', w * 0.03, h * 0.06);
+  label(0.03, 0.06, 'PLATFORM v47', 0.034, 700);
+  ctx.textAlign = 'center';
+  // the internet, and the load balancer in front of everything
+  label(0.5, 0.06, '🌍 internet');
+  rect(0.42, 0.11, 0.16, 0.08);
+  label(0.5, 0.15, 'ALB');
+  arrow(0.5, 0.08, 0.5, 0.11);
+  // the VPC: a dashed boundary round the rest
+  ctx.setLineDash([w * 0.012, w * 0.008]);
+  rect(0.04, 0.24, 0.92, 0.72);
+  ctx.setLineDash([]);
+  ctx.textAlign = 'left';
+  label(0.06, 0.28, 'VPC · 3 AZs', 0.024);
+  ctx.textAlign = 'center';
+  // EKS, its nodes and the services on them
+  rect(0.08, 0.33, 0.5, 0.58);
+  label(0.33, 0.37, 'EKS ☸ k8s', 0.028, 700);
+  const pods = [
+    [0.12, 0.44, 'gateway'],
+    [0.34, 0.44, 'auth'],
+    [0.12, 0.6, 'checkout'],
+    [0.34, 0.6, 'billing'],
+    [0.12, 0.76, 'node svc ×12'],
+    [0.34, 0.76, 'agents ×666'],
+  ] as const;
+  for (const [x, y, name] of pods) {
+    rect(x, y, 0.2, 0.1);
+    label(x + 0.1, y + 0.05, name, 0.022);
+  }
+  arrow(0.5, 0.19, 0.22, 0.44);
+  // Kafka and Postgres, beside the cluster
+  rect(0.64, 0.36, 0.28, 0.24);
+  label(0.78, 0.41, 'Kafka', 0.028, 700);
+  label(0.78, 0.48, 'orders · events', 0.02);
+  label(0.78, 0.54, '3 brokers', 0.02);
+  rect(0.64, 0.68, 0.28, 0.16);
+  label(0.78, 0.76, 'Postgres (RDS)', 0.024);
+  arrow(0.54, 0.49, 0.64, 0.47);
+  arrow(0.54, 0.65, 0.64, 0.5);
+  arrow(0.54, 0.81, 0.64, 0.77);
+  // today's problem
+  ctx.strokeStyle = '#d63a3a';
+  ctx.lineWidth = w * 0.006;
+  ctx.beginPath();
+  ctx.ellipse(w * 0.22, h * 0.81, w * 0.14, h * 0.09, 0, 0, Math.PI * 2);
+  ctx.stroke();
 }
 
 /** His poster: a riff on his favourite album, for the job he actually does. */
@@ -122,8 +153,8 @@ export function createArchitectCorner() {
   glow.position.copy(MONITOR.at).add(new THREE.Vector3(0.4, 0, -0.4));
   scene.add(glow);
 
-  const board = picture(5.6, 3.0, paintWhiteboard, { px: 1024, frame: 0xc9ccd2 });
-  board.position.set(0.6, 4.4, -3.15);
+  const board = picture(5.0, 2.8, paintWhiteboard, { px: 1024, frame: 0xc9ccd2 });
+  board.position.set(-0.6, 4.4, -3.15); // right behind him, all of it in his shots
   const poster = picture(1.7, 2.3, paintPoster);
   poster.position.set(-4.6, 4.2, -3.15);
   scene.add(board, poster);
