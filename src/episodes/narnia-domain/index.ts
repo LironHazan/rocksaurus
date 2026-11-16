@@ -14,14 +14,14 @@ import { SOUND } from './sound';
 import { CHAT, CUE, CUTS, DURATION, LINES, SYLLABLES, YASHI_SCRIPT, calendarAt, mouthAt, speaking } from './timeline';
 
 // Beat sheet (video seconds; timeline.ts has the cues, the chat and the lines)
-//   0–3.6      the DevOps floor, 9 AM: Rorit, Amazaurus, Eilon and Eter at work
-//   3.6–8.6    an email from Chuks lands on Rorit's monitor: Narnia compliance, a new domain name, due yesterday
-//   8.6–10     "Narnia?!": her phone comes out
-//   10–20.6    the DevOps group chat: Rorit's alert; Amazaurus ("Mm. Okay."), Eilon ("Love it!!"), and Eter takes
-//              the lead: waiting on Yashinozarus for the name
-//   20.6–27    Eter at her desk: the Narnia plan, all ticked off but the domain name
-//   27–37      meanwhile, Yashinozarus: the name is ready, but "I need approval from upper management"
-//   37–45      she waits: the desk calendar flies by, days, then years; she sags
+//   0–3.6      the DevOps floor, 9 AM: Rorit, Amazaurus, Eilon and Eter at their desk, together
+//   3.6–8.6    an email from Chuks lands on Rorit's monitor: Narnia compliance, a new domain name for everything
+//   8.6–10     "Narnia?!": her phone comes out. From here on, all four are stressed
+//   10–20.6    the DevOps group chat: 200 microservices, 200 certs; the domain's hardcoded everywhere; Eter leads
+//   20.6–28.6  Yashinozarus: upper management approves the name in 24 hours. The easy part. grep: 4,812
+//   28.6–33    Eter at her desk: the plan, the name ticked off, the certs and the hardcoded domains not
+//   33–45      the grind: all four typing flat out, Rorit's terminal, "Who hardcoded the domain 4,812 times?!", the
+//              calendar flying through months
 //   45–56      Lulu walks over. "When will we be Narnia compliant?" "Year 20666. No worries." The calendar agrees
 //   then the channel's end card (outro.ts)
 
@@ -29,8 +29,8 @@ import { CHAT, CUE, CUTS, DURATION, LINES, SYLLABLES, YASHI_SCRIPT, calendarAt, 
 const SCREEN_LINES = 8;
 /** How far the close-ups stand off. */
 const CLOSE = { face: 4.4, lulu: 5.6 } as const;
-/** Minutes the wall clock races through while she waits: three days. */
-const WAIT_MINUTES = 3 * 24 * 60;
+/** Minutes the wall clock races through in the grind: three days, round and round. */
+const GRIND_MINUTES = 3 * 24 * 60;
 
 const landed = (i: number) => CHAT[i]!.at;
 
@@ -89,15 +89,17 @@ const episode: Episode = {
       [landed(3) + 0.8, 'eter'],
       [landed(4) + 0.2, 'pov'], // her answer
       [CUE.board[0], 'desk'],
-      [LINES[1]!.from, 'eter'],
-      [LINES[1]!.to, 'plan'],
-      [CUE.wait[0], 'desk'],
-      [CUE.wait[0] + 2.0, 'calendar'],
-      [CUE.wait[0] + 4.0, 'eter'],
-      [CUE.wait[0] + 5.6, 'calendar'],
+      [LINES[2]!.from, 'eter'],
+      [LINES[2]!.to, 'plan'], // what's left on it
+      [CUE.grind[0], 'wide'], // all four of them, flat out
+      [CUE.grind[0] + 1.6, 'monitor'], // 4,812 hardcoded domains
+      [LINES[3]!.from, 'rorit'],
+      [LINES[3]!.to + 0.2, 'amazaurus'],
+      [LINES[3]!.to + 1.6, 'eilon'],
+      [LINES[3]!.to + 3.0, 'calendar'], // months go by
       [CUE.lulu[0], 'arrive'],
-      [LINES[3]!.from, 'eter'],
-      [LINES[4]!.from, 'lulu'],
+      [LINES[4]!.from, 'eter'],
+      [LINES[5]!.from, 'lulu'],
       [CUE.year, 'calendar'],
       [CUE.year + 1.0, 'two'],
     ]);
@@ -110,7 +112,7 @@ const episode: Episode = {
       monitor: () => overShoulder(at(floor.monitor), normalOf(floor.monitor), 2.0, -0.2, 0.55),
       rorit: () => face(cast.rigs.Rorit, 0.5), // from her left: her monitor is on her right
       pov: () => phonePov(cast.phones.Rorit, stage.camera),
-      amazaurus: () => face(cast.rigs.Amazaurus),
+      amazaurus: () => inFrontOf(cast.rigs.Amazaurus.head, cast.rigs.Amazaurus.root, CLOSE.face, 0.1, 0.7), // over the desk: he's short
       eilon: () => face(cast.rigs.Eilon),
       eter: () => face(cast.rigs.Eter, 0.35),
       // Eter at her desk, the plan on the wall behind her, the calendar beside her
@@ -141,9 +143,9 @@ const episode: Episode = {
           scene: floor.scene,
           frame(t) {
             cast.update(t);
-            floor.showMail(t < CUE.mail ? 'inbox' : t < CUE.open ? 'new' : 'open');
+            floor.showMail(t < CUE.mail ? 'inbox' : t < CUE.open ? 'new' : t < CUE.grind[0] ? 'open' : 'grind');
             floor.showDay(calendarAt(t));
-            floor.clock.set(9, t / 2 + ease(seg(t, CUE.wait[0], CUE.wait[1])) * WAIT_MINUTES);
+            floor.clock.set(9, t / 2 + ease(seg(t, CUE.grind[0], CUE.grind[1])) * GRIND_MINUTES);
             const shot = floorShotAt(t);
             cast.hideRoritHead(shot === 'pov');
             floor.scene.updateMatrixWorld(true);

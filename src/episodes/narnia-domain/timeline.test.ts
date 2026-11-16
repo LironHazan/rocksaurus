@@ -4,16 +4,16 @@ import { SOUND } from './sound';
 import { CHAT, COMPLIANT_YEAR, CUE, CUTS, DURATION, LINES, YASHI_SCRIPT, calendarAt } from './timeline';
 
 describe('Narnia Compliance', () => {
-  it('the story runs in order: the email, the gasp, the chat, the plan, Yashinozarus, the wait, Lulu, the year', () => {
+  it('the story runs in order: the email, the gasp, the chat, Yashinozarus, the plan, the grind, Lulu, the year', () => {
     const order = [
       CUE.mail,
       CUE.open,
       CUE.gasp,
       CUE.phoneOut,
       CUE.chat[0],
-      CUE.board[0],
       CUE.yashi[0],
-      CUE.wait[0],
+      CUE.board[0],
+      CUE.grind[0],
       CUE.lulu[0],
       CUE.year,
     ];
@@ -36,11 +36,17 @@ describe('Narnia Compliance', () => {
     expect(LINES.at(-1)!.text).toContain(String(COMPLIANT_YEAR));
   });
 
-  it('the calendar says day 1 until she starts waiting, flies through the days and years, and ends on 20666', () => {
+  it('the approval is the quick part: the name is approved before the grind starts', () => {
+    const approved = YASHI_SCRIPT.find(l => l.text.includes('approved'))!;
+    expect(approved.at).toBeLessThan(CUE.grind[0]);
+    expect(CHAT.some(m => m.text.includes('200'))).toBe(true); // 200 microservices, 200 certs
+  });
+
+  it('the calendar says day 1 until the grind, flies through the days and years, and ends on 20666', () => {
     expect(calendarAt(0)).toBe('Day 1');
-    expect(calendarAt(CUE.wait[0])).toBe('Day 1');
+    expect(calendarAt(CUE.grind[0])).toBe('Day 1');
     const seen: number[] = [];
-    for (let t = CUE.wait[0]; t <= CUE.wait[1]; t += 0.1) {
+    for (let t = CUE.grind[0]; t <= CUE.grind[1]; t += 0.1) {
       const [unit, n] = calendarAt(t).split(' ');
       seen.push(unit === 'Year' ? Number(n) * 365 : Number(n));
     }

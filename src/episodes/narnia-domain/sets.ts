@@ -72,8 +72,29 @@ function chair(at: THREE.Vector3): THREE.Group {
   return g;
 }
 
-/** Mail, the way it looks at t: the inbox, then Chuks's email arriving (bold, on top), then opened. */
-export type MailState = 'inbox' | 'new' | 'open';
+/** Rorit's screen, the way it looks at t: the inbox, then Chuks's email arriving (bold, on top), then opened; in the
+ * grind, her terminal: the hardcoded domains, and the certs. */
+export type MailState = 'inbox' | 'new' | 'open' | 'grind';
+/** Her terminal in the grind. */
+const GRIND = [
+  ['$ grep -rl papopako.io | wc -l', '#7fe0b0'],
+  ['4812', '#ff6b5a'],
+  ['$ certs reissue --all', '#7fe0b0'],
+  ['✓ 61/200 · ✗ 3 failed (cert-manager)', '#ffd36b'],
+  ['$ sed -i s/papopako.io/papopako.narnia/', '#7fe0b0'],
+  ['✗ helm: chart pinned to old domain', '#ff6b5a'],
+] as const;
+
+function paintGrind(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  ctx.fillStyle = '#12141c';
+  ctx.fillRect(0, 0, w, h);
+  ctx.textBaseline = 'middle';
+  ctx.font = font(h * 0.055, 600);
+  GRIND.forEach(([text, colour], i) => {
+    ctx.fillStyle = colour;
+    ctx.fillText(text, w * 0.04, h * (0.12 + i * 0.15));
+  });
+}
 const INBOX = [
   ['Silvi', 'Pizza Friday is BACK 🍕'],
   ['Eilon', 'Standup notes 😄'],
@@ -82,6 +103,10 @@ const INBOX = [
 const MAIL = { side: 0.22, ink: '#1f2430', faint: '#7a8090', accent: '#2f6be5', warn: '#d6452f' } as const;
 
 function paintMail(ctx: CanvasRenderingContext2D, w: number, h: number, state: MailState) {
+  if (state === 'grind') {
+    paintGrind(ctx, w, h);
+    return;
+  }
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, w, h);
   const side = w * MAIL.side;
@@ -134,7 +159,7 @@ function paintMail(ctx: CanvasRenderingContext2D, w: number, h: number, state: M
   });
 }
 
-/** The Narnia plan on the wall behind Eter: everything ticked off but the one thing. */
+/** The Narnia plan on the wall behind Eter: the name's done; the real work isn't. */
 function paintPlan(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.fillStyle = '#fbfbf8';
   ctx.fillRect(0, 0, w, h);
@@ -143,17 +168,48 @@ function paintPlan(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.font = font(h * 0.11, 800);
   ctx.fillText('NARNIA COMPLIANCE 🦁', w * 0.05, h * 0.12);
   ctx.fillStyle = '#1f2430';
-  ctx.font = font(h * 0.075, 600);
+  ctx.font = font(h * 0.072, 600);
   [
     '✅ Kickoff',
-    '✅ Slides (47 of them)',
-    '✅ Rollout plan',
-    '⬜ 200 new certs (1 per microservice) 🔐',
-    '⬜ Domain name: ____________',
+    '✅ Domain: papopako.narnia (24 h ⚡)',
+    '⬜ Reissue 200 TLS certs 🔐',
+    '⬜ Replace 4,812 hardcoded domains 😱',
+    '⬜ Update DNS, Helm, configs, README',
   ].forEach((l, i) => ctx.fillText(l, w * 0.06, h * (0.28 + i * 0.115)));
   ctx.fillStyle = '#d6452f';
   ctx.font = font(h * 0.07, 700);
-  ctx.fillText('⏳ waiting on Yashinozarus', w * 0.1, h * 0.9);
+  ctx.fillText('⏳ ETA: unknown', w * 0.1, h * 0.9);
+}
+
+/** The disaster-movie poster: "JUST A DNS CHANGE", in flames. Our own drawing. */
+function paintDisaster(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  const sky = ctx.createLinearGradient(0, 0, 0, h);
+  sky.addColorStop(0, '#1a0a0a');
+  sky.addColorStop(0.55, '#8a1f0f');
+  sky.addColorStop(1, '#ff8a1f');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, w, h);
+  // a burning server rack: its silhouette, its blinking lights, and the flames over it
+  ctx.fillStyle = '#0b0b0f';
+  ctx.fillRect(w * 0.32, h * 0.5, w * 0.36, h * 0.36);
+  ctx.fillStyle = '#ff3b2f';
+  for (let i = 0; i < 6; i++) ctx.fillRect(w * 0.37, h * (0.54 + i * 0.05), w * 0.04, h * 0.015);
+  ctx.fillStyle = '#ffb02e';
+  ctx.font = font(w * 0.22);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🔥🔥🔥', w / 2, h * 0.47);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = font(w * 0.13, 800);
+  ctx.fillText('JUST A', w / 2, h * 0.11);
+  ctx.font = font(w * 0.15, 800);
+  ctx.fillText('DNS CHANGE', w / 2, h * 0.21);
+  ctx.fillStyle = '#ffd36b';
+  ctx.font = font(w * 0.065, 600);
+  ctx.fillText('What could possibly go wrong?', w / 2, h * 0.3);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = font(w * 0.07, 700);
+  ctx.fillText('IN PROD THIS FRIDAY', w / 2, h * 0.93);
 }
 
 /** The DevOps floor: the room, the desks, Rorit's mail, the plan, the calendar. */
@@ -208,22 +264,8 @@ export function createDevopsFloor() {
     ctx.fillText('DevOps 🦖', w / 2, h * 0.52);
   });
   sign.position.set(-2.4, 6.6, BACK + 0.05);
-  const poster = picture(1.8, 2.4, (ctx, w, h) => {
-    ctx.fillStyle = '#121214';
-    ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#7fe0b0';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = font(w * 0.13);
-    ctx.fillText('UPTIME', w / 2, h * 0.3);
-    ctx.font = font(w * 0.09, 600);
-    ctx.fillText('IS A', w / 2, h * 0.43);
-    ctx.font = font(w * 0.13);
-    ctx.fillText('LIFESTYLE', w / 2, h * 0.56);
-    ctx.font = font(w * 0.3);
-    ctx.fillText('🤘', w / 2, h * 0.8);
-  });
-  poster.position.set(-7, 4.6, BACK + 0.05);
+  const poster = picture(2.2, 3.0, paintDisaster, { px: 768 });
+  poster.position.set(-5.4, 4.8, BACK + 0.05); // behind Rorit: in her shots
   scene.add(plan, sign, poster);
 
   const clock = createWallClock(0.6);
