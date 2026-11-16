@@ -19,6 +19,7 @@ import luluYogurt from './lulu-yogurt';
 import feslaFrok from './fesla-frok';
 import meetingRoom from './meeting-room';
 import nodeCve from './node-cve';
+import narniaDomain from './narnia-domain';
 import officeBesties from './office-besties';
 import prodCerts from './prod-certs';
 import steggyMatcha from './steggy-matcha';
@@ -40,7 +41,7 @@ export const folders: readonly EpisodeFolder[] = [
   { id: 'lulu', title: 'Lulu', episodes: [luluOnCall, officeBesties, luluYogurt, feslaFrok, meetingRoom, nodeCve] },
   { id: 'steggy', title: 'Steggy', episodes: [steggyMatcha] },
   { id: 'rory', title: 'Rory', episodes: [roryPizza, roryFriday, roryRocks] },
-  { id: 'papo-pako', title: 'Papo Pako Shapeworks', episodes: [prodCerts] },
+  { id: 'papo-pako', title: 'Papo Pako Shapeworks', episodes: [prodCerts, narniaDomain] },
 ];
 
 export const episodes: readonly Episode[] = folders.flatMap(f => f.episodes);
