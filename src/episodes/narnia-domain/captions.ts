@@ -25,7 +25,7 @@ const AT_THE_BOTTOM: Caption[] = [
   sub(landed(2), landed(3) - 0.6, 'Eilon: smiling. Nervously 😅'),
   sub(landed(3) + 0.6, CUE.chat[1], 'Eter leads the Narnia effort 🦁'),
   punch(landed(4) - 0.4, CUE.chat[1], 'Step one: a name'),
-  title(CUE.yashi[0] + 0.2, LINES[1]!.from - 0.1, '🧠 Yashinozarus\nAsks upper management'),
+  title(CUE.yashi[0] + 0.2, LINES[1]!.from - 0.1, '🧠 Yashinozarus\nAsks upper management on Hack 💬'),
   line(1),
   sub(LINES[1]!.to + 0.1, CUE.yashi[1], 'Approved: papopakoshapeworks.na 🦁'),
   punch(LINES[1]!.to + 0.5, CUE.yashi[1], 'The easy part ✅ Now: every hardcoded .com 🔍'),

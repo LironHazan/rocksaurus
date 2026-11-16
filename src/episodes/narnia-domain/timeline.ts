@@ -2,6 +2,7 @@ import { speech, type SpokenLine } from '../../audio/babble';
 import { OFFICE_VOICES } from '../../characters/coworkers';
 import type { TimedChatLine } from '../../props/phone';
 import type { ScriptLine } from '../../world/screen-script';
+import type { HackMessage } from '../../world/hack-window';
 
 // The DevOps floor at Papo Pako Shapeworks, 9 AM. An email from Chuks lands on Rorit's screen: Narnia compliance, a
 // new, Narnia-approved domain name for everything: papopakoshapeworks.com becomes papopakoshapeworks.na. She alerts the DevOps group chat: Amazaurus does the maths (200
@@ -72,12 +73,16 @@ export const { syllables: SYLLABLES, mouthAt } = speech(LINES, OFFICE_VOICES, 47
 export const speaking = (who: keyof typeof OFFICE_VOICES, t: number) =>
   LINES.some(l => l.who === who && t >= l.from && t < l.to);
 
-/** Yashinozarus's terminal: the name, approved in a day; then the size of the real job. */
+/** Yashinozarus asks upper management on Hack (the team chat): they approve the name. In 24 hours. */
+export const UPPER_MANAGEMENT = 'Upper Mgmt';
+export const HACK_DM: readonly HackMessage[] = [
+  { who: 'Yashinozarus', text: 'Hi 👋 Can we approve papopakoshapeworks.na for Narnia? 🙏', at: 29.7 },
+  { who: UPPER_MANAGEMENT, text: '👀 Looking into it', at: 31.6 },
+  { who: UPPER_MANAGEMENT, text: '(24 hours later) Approved ✅', at: 33.0 },
+];
+/** Then, in his terminal, the size of the real job. */
 export const YASHI_SCRIPT: readonly ScriptLine[] = [
   { at: 0.0, text: 'yashi@arch ~ $', kind: 'title' },
-  { at: 29.7, text: '› approve papopakoshapeworks.na', kind: 'prompt', cps: 16 },
-  { at: 31.9, text: '⏳ sent to upper management…', kind: 'dim' },
-  { at: 33.0, text: '✓ approved in 24 h ✅', kind: 'ok' },
   { at: 37.5, text: '› grep -rl papopakoshapeworks.com | wc -l', kind: 'prompt', cps: 18 },
   { at: 39.3, text: '4812 😱', kind: 'err' },
 ];

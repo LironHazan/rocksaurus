@@ -1,7 +1,7 @@
 import { TYPING } from '../../props/phone';
 import { CAPTIONS } from './captions';
 import { SOUND } from './sound';
-import { CHAT, COMPLIANT_YEAR, CUE, CUTS, DURATION, LINES, YASHI_SCRIPT, calendarAt } from './timeline';
+import { CHAT, COMPLIANT_YEAR, HACK_DM, CUE, CUTS, DURATION, LINES, YASHI_SCRIPT, calendarAt } from './timeline';
 
 describe('Narnia Compliance', () => {
   it('the story runs in order: the email, the gasp, the chat, Yashinozarus, the plan, the grind, Lulu, the year', () => {
@@ -37,7 +37,7 @@ describe('Narnia Compliance', () => {
   });
 
   it('the approval is the quick part: the name is approved before the grind starts', () => {
-    const approved = YASHI_SCRIPT.find(l => l.text.includes('approved'))!;
+    const approved = HACK_DM.find(m => m.text.includes('Approved'))!;
     expect(approved.at).toBeLessThan(CUE.grind[0]);
     expect(CHAT.some(m => m.text.includes('200'))).toBe(true); // 200 microservices, 200 certs
   });
@@ -59,6 +59,7 @@ describe('Narnia Compliance', () => {
     for (let i = 1; i < CUTS.length; i++) expect(CUTS[i]![0]).toBeGreaterThan(CUTS[i - 1]![0]);
     const atHisDesk = (t: number) => CUTS.findLast(([at]) => at <= t)?.[1] === 'yashi';
     for (const l of YASHI_SCRIPT.slice(1)) expect(atHisDesk(l.at)).toBe(true);
+    for (const m of HACK_DM) expect(atHisDesk(m.at)).toBe(true); // he asks on Hack, at his desk
     expect(atHisDesk(LINES.find(l => l.who === 'Yashinozarus')!.from)).toBe(true);
   });
 

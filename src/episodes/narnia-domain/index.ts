@@ -5,13 +5,27 @@ import { ease, lerp, seg } from '../../engine/math';
 import { playSyllables } from '../../audio/babble';
 import { phonePov } from '../../props/phone';
 import { cornerShots, createArchitectCorner, createYashiAtDesk } from '../../world/architect-corner';
+import { hackOver, typedOut } from '../../world/hack-window';
 import { keystrokes, linesAt } from '../../world/screen-script';
 import { withOutro } from '../outro';
 import { CAPTIONS } from './captions';
 import { createFloorCast } from './cast';
 import { SPOTS, createDevopsFloor } from './sets';
 import { SOUND } from './sound';
-import { CHAT, CUE, CUTS, DURATION, LINES, SYLLABLES, YASHI_SCRIPT, calendarAt, mouthAt, speaking } from './timeline';
+import {
+  CHAT,
+  CUE,
+  CUTS,
+  DURATION,
+  HACK_DM,
+  LINES,
+  SYLLABLES,
+  UPPER_MANAGEMENT,
+  YASHI_SCRIPT,
+  calendarAt,
+  mouthAt,
+  speaking,
+} from './timeline';
 
 // Beat sheet (video seconds; timeline.ts has the cues, the chat and the lines). Slow on purpose: every infra beat
 // gets time to land.
@@ -19,13 +33,16 @@ import { CHAT, CUE, CUTS, DURATION, LINES, SYLLABLES, YASHI_SCRIPT, calendarAt, 
 //   5–12       an email from Chuks lands on Rorit's monitor: Narnia compliance, papopakoshapeworks.com → .na
 //   12–14      "Narnia?!": her phone comes out. From here on, all four are stressed
 //   14–28.8    the DevOps group chat: 200 microservices, 200 certs; the domain's hardcoded everywhere; Eter leads
-//   28.8–40    Yashinozarus: upper management approves papopakoshapeworks.na in 24 hours. The easy part. grep: 4,812
+//   28.8–40    Yashinozarus asks upper management on Hack: papopakoshapeworks.na, approved in 24 hours. The easy
+//              part. Then grep, in his terminal: 4,812
 //   40–46.2    Eter at her desk: the plan, the domain ticked off, the certs and the hardcoded domains not
 //   46.2–63    the grind: all four typing flat out, Rorit's terminal, "Who hardcoded the domain 4,812 times?!", the
 //              calendar flying through months
 //   63–78      Lulu walks over. "When will we be Narnia compliant?" "Year 20666. No worries." The calendar agrees
 //   then the channel's end card (outro.ts)
 
+/** Their avatar colours in Hack. */
+const AVATARS = { Yashinozarus: '#7fa38f', [UPPER_MANAGEMENT]: '#8a8f9c' };
 /** The screen shows its last lines: as many as fit. */
 const SCREEN_LINES = 8;
 /** How far the close-ups stand off. */
@@ -59,6 +76,8 @@ const episode: Episode = {
       t => speaking('Yashinozarus', t),
     );
     corner.scene.add(yashi.rig.root);
+    // Hack, open on his monitor: his DM with upper management, until he goes to his terminal
+    const hack = hackOver(corner.screen.mesh, UPPER_MANAGEMENT, AVATARS);
 
     const at = (o: THREE.Object3D) => o.getWorldPosition(new THREE.Vector3());
     const normalOf = (o: THREE.Object3D) => new THREE.Vector3(0, 0, 1).applyQuaternion(o.quaternion);
@@ -158,6 +177,8 @@ const episode: Episode = {
           frame(t) {
             yashi.update(t);
             corner.screen.show(linesAt(YASHI_SCRIPT, t).slice(-SCREEN_LINES), true);
+            hack.mesh.visible = t < YASHI_SCRIPT[1]!.at;
+            hack.show(typedOut(HACK_DM, t));
             corner.scene.updateMatrixWorld(true);
             return YASHI_SHOTS[yashiShotAt(t)](t);
           },

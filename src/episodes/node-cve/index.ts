@@ -9,7 +9,8 @@ import { CAPTIONS } from './captions';
 import { createAskers, createLuluAtDesk } from './cast';
 import { cornerShots, createArchitectCorner, createYashiAtDesk } from '../../world/architect-corner';
 import { keystrokes } from '../../world/screen-script';
-import { createHackWindow, createSign } from './sets';
+import { hackOver } from '../../world/hack-window';
+import { createSign } from './sets';
 import { SOUND } from './sound';
 import { playSyllables } from '../../audio/babble';
 import { LULU_SCRIPT, YASHI_SCRIPT, dmAt } from './terminal';
@@ -27,8 +28,8 @@ import { ASKERS, CUE, CUTS, DURATION, LINES, SYLLABLES, mouthAt } from './timeli
 //   50.6–57    back at her desk, Rorit is back: "Sorry, one more: what's an AGENT?" Her head goes down on the desk
 //   then the channel's end card (outro.ts)
 
-/** Hack sits this far in front of the terminal it covers. */
-const HACK_IN_FRONT = new THREE.Vector3(0, 0, 0.005);
+/** Their avatar colours in Hack. */
+const AVATARS = { Yashinozarus: '#7fa38f', Lulu: '#c79bd8' } as const;
 /** How long the shot of the sign holds when she's just put it up (seconds): long enough to read it. */
 const SIGN_HOLD_S = 1.2;
 /** The screen shows its last lines: as many as fit. */
@@ -60,17 +61,9 @@ const episode: Episode = {
     sign.position.set(...SIGN_ON_MONITOR);
     sign.rotation.y = Math.PI; // facing out the back
     office.monitor.add(sign);
-    // Hack, open over each terminal for the DM: the same size, a hair in front of it
-    const hackOver = (screen: THREE.Mesh, other: 'Yashinozarus' | 'Lulu') => {
-      const size =
-        screen.geometry instanceof THREE.PlaneGeometry ? screen.geometry.parameters : { width: 1, height: 1 };
-      const hack = createHackWindow(size.width, size.height, other);
-      hack.mesh.position.copy(screen.position).add(HACK_IN_FRONT);
-      screen.parent!.add(hack.mesh);
-      return hack;
-    };
-    const luluHack = hackOver(office.screen.mesh, 'Yashinozarus');
-    const yashiHack = hackOver(corner.screen.mesh, 'Lulu');
+    // Hack, open over each terminal for the DM
+    const luluHack = hackOver(office.screen.mesh, 'Yashinozarus', AVATARS);
+    const yashiHack = hackOver(corner.screen.mesh, 'Lulu', AVATARS);
     const screenNormal = new THREE.Vector3();
     const screenAt = (m: THREE.Object3D) => m.getWorldPosition(new THREE.Vector3());
     const normalOf = (m: THREE.Object3D) => screenNormal.set(0, 0, 1).applyQuaternion(m.quaternion);

@@ -26,7 +26,7 @@ const SHOCK = 1.35;
 const STRESS = { eyes: 1.2, jitter: 0.05, jitterRate: 13, typeRate: 16, dip: 0.25 } as const;
 const SWEAT_S = 1.3;
 /** The sweat drop beside the outer eye (in eye spacings): out, up, how far it runs down, and its size. */
-const SWEAT = { out: 0.4, up: 0.5, fall: 1.0, size: 0.22 } as const;
+const SWEAT = { out: 0.35, up: 0.5, fall: 0.8, size: 0.11 } as const;
 /** Lulu's walk over: a step (seconds) and how big. */
 const LULU_STEP = 0.5;
 const LULU_STRIDE = 0.8;

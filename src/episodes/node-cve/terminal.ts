@@ -1,4 +1,5 @@
 import type { ScriptLine } from '../../world/screen-script';
+import { typedOut, type HackMessage } from '../../world/hack-window';
 import { CUE } from './timeline';
 
 // What's on their screens: their terminals, and Hack (the team chat) for his DM. Version numbers are made up for the
@@ -26,22 +27,11 @@ export const YASHI_SCRIPT: readonly ScriptLine[] = [
   { at: CUE.patch[0] + 3.6, text: '✓ Rolled out to EKS · tests green 🛡️', kind: 'ok' },
 ];
 
-/** A chat message: who wrote it, what, and when they start typing it (it's typed out at `cps`). */
-interface ChatMessage {
-  who: 'Yashinozarus' | 'Lulu';
-  text: string;
-  at: number;
-}
-/** How fast they type in chat (characters a second). */
-const CHAT_CPS = 30;
 /** His DM to her, and her answer. */
-const DM: readonly ChatMessage[] = [
+const DM: readonly HackMessage[] = [
   { who: 'Yashinozarus', text: '🚨 Critical npm CVE. Node.js upgrade, no fixes for deprecated versions.', at: CUE.dm },
   { who: 'Yashinozarus', text: 'Come over? 🧐', at: CUE.dm + 1.0 },
   { who: 'Lulu', text: 'On my way 🏃‍♀️', at: CUE.ping + 2.0 },
 ];
-/** The messages as they stand at t: each typed out so far. */
-export const dmAt = (t: number): { who: ChatMessage['who']; text: string }[] =>
-  DM.flatMap(m =>
-    t >= m.at ? [{ who: m.who, text: [...m.text].slice(0, Math.floor((t - m.at) * CHAT_CPS)).join('') }] : [],
-  );
+/** The DM as it stands at t. */
+export const dmAt = (t: number) => typedOut(DM, t);
