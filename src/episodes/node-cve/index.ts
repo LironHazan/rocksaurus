@@ -6,12 +6,15 @@ import { linesAt } from '../../world/screen-script';
 import { createOffice } from '../../world/lulu-office';
 import { withOutro } from '../outro';
 import { CAPTIONS } from './captions';
-import { createAskers, createLuluAtDesk, createYashiAtDesk } from './cast';
-import { createArchitectCorner, createHackWindow, createSign } from './sets';
+import { createAskers, createLuluAtDesk } from './cast';
+import { cornerShots, createArchitectCorner, createYashiAtDesk } from '../../world/architect-corner';
+import { keystrokes } from '../../world/screen-script';
+import { hackOver } from '../../world/hack-window';
+import { createSign } from './sets';
 import { SOUND } from './sound';
 import { playSyllables } from '../../audio/babble';
 import { LULU_SCRIPT, YASHI_SCRIPT, dmAt } from './terminal';
-import { ASKERS, CUE, CUTS, DURATION, LINES, SYLLABLES } from './timeline';
+import { ASKERS, CUE, CUTS, DURATION, LINES, SYLLABLES, mouthAt } from './timeline';
 
 // Beat sheet (video seconds; timeline.ts has the cues and lines)
 //   0–3.4      Lulu at her desk, typing to her agent
@@ -25,14 +28,14 @@ import { ASKERS, CUE, CUTS, DURATION, LINES, SYLLABLES } from './timeline';
 //   50.6–57    back at her desk, Rorit is back: "Sorry, one more: what's an AGENT?" Her head goes down on the desk
 //   then the channel's end card (outro.ts)
 
-/** Hack sits this far in front of the terminal it covers. */
-const HACK_IN_FRONT = new THREE.Vector3(0, 0, 0.005);
+/** Their avatar colours in Hack. */
+const AVATARS = { Yashinozarus: '#7fa38f', Lulu: '#c79bd8' } as const;
 /** How long the shot of the sign holds when she's just put it up (seconds): long enough to read it. */
 const SIGN_HOLD_S = 1.2;
 /** The screen shows its last lines: as many as fit. */
 const SCREEN_LINES = 8;
 /** How far the close-ups stand off. */
-const CLOSE = { lulu: 5.6, asker: 5.0, big: 7.0, yashi: 4.4 } as const;
+const CLOSE = { lulu: 5.6, asker: 5.0, big: 7.0 } as const;
 /** The sign's place on her monitor: taped to its back, facing whoever comes to her desk (in the monitor's space). */
 const SIGN_ON_MONITOR = [0, -0.3, -0.13] as const; // above the top of its pole
 
@@ -47,24 +50,20 @@ const episode: Episode = {
     const corner = createArchitectCorner();
     const lulu = createLuluAtDesk();
     const askers = createAskers();
-    const yashi = createYashiAtDesk();
+    const yashi = createYashiAtDesk(
+      keystrokes(YASHI_SCRIPT),
+      t => mouthAt('Yashinozarus', t),
+      t => LINES.some(l => l.who === 'Yashinozarus' && t >= l.from && t < l.to),
+    );
     office.scene.add(lulu.rig.root, ...Object.values(askers.rigs).map(r => r.root));
     corner.scene.add(yashi.rig.root);
     const sign = createSign();
     sign.position.set(...SIGN_ON_MONITOR);
     sign.rotation.y = Math.PI; // facing out the back
     office.monitor.add(sign);
-    // Hack, open over each terminal for the DM: the same size, a hair in front of it
-    const hackOver = (screen: THREE.Mesh, other: 'Yashinozarus' | 'Lulu') => {
-      const size =
-        screen.geometry instanceof THREE.PlaneGeometry ? screen.geometry.parameters : { width: 1, height: 1 };
-      const hack = createHackWindow(size.width, size.height, other);
-      hack.mesh.position.copy(screen.position).add(HACK_IN_FRONT);
-      screen.parent!.add(hack.mesh);
-      return hack;
-    };
-    const luluHack = hackOver(office.screen.mesh, 'Yashinozarus');
-    const yashiHack = hackOver(corner.screen.mesh, 'Lulu');
+    // Hack, open over each terminal for the DM
+    const luluHack = hackOver(office.screen.mesh, 'Yashinozarus', AVATARS);
+    const yashiHack = hackOver(corner.screen.mesh, 'Lulu', AVATARS);
     const screenNormal = new THREE.Vector3();
     const screenAt = (m: THREE.Object3D) => m.getWorldPosition(new THREE.Vector3());
     const normalOf = (m: THREE.Object3D) => screenNormal.set(0, 0, 1).applyQuaternion(m.quaternion);
@@ -122,13 +121,9 @@ const episode: Episode = {
       [LINES[8]!.to, 'screen'], // the images, rebuilt and rolled out
       [LINES[9]!.from, 'face'],
     ]);
+    const shotsAtHisDesk = cornerShots(corner, yashi, CUE.yashi[0]);
     const YASHI_SHOTS: Record<YashiShot, (t: number) => Shot> = {
-      desk: t => {
-        const c = ease(seg(t, CUE.yashi[0], CUE.yashi[0] + 1.4));
-        return { cam: [lerp(3.6, 2.8, c), 3.4, lerp(8.6, 7.4, c)], look: [-0.2, 2.4, 0.6] };
-      },
-      screen: () => overShoulder(screenAt(corner.monitor), normalOf(corner.monitor), 1.4, -0.3, 0.6), // past his head
-      face: () => inFrontOf(yashi.rig.head, yashi.rig.root, CLOSE.yashi, 0.2, 0.1),
+      ...shotsAtHisDesk,
       arrive: () => ({ cam: [5.6, 4.8, 11.5], look: [0.8, 2.8, 0.6] }), // she walks in, over to him
       lulu: () => inFrontOf(lulu.rig.head, lulu.rig.root, CLOSE.lulu, 0.6, -0.2),
     };

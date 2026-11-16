@@ -3,6 +3,11 @@ import { createOrnithomimus, RORIT_COLORS, type OrnithomimusRig } from './ornith
 import { createTyrannosaurus, TIKI_COLORS } from './tyrannosaurus';
 import { createCeratops } from './ceratops';
 import { createStegosaurus, STEGGY_COLORS, type StegosaurusRig } from './stegosaurus';
+import { createRory } from './rory';
+import { createLulu } from './lulu';
+import { addAfroPuff } from '../props/afro';
+import { addFlannel } from '../props/flannel';
+import type { RigFit } from './types';
 import { ball } from './materials';
 import { addGlasses } from '../props/glasses';
 import { addJersey, TREX_BODY } from '../props/soccer';
@@ -14,7 +19,7 @@ import { textTexture } from '../world/text-texture';
 import type { Voice } from '../audio/babble';
 
 // Lulu's coworkers at Papo Pako Shapeworks. Statitezarus, Igarzarus and Dchozaurus share the slim Ornithomimus build
-// (like Taluzarus in Prod Certs); Ogozaurus is a big T-Rex, Tiki Taka's build; Yashinozarus, the architect, a
+// (like Taluzarus in Prod Certs); Eter is a long-neck, Lulu's build; Eilon, the tech lead, is a little T-Rex, Rory's build; Ogozaurus is a big T-Rex, Tiki Taka's build; Yashinozarus, the architect, a
 // Stegosaurus. Clothes are plain shapes and our own prints: no real logos.
 
 /** Ogozaurus is slimmer than Tiki Taka: his width and depth, scaled. */
@@ -234,9 +239,64 @@ export function createYashinozarus(): StegosaurusRig {
   return rig;
 }
 
+const EILON_COLORS = { body: 0xff9a7a, belly: 0xfff0e0, bumps: 0xe8765a, cheeks: 0xffb3c1 };
+
+/** Rory's build, measured (see createRory): the body ellipsoid a shirt wraps, and the head. */
+const RORY_FIT: RigFit = { torso: { center: [0, 1.2, 0], radii: [1, 1.1, 0.95] }, head: [1, 0.92, 1] };
+
+/** Eilon: the tech lead. Short, blue eyes, always smiling; a plain grey tee and jeans. */
+export function createEilon() {
+  const rig = Object.assign(createRory(EILON_COLORS), { fit: RORY_FIT });
+  const iris = new THREE.MeshPhysicalMaterial({ color: 0x3d8ef0, roughness: 0.15, clearcoat: 1 });
+  const pupil = new THREE.MeshPhysicalMaterial({ color: 0x1b1b2e, roughness: 0.15, clearcoat: 1 });
+  for (const eye of rig.eyes) {
+    const eyeball = eye.children.find(c => c instanceof THREE.Mesh); // the first mesh in each eye is the eyeball
+    if (eyeball instanceof THREE.Mesh) eyeball.material = iris;
+    eye.add(ball(0.13, pupil, [0, -0.01, 0.08], [1, 1.1, 0.5]));
+  }
+  addBandTee(rig, { text: '', color: 0x9aa0a8 }); // plain grey
+  // jeans: over the hips and thighs, cuffs rolled above the feet
+  const denim = new THREE.MeshStandardMaterial({ color: 0x3b5a8c, roughness: 0.9 });
+  const [cx, cy, cz] = RORY_FIT.torso.center;
+  const [rx, ry, rz] = RORY_FIT.torso.radii;
+  const hips = new THREE.Mesh(
+    new THREE.SphereGeometry(1, 48, 24, 0, Math.PI * 2, Math.PI * 0.64, Math.PI * 0.36),
+    denim,
+  );
+  hips.scale.set(rx * 1.03, ry * 1.03, rz * 1.03);
+  hips.position.set(cx, cy, cz);
+  rig.torso.add(hips);
+  for (const thigh of rig.thighs) thigh.material = denim;
+  for (const foot of rig.feet) {
+    const cuff = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.07, 8, 24), denim);
+    cuff.rotation.x = Math.PI / 2;
+    cuff.position.y = 0.36;
+    foot.add(cuff);
+  }
+  return rig;
+}
+
+/** Eter: DevOps, and she leads the Narnia effort. Lulu's build (a long-neck), lion gold (it's Narnia), her curly hair
+ * up in a high afro puff, and a forest-green flannel. Very organised; very patient, for now. */
+export function createEter() {
+  const rig = createLulu({
+    body: 0xe8b84a,
+    belly: 0xfbeccb,
+    spots: 0xc9962e,
+    cheeks: 0xffb3a1,
+    flower: 0xffffff,
+    eyes: 0x3a8a4a,
+  });
+  rig.flower.visible = false; // the flower is Lulu's
+  for (const stick of rig.sticks) stick.visible = false; // and so are the drumsticks
+  addAfroPuff(rig, { color: 0x3a2418, scrunchie: 0xffd23f, seed: 5 });
+  addFlannel(rig, { base: '#2f6b45', band: '#16261c', accent: '#c9962e', line: '#e3d6b0' });
+  return rig;
+}
+
 /** How they sound when they talk (babble): Dchozaurus warm, Igarzarus dry, Statitezarus quick and eager, Ogozaurus
  * (a big T-Rex, delighted) the highest of them all, Yashinozarus low and unhurried, Rorit bright and quick, Silvi
- * sunny, Omli deep; and Lulu. */
+ * sunny, Omli deep, Eter clear and brisk; and Lulu. */
 export const OFFICE_VOICES = {
   Ogozaurus: { notes: ['C4', 'E4', 'G4', 'A4'], rate: 0.14 },
   Dchozaurus: { notes: ['C3', 'D3', 'F3', 'G3'], rate: 0.14 },
@@ -247,4 +307,5 @@ export const OFFICE_VOICES = {
   Silvi: { notes: ['C4', 'D4', 'E4', 'G4'], rate: 0.15 },
   Omli: { notes: ['F2', 'G2', 'A2', 'C3'], rate: 0.16 },
   Lulu: { notes: ['F3', 'G3', 'A3', 'C4'], rate: 0.17 },
+  Eter: { notes: ['E4', 'F4', 'A4', 'B4'], rate: 0.13 },
 } as const satisfies Record<string, Voice>;

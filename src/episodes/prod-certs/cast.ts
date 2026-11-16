@@ -1,9 +1,6 @@
 import * as THREE from 'three';
 import { ball } from '../../characters/materials';
 import { createOrnithomimus, RORIT_COLORS, type OrnithomimusRig } from '../../characters/ornithomimus';
-import { createRory } from '../../characters/rory';
-import { addBandTee } from '../../props/band-tee';
-import type { RigFit } from '../../characters/types';
 import { addPonytail } from '../../props/ponytail';
 import { ROUND } from '../../world/interior';
 import { textTexture } from '../../world/text-texture';
@@ -116,41 +113,5 @@ export function createTaluzarus(): OrnithomimusRig {
   return rig;
 }
 
-const EILON_COLORS = { body: 0xff9a7a, belly: 0xfff0e0, bumps: 0xe8765a, cheeks: 0xffb3c1 };
-
-/** Rory's build, measured (see createRory): the body ellipsoid a shirt wraps, and the head. */
-const RORY_FIT: RigFit = { torso: { center: [0, 1.2, 0], radii: [1, 1.1, 0.95] }, head: [1, 0.92, 1] };
-
-/** Eilon: the tech lead. Short, blue eyes, always smiling; a plain grey tee and jeans. */
-export function createEilon() {
-  const rig = Object.assign(createRory(EILON_COLORS), { fit: RORY_FIT });
-  const iris = new THREE.MeshPhysicalMaterial({ color: 0x3d8ef0, roughness: 0.15, clearcoat: 1 });
-  const pupil = new THREE.MeshPhysicalMaterial({ color: 0x1b1b2e, roughness: 0.15, clearcoat: 1 });
-  for (const eye of rig.eyes) {
-    const eyeball = eye.children.find(c => c instanceof THREE.Mesh); // the first mesh in each eye is the eyeball
-    if (eyeball instanceof THREE.Mesh) eyeball.material = iris;
-    eye.add(ball(0.13, pupil, [0, -0.01, 0.08], [1, 1.1, 0.5]));
-  }
-  addBandTee(rig, { text: '', color: 0x9aa0a8 }); // plain grey
-  // jeans: over the hips and thighs, cuffs rolled above the feet
-  const denim = new THREE.MeshStandardMaterial({ color: 0x3b5a8c, roughness: 0.9 });
-  const [cx, cy, cz] = RORY_FIT.torso.center;
-  const [rx, ry, rz] = RORY_FIT.torso.radii;
-  const hips = new THREE.Mesh(
-    new THREE.SphereGeometry(1, 48, 24, 0, Math.PI * 2, Math.PI * 0.64, Math.PI * 0.36),
-    denim,
-  );
-  hips.scale.set(rx * 1.03, ry * 1.03, rz * 1.03);
-  hips.position.set(cx, cy, cz);
-  rig.torso.add(hips);
-  for (const thigh of rig.thighs) thigh.material = denim;
-  for (const foot of rig.feet) {
-    const cuff = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.07, 8, 24), denim);
-    cuff.rotation.x = Math.PI / 2;
-    cuff.position.y = 0.36;
-    foot.add(cuff);
-  }
-  return rig;
-}
-
+export { createEilon } from '../../characters/coworkers';
 export { createAmazaurus } from '../../characters/amazaurus';

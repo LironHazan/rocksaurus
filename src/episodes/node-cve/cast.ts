@@ -2,21 +2,20 @@ import * as THREE from 'three';
 import { ease, lerp, seg } from '../../engine/math';
 import { cuts } from '../../engine/director';
 import { createLulu, idleLulu, reachLulu, resetLulu, walkLulu } from '../../characters/lulu';
-import { createRorit, createSilvi, createYashinozarus } from '../../characters/coworkers';
+import { createRorit, createSilvi } from '../../characters/coworkers';
 import { createOmli } from '../../characters/omli';
 import { restRig } from '../../characters/rest';
-import { armOf, reachArm } from '../../characters/reach';
 import type { CharacterRig } from '../../characters/types';
 import { addPonytail } from '../../props/ponytail';
 import { addFlannel } from '../../props/flannel';
 import { recentHit } from '../../band/timing';
 import { keystrokes } from '../../world/screen-script';
 import { DESK_SPOT } from '../../world/lulu-office';
-import { KEYBOARD } from './sets';
-import { LULU_SCRIPT, YASHI_SCRIPT } from './terminal';
+import { LULU_SCRIPT } from './terminal';
 import { ASKERS, CUE, LINES, mouthAt } from './timeline';
 
-// Who does what, as a function of t: Lulu at her desk, the askers walking up and away, Yashinozarus at his.
+// Who does what, as a function of t: Lulu at her desk, and the askers walking up and away. Yashinozarus at his desk is
+// world/architect-corner.ts.
 
 /** Where the askers come in from (the hallway: front right, past the open side of the room, never through a wall),
  * and where they stop by her desk. */
@@ -155,31 +154,6 @@ export function createAskers() {
         else walk(rig, BY_DESK, ENTRY, a.leave[0], a.leave[1], t);
         rig.setMouth(mouthAt(a.who, t));
       }
-    },
-  };
-}
-
-/** Yashinozarus at his desk: typing, reading, saying very little. */
-export function createYashiAtDesk() {
-  const yashi = createYashinozarus();
-  const feet = yashi.feet.map(f => f.position.clone());
-  const keys = keystrokes(YASHI_SCRIPT);
-  const paws = [armOf(yashi, -1), armOf(yashi, 1)] as const;
-  const v = new THREE.Vector3();
-  return {
-    rig: yashi,
-    update(t: number) {
-      restRig(yashi, feet, t, { eyesOpen: 0.8 });
-      yashi.head.rotation.y = 0.35; // to his monitor, on his left
-      yashi.setMouth(mouthAt('Yashinozarus', t));
-      if (at('Yashinozarus', t)) yashi.head.rotation.set(0.05, 0.15, -0.08); // to us, an eyebrow up
-      yashi.root.updateMatrixWorld(true);
-      const i = keys.findLastIndex(k => k <= t);
-      paws.forEach((paw, k) => {
-        const hit = i >= 0 && i % 2 === k ? recentHit(t, [keys[i]!], 18) : 0;
-        const key = v.copy(KEYBOARD).add(new THREE.Vector3((k ? 1 : -1) * 0.25, 0.12 * (1 - hit), 0));
-        reachArm(paw, paw.parent!.worldToLocal(key));
-      });
     },
   };
 }

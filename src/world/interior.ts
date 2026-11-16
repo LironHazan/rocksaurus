@@ -354,3 +354,18 @@ export function createWallClock(r = 0.6): WallClock {
     },
   };
 }
+
+/**
+ * A desk monitor around a screen mesh `w` × `h` (facing +z, its centre at the group's origin less half its height):
+ * a black bezel, and a stand `rise` tall from the desk up to the screen's bottom edge.
+ */
+export function deskMonitor(screen: THREE.Mesh, w: number, h: number, rise: number): THREE.Group {
+  const monitor = new THREE.Group();
+  const bezel = box(w + 0.12, h + 0.12, 0.08, mat(0x16171c, 0.4));
+  bezel.position.set(0, -(h + 0.12) / 2, -0.05);
+  // box and cylinder stand on their base
+  const stand = cylinder(0.05, 0.05, rise, mat(0x9aa0ad, 0.3, { metalness: 0.6 }));
+  stand.position.set(0, -h / 2 - rise, -0.12);
+  monitor.add(bezel, screen, stand);
+  return monitor;
+}
