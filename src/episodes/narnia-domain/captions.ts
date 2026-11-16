@@ -14,7 +14,7 @@ const RANT = LINES[3]!;
 const AT_THE_BOTTOM: Caption[] = [
   title(0.2, CUE.campus[1] - 0.2, '🏢 Papo Pako Shapeworks\n9 AM'),
   title(CUE.campus[1] + 0.1, CUE.mail - 0.2, '🦖 The DevOps team'),
-  sub(CUE.mail, CUE.open + 1.6, '📧 New email. From: Chuks'),
+  sub(CUE.mail, CUE.open + 1.6, '📧 New email on the Narnia new region'),
   punch(CUE.mail + 0.6, CUE.open + 1.6, 'Subject: Narnia compliance ⚠️'),
   sub(CUE.open + 1.7, CUE.gasp, 'New domain: papopakoshapeworks.com → .na 🌐'),
   punch(CUE.open + 2.3, CUE.gasp, 'For every service. Due: yesterday 💀'),

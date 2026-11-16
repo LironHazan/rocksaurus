@@ -72,7 +72,7 @@ function chair(at: THREE.Vector3): THREE.Group {
   return g;
 }
 
-/** Rorit's screen, the way it looks at t: the inbox, then Chuks's email arriving (bold, on top), then opened; in the
+/** Rorit's screen, the way it looks at t: the inbox, then the Narnia region's email arriving (bold, on top), then opened; in the
  * grind, her terminal: the hardcoded domains, the certs, and the tests (the domain's hardcoded in them too). */
 export type MailState = 'inbox' | 'new' | 'open' | 'grind';
 /** Her terminal in the grind. */
@@ -125,10 +125,10 @@ function paintMail(ctx: CanvasRenderingContext2D, w: number, h: number, state: M
   if (state === 'open') {
     ctx.fillStyle = MAIL.warn;
     ctx.font = font(h * 0.062);
-    ctx.fillText('⚠️ Narnia compliance: new domain name', x, h * 0.09);
+    ctx.fillText('⚠️ The new Narnia region: new domain', x, h * 0.09);
     ctx.fillStyle = MAIL.faint;
     ctx.font = font(h * 0.042, 600);
-    ctx.fillText('From: Chuks · To: DevOps', x, h * 0.18);
+    ctx.fillText('From: Narnia Region · To: DevOps', x, h * 0.18);
     ctx.fillStyle = MAIL.ink;
     ctx.font = font(h * 0.05, 500);
     const body = [
@@ -138,12 +138,13 @@ function paintMail(ctx: CanvasRenderingContext2D, w: number, h: number, state: M
       'papopakoshapeworks.com → papopakoshapeworks.na',
       'That’s all 200 microservices. New certs too.',
       'Deadline: yesterday.',
-      'Thanks! 🦁 Chuks',
+      'Thanks! 🦁 The Narnia region team',
     ];
     body.forEach((l, i) => ctx.fillText(l, x, h * (0.27 + i * 0.105)));
     return;
   }
-  const rows = state === 'new' ? [['Chuks', '⚠️ Narnia compliance: new domain name'] as const, ...INBOX] : INBOX;
+  const rows =
+    state === 'new' ? [['Narnia Region', '⚠️ The new Narnia region: new domain name'] as const, ...INBOX] : INBOX;
   rows.forEach(([from, subject], i) => {
     const y = h * (0.12 + i * 0.16);
     const fresh = state === 'new' && i === 0;

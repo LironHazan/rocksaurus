@@ -32,7 +32,7 @@ import {
 // gets time to land.
 //   0–6        Papo Pako Shapeworks, 9 AM: Lulu skates up to the HQ and in through the doors
 //   6–11       the DevOps team: Rorit, Amazaurus, Eilon and Eter at their desk, together
-//   5–12       an email from Chuks lands on Rorit's monitor: Narnia compliance, papopakoshapeworks.com → .na
+//   5–12       an email on the new Narnia region lands on Rorit's monitor: Narnia compliance, papopakoshapeworks.com → .na
 //   12–14      "Narnia?!": her phone comes out. From here on, all four are stressed
 //   14–28.8    the DevOps group chat: 200 microservices, 200 certs; the domain's hardcoded everywhere; Eter leads
 //   28.8–40    Yashinozarus asks upper management on Hack: papopakoshapeworks.na, approved in 24 hours. The easy

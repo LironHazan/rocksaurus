@@ -4,13 +4,14 @@ import type { TimedChatLine } from '../../props/phone';
 import type { ScriptLine } from '../../world/screen-script';
 import type { HackMessage } from '../../world/hack-window';
 
-// Papo Pako Shapeworks, 9 AM: Lulu skates up to the HQ and goes in. On the DevOps floor, an email from Chuks lands on
-// Rorit's screen: Narnia compliance, papopakoshapeworks.com becomes papopakoshapeworks.na, for everything. She alerts
-// the DevOps group chat: Amazaurus does the maths (200 microservices, 200 certs to reissue), Eilon remembers the
-// domain is hardcoded everywhere, and Eter takes the lead. Yashinozarus asks upper management on Hack: approved, in 24
-// hours. The easy part. Then the real DevOps pain: 200 certs, one by one, and 4,812 hardcoded domains to replace, all
-// four of them in it, stressed, for months. Then Lulu walks by: "We'll be compliant to Narnia in year 20666. No
-// worries." Times are video seconds. Slow on purpose, so an infra audience gets every beat. No music.
+// Papo Pako Shapeworks, 9 AM: Lulu skates up to the HQ and goes in. On the DevOps floor, an email on the new Narnia
+// region lands on Rorit's screen: papopakoshapeworks.com becomes papopakoshapeworks.na, for everything. She alerts the
+// DevOps group chat: Amazaurus does the maths (200 microservices, 200 certs to reissue), Eilon remembers the domain is
+// hardcoded everywhere, and Eter takes the lead. Yashinozarus asks upper management on Hack: approved, in 24 hours.
+// The easy part. Then the real DevOps pain: 200 certs to reissue and test, 4,812 hardcoded domains to replace (the
+// tests hardcoded it too), all four of them in it, stressed, for months. Then Lulu walks by: "We'll be compliant to
+// Narnia in year 20666. No worries." Times are video seconds. Slow on purpose, so an infra audience gets every beat.
+// No music, no alert sounds.
 
 export const DURATION = 84; // then the end card, see ../outro.ts
 
@@ -56,7 +57,7 @@ export const CHAT: readonly (TimedChatLine & { from: Member })[] = [
     at: 22.2,
     time: '9:02',
     from: 'Rorit',
-    text: '🚨 Email from Chuks: Narnia compliance. papopakoshapeworks.com → papopakoshapeworks.na. EVERYTHING',
+    text: '🚨 New email on the Narnia new region: papopakoshapeworks.com → papopakoshapeworks.na. EVERYTHING',
   },
   { at: 25.0, time: '9:02', from: 'Amazaurus', text: '200 microservices. 200 certs to reissue 😬' },
   { at: 27.6, time: '9:03', from: 'Eilon', text: 'and the domain is hardcoded… everywhere 😅' },
