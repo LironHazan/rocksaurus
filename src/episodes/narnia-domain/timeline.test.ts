@@ -75,7 +75,14 @@ describe('Narnia Compliance', () => {
         if (a !== b && a.y === b.y) expect(a.to <= b.from + 1e-9 || b.to <= a.from + 1e-9).toBe(true);
   });
 
-  it('the office is heard the whole way through', () => {
+  it('opens outside the HQ, and names the company there only: after that, it is the DevOps team', () => {
+    expect(CUTS[0]![1]).toBe('campus');
+    const named = CAPTIONS.filter(c => c.text.includes('Papo Pako'));
+    expect(named.length).toBeGreaterThan(0);
+    for (const c of named) expect(c.to).toBeLessThanOrEqual(CUE.campus[1]);
+  });
+
+  it('there is always a bed: the street outside, then the office', () => {
     for (let t = 0; t < DURATION; t += 0.5) expect(SOUND.beds.some(b => t >= b.from && t < b.to)).toBe(true);
   });
 });

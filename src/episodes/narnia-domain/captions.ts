@@ -12,7 +12,8 @@ const landed = (i: number) => CHAT[i]!.at;
 const RANT = LINES[3]!;
 
 const AT_THE_BOTTOM: Caption[] = [
-  title(0.2, CUE.mail - 0.2, '🏢 Papo Pako Shapeworks\nThe DevOps floor, 9 AM'),
+  title(0.2, CUE.campus[1] - 0.2, '🏢 Papo Pako Shapeworks\n9 AM'),
+  title(CUE.campus[1] + 0.1, CUE.mail - 0.2, '🦖 The DevOps team'),
   sub(CUE.mail, CUE.open + 1.6, '📧 New email. From: Chuks'),
   punch(CUE.mail + 0.6, CUE.open + 1.6, 'Subject: Narnia compliance ⚠️'),
   sub(CUE.open + 1.7, CUE.gasp, 'New domain: papopakoshapeworks.com → .na 🌐'),
@@ -32,11 +33,12 @@ const AT_THE_BOTTOM: Caption[] = [
   line(2),
   sub(LINES[2]!.to + 0.1, CUE.board[1], 'The real DevOps pain begins 😰'),
   sub(CUE.grind[0] + 0.1, RANT.from - 0.1, 'Reissue 200 TLS certs 🔐'),
-  punch(CUE.grind[0] + 0.6, RANT.from - 0.1, 'One. By. One.'),
+  punch(CUE.grind[0] + 0.6, RANT.from - 0.1, 'Then test all 200 of them 🧪'),
   line(3),
-  sub(RANT.to + 0.1, RANT.to + 2.9, 'Configs, code, Helm charts… 😱'),
-  punch(RANT.to + 0.5, RANT.to + 2.9, 'And one README from 2016 📜'),
-  sub(RANT.to + 3.0, CUE.grind[1], 'Months later. Cert 61 of 200 💀'),
+  sub(RANT.to + 0.1, RANT.to + 4.3, 'Run the tests. 312 fail 🔴'),
+  punch(RANT.to + 0.6, RANT.to + 4.3, 'The tests hardcoded the domain too 🤦'),
+  sub(RANT.to + 4.4, CUE.grind[1], 'Months later. Cert 61 of 200 💀'),
+  punch(RANT.to + 4.9, CUE.grind[1], 'Staging: green. Prod: 3 expired mid-test 🔥'),
   sub(CUE.lulu[0] + 0.1, LINES[4]!.from - 0.1, 'Then Lulu walks by 🥁'),
   line(4),
   line(5),

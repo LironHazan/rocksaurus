@@ -8,6 +8,7 @@ import { restRig } from '../../characters/rest';
 import type { CharacterRig } from '../../characters/types';
 import { addFlannel } from '../../props/flannel';
 import { addPonytail } from '../../props/ponytail';
+import { DECK_TOP, createSkateboard } from '../../props/skateboard';
 import { chatView, createPhone, holdPhone, type Phone } from '../../props/phone';
 import { LULU_ENTRY, LULU_STOP, SPOTS } from './sets';
 import { CHAT, COLOURS, CUE, MEMBERS, START_CLOCK, mouthAt, type Member } from './timeline';
@@ -180,6 +181,52 @@ export function createFloorCast() {
     /** For the phone close-ups: hide Rorit's head, the camera is where her eyes are. */
     hideRoritHead(hidden: boolean) {
       rigs.Rorit.head.visible = !hidden;
+    },
+  };
+}
+
+/** Her ride, on the ground: in from the street on the left, round the front of the bench, up to the HQ's doors (the
+ * cut comes as she goes in). */
+const RIDE = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(-11, 0, 8),
+  new THREE.Vector3(-6, 0, 3.2),
+  new THREE.Vector3(-3.8, 0, -3),
+  new THREE.Vector3(-4, 0, -7),
+  new THREE.Vector3(-4, 0, -8.8),
+]);
+/** She ducks under the HQ's canopy (she's taller than the doors): how far her neck bends down (idleLulu's nod), and
+ * where she starts and finishes ducking (z, on the way in). */
+const DUCK = { nod: 1.4, from: -5.5, to: -7.8 } as const;
+/** On the board: her arms out for balance (radians), and the ponytail streaming back as she rolls. */
+const BALANCE = { out: 0.8, forward: -0.3 } as const;
+const STREAM = 0.6;
+
+/** Lulu on her skateboard, outside the HQ: she rolls up to the doors, and ducks to get in. */
+export function createSkaterLulu() {
+  const rig = createLulu();
+  const hair = addPonytail(rig);
+  addFlannel(rig);
+  const board = createSkateboard();
+  const ahead = new THREE.Vector3();
+  return {
+    rig,
+    board,
+    update(t: number) {
+      resetLulu(rig);
+      for (const stick of rig.sticks) stick.visible = false; // her paws are free: she's balancing
+      const k = ease(seg(t, CUE.ride[0], CUE.ride[1]));
+      const at = RIDE.getPointAt(k);
+      RIDE.getTangentAt(Math.min(k, 0.999), ahead);
+      const yaw = Math.atan2(ahead.x, ahead.z);
+      board.position.copy(at);
+      board.rotation.y = yaw;
+      rig.root.position.copy(at).setY(DECK_TOP);
+      rig.root.rotation.y = yaw;
+      const duck = ease(seg(-at.z, -DUCK.from, -DUCK.to));
+      idleLulu(rig, t, { eyesOpen: 0.85, nod: duck * DUCK.nod });
+      for (const arm of rig.arms) arm.rotation.set(BALANCE.forward, 0, arm.userData.side * BALANCE.out);
+      const rolling = k > 0 && k < 1 ? 1 : 0;
+      hair.ponytail.rotation.set(0.1 + rolling * STREAM, 0, Math.sin(t * 3) * 0.08);
     },
   };
 }

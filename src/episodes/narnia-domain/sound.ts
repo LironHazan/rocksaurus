@@ -3,16 +3,14 @@ import * as fx from '../../audio/foley';
 import { keystrokes } from '../../world/screen-script';
 import { CUE, CUTS, DURATION, YASHI_SCRIPT, calendarAt } from './timeline';
 
-// No music, and no alert sounds (no dings, buzzes or chat pops): the office. Its hush; Rorit's click on the email;
-// Yashinozarus's keys; the grind (four keyboards going at once, the calendar's pages flying); Lulu's steps; and a
+// No music, and no alert sounds (no dings, buzzes or chat pops). Outside, the street and her wheels; then the office. Its hush; Rorit's click on the email;
+// Yashinozarus's keys; in the grind, the calendar's pages flying; Lulu's steps; and a
 // sparkle on the year 20666.
 
-type Kind = 'click' | 'key' | 'flip' | 'step' | 'sparkle';
+type Kind = 'roll' | 'click' | 'key' | 'flip' | 'step' | 'sparkle';
 
-/** Lulu's steps (seconds apart), the grind's keys (seconds apart: four of them typing), and the fastest the
- * calendar's pages are heard turning (seconds apart). */
+/** Lulu's steps (seconds apart), and the fastest the calendar's pages are heard turning (seconds apart). */
 const LULU_STEP = 0.5;
-const GRIND_KEYS = 0.09;
 const FLIP_GAP = 0.18;
 /** How finely the calendar is checked for a new page (seconds). */
 const FLIP_SCAN = 0.02;
@@ -35,11 +33,11 @@ function flips(): number[] {
 
 function cues(): Cue<Kind>[] {
   return [
+    { at: CUE.ride[0], kind: 'roll' },
     { at: CUE.open, kind: 'click' },
     ...keystrokes(YASHI_SCRIPT)
       .filter(t => shownAt(t, 'yashi'))
       .map(at => ({ at, kind: 'key' as const })),
-    ...every(CUE.grind[0], CUE.grind[1], GRIND_KEYS).map(at => ({ at, kind: 'key' as const })),
     ...flips().map(at => ({ at, kind: 'flip' as const })),
     ...every(CUE.lulu[0], CUE.lulu[1], LULU_STEP).map(at => ({ at, kind: 'step' as const })),
     { at: CUE.year, kind: 'sparkle' },
@@ -47,6 +45,7 @@ function cues(): Cue<Kind>[] {
 }
 
 const PLAYERS: Record<Kind, Player> = {
+  roll: (b, w) => fx.swish(quieter(b, 0.5), w, CUE.ride[1] - CUE.ride[0]), // her wheels on the plaza
   click: fx.tick,
   key: (b, w) => fx.keyTap(quieter(b, 0.5), w),
   flip: (b, w) => fx.page(quieter(b, 0.6), w),
@@ -59,5 +58,8 @@ export const SOUND = cueSheet({
   duration: DURATION,
   players: PLAYERS,
   cues: cues(),
-  beds: [{ from: 0, to: DURATION, kind: 'room' }],
+  beds: [
+    { from: 0, to: CUE.campus[1], kind: 'street' },
+    { from: CUE.campus[1], to: DURATION, kind: 'room' },
+  ],
 });

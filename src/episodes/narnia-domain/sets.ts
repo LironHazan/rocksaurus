@@ -73,7 +73,7 @@ function chair(at: THREE.Vector3): THREE.Group {
 }
 
 /** Rorit's screen, the way it looks at t: the inbox, then Chuks's email arriving (bold, on top), then opened; in the
- * grind, her terminal: the hardcoded domains, and the certs. */
+ * grind, her terminal: the hardcoded domains, the certs, and the tests (the domain's hardcoded in them too). */
 export type MailState = 'inbox' | 'new' | 'open' | 'grind';
 /** Her terminal in the grind. */
 const GRIND = [
@@ -81,8 +81,8 @@ const GRIND = [
   ['4812', '#ff6b5a'],
   ['$ certs reissue --all', '#7fe0b0'],
   ['✓ 61/200 · ✗ 3 failed (cert-manager)', '#ffd36b'],
-  ['$ sed -i s/papopakoshapeworks.com/…/', '#7fe0b0'],
-  ['✗ helm: chart pinned to old domain', '#ff6b5a'],
+  ['$ npm test', '#7fe0b0'],
+  ['✗ 312 failed: expected papopakoshapeworks.com', '#ff6b5a'],
 ] as const;
 
 function paintGrind(ctx: CanvasRenderingContext2D, w: number, h: number) {

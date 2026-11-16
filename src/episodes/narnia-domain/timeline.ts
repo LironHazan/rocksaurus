@@ -4,34 +4,38 @@ import type { TimedChatLine } from '../../props/phone';
 import type { ScriptLine } from '../../world/screen-script';
 import type { HackMessage } from '../../world/hack-window';
 
-// The DevOps floor at Papo Pako Shapeworks, 9 AM. An email from Chuks lands on Rorit's screen: Narnia compliance, a
-// new, Narnia-approved domain name for everything: papopakoshapeworks.com becomes papopakoshapeworks.na. She alerts the DevOps group chat: Amazaurus does the maths (200
-// microservices, 200 certs to reissue), Eilon remembers the domain is hardcoded everywhere, and Eter takes the lead.
-// Yashinozarus gets the name approved by upper management in 24 hours: the easy part. Then the real DevOps pain:
-// 200 certs, one by one, and 4,812 hardcoded domains to replace, and all four of them in it, stressed, for months.
-// Then Lulu walks by: "We'll be compliant to Narnia in year 20666. No worries." Times are video seconds. No music.
+// Papo Pako Shapeworks, 9 AM: Lulu skates up to the HQ and goes in. On the DevOps floor, an email from Chuks lands on
+// Rorit's screen: Narnia compliance, papopakoshapeworks.com becomes papopakoshapeworks.na, for everything. She alerts
+// the DevOps group chat: Amazaurus does the maths (200 microservices, 200 certs to reissue), Eilon remembers the
+// domain is hardcoded everywhere, and Eter takes the lead. Yashinozarus asks upper management on Hack: approved, in 24
+// hours. The easy part. Then the real DevOps pain: 200 certs, one by one, and 4,812 hardcoded domains to replace, all
+// four of them in it, stressed, for months. Then Lulu walks by: "We'll be compliant to Narnia in year 20666. No
+// worries." Times are video seconds. Slow on purpose, so an infra audience gets every beat. No music.
 
-export const DURATION = 78; // then the end card, see ../outro.ts
+export const DURATION = 84; // then the end card, see ../outro.ts
 
 export const CUE = {
+  /** Outside the HQ: Lulu skates up to the doors and goes in. */
+  campus: [0, 6.0],
+  ride: [0.6, 5.8],
   /** The email lands on Rorit's monitor, and she opens it. */
-  mail: 5.0,
-  open: 6.4,
+  mail: 11.0,
+  open: 12.4,
   /** Her face, and the phone comes out: from here on, they're all stressed. */
-  gasp: 12.0,
-  phoneOut: 13.4,
+  gasp: 18.0,
+  phoneOut: 19.4,
   /** The group chat, on everyone's phones. */
-  chat: [14.0, 28.8],
+  chat: [20.0, 34.8],
   /** Yashinozarus: the name, approved in 24 hours. */
-  yashi: [28.8, 40.0],
+  yashi: [34.8, 46.0],
   /** Eter at her desk: the plan, and what's left on it. */
-  board: [40.0, 46.2],
+  board: [46.0, 52.2],
   /** The grind: 200 certs and 4,812 hardcoded domains, all four of them typing, for months. */
-  grind: [46.2, 63.0],
+  grind: [52.2, 69.0],
   /** Lulu walks over to Eter's desk. */
-  lulu: [63.0, 66.6],
+  lulu: [69.0, 72.6],
   /** The calendar lands on the year Lulu names. */
-  year: 75.3,
+  year: 81.3,
 } as const;
 
 export const MEMBERS = ['Rorit', 'Amazaurus', 'Eilon', 'Eter'] as const;
@@ -49,24 +53,24 @@ export const START_CLOCK = '9:01';
 /** "DevOps 🦖", the group chat. */
 export const CHAT: readonly (TimedChatLine & { from: Member })[] = [
   {
-    at: 16.2,
+    at: 22.2,
     time: '9:02',
     from: 'Rorit',
     text: '🚨 Email from Chuks: Narnia compliance. papopakoshapeworks.com → papopakoshapeworks.na. EVERYTHING',
   },
-  { at: 19.0, time: '9:02', from: 'Amazaurus', text: '200 microservices. 200 certs to reissue 😬' },
-  { at: 21.6, time: '9:03', from: 'Eilon', text: 'and the domain is hardcoded… everywhere 😅' },
-  { at: 24.1, time: '9:03', from: 'Rorit', text: 'Eter, you lead it 🦁' },
-  { at: 26.9, time: '9:03', from: 'Eter', text: 'On it. Yashinozarus, get us the name approved 🙏' },
+  { at: 25.0, time: '9:02', from: 'Amazaurus', text: '200 microservices. 200 certs to reissue 😬' },
+  { at: 27.6, time: '9:03', from: 'Eilon', text: 'and the domain is hardcoded… everywhere 😅' },
+  { at: 30.1, time: '9:03', from: 'Rorit', text: 'Eter, you lead it 🦁' },
+  { at: 32.9, time: '9:03', from: 'Eter', text: 'On it. Yashinozarus, get us the name approved 🙏' },
 ];
 
 export const LINES: readonly SpokenLine<keyof typeof OFFICE_VOICES>[] = [
-  { from: 12.3, to: 13.7, who: 'Rorit', text: 'Narnia?! 😱' },
-  { from: 33.9, to: 37.2, who: 'Yashinozarus', text: 'Upper management approved. 24 hours ✅' },
-  { from: 40.9, to: 44.8, who: 'Eter', text: 'Easy part’s done. Now… 200 certs 😰' },
-  { from: 51.8, to: 55.4, who: 'Rorit', text: 'Who hardcoded the domain 4,812 times?! 😱' },
-  { from: 66.9, to: 70.3, who: 'Eter', text: 'Lulu… when will we be Narnia compliant? 😩' },
-  { from: 70.8, to: 75.3, who: 'Lulu', text: 'We’ll be compliant to Narnia in year 20666. No worries 😎' },
+  { from: 18.3, to: 19.7, who: 'Rorit', text: 'Narnia?! 😱' },
+  { from: 39.9, to: 43.2, who: 'Yashinozarus', text: 'Upper management approved. 24 hours ✅' },
+  { from: 46.9, to: 50.8, who: 'Eter', text: 'Easy part’s done. Now… 200 certs 😰' },
+  { from: 57.8, to: 61.4, who: 'Rorit', text: 'Who hardcoded the domain 4,812 times?! 😱' },
+  { from: 72.9, to: 76.3, who: 'Eter', text: 'Lulu… when will we be Narnia compliant? 😩' },
+  { from: 76.8, to: 81.3, who: 'Lulu', text: 'We’ll be compliant to Narnia in year 20666. No worries 😎' },
 ];
 
 export const { syllables: SYLLABLES, mouthAt } = speech(LINES, OFFICE_VOICES, 47);
@@ -76,15 +80,16 @@ export const speaking = (who: keyof typeof OFFICE_VOICES, t: number) =>
 /** Yashinozarus asks upper management on Hack (the team chat): they approve the name. In 24 hours. */
 export const UPPER_MANAGEMENT = 'Upper Mgmt';
 export const HACK_DM: readonly HackMessage[] = [
-  { who: 'Yashinozarus', text: 'Hi 👋 Can we approve papopakoshapeworks.na for Narnia? 🙏', at: 29.7 },
-  { who: UPPER_MANAGEMENT, text: '👀 Looking into it', at: 31.6 },
-  { who: UPPER_MANAGEMENT, text: '(24 hours later) Approved ✅', at: 33.0 },
+  { who: 'Yashinozarus', text: 'Hi 👋 Can we approve our new domain for Narnia? 🙏', at: 35.7 },
+  { who: 'Yashinozarus', text: 'papopakoshapeworks.na 🦁', at: 36.6 },
+  { who: UPPER_MANAGEMENT, text: '👀 Looking into it', at: 37.6 },
+  { who: UPPER_MANAGEMENT, text: '(24 hours later) Approved ✅', at: 39.0 },
 ];
 /** Then, in his terminal, the size of the real job. */
 export const YASHI_SCRIPT: readonly ScriptLine[] = [
   { at: 0.0, text: 'yashi@arch ~ $', kind: 'title' },
-  { at: 37.5, text: '› grep -rl papopakoshapeworks.com | wc -l', kind: 'prompt', cps: 18 },
-  { at: 39.3, text: '4812 😱', kind: 'err' },
+  { at: 43.5, text: '› grep -rl papopakoshapeworks.com | wc -l', kind: 'prompt', cps: 18 },
+  { at: 45.3, text: '4812 😱', kind: 'err' },
 ];
 
 /** Days in a year, and how long the grind has gone on (days) when Lulu walks in. */
@@ -102,10 +107,11 @@ export function calendarAt(t: number): string {
   return days < YEAR_DAYS ? `Day ${days}` : `Year ${Math.floor(days / YEAR_DAYS)}`;
 }
 
-/** Where we are: the DevOps floor, or Yashinozarus's corner. */
-export type Where = 'floor' | 'yashi';
+/** Where we are: outside the HQ, the DevOps floor, or Yashinozarus's corner. */
+export type Where = 'campus' | 'floor' | 'yashi';
 export const CUTS: readonly (readonly [number, Where])[] = [
-  [0, 'floor'],
+  [0, 'campus'],
+  [CUE.campus[1], 'floor'],
   [CUE.yashi[0], 'yashi'],
   [CUE.yashi[1], 'floor'],
 ];
