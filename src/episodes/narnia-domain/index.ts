@@ -13,16 +13,17 @@ import { SPOTS, createDevopsFloor } from './sets';
 import { SOUND } from './sound';
 import { CHAT, CUE, CUTS, DURATION, LINES, SYLLABLES, YASHI_SCRIPT, calendarAt, mouthAt, speaking } from './timeline';
 
-// Beat sheet (video seconds; timeline.ts has the cues, the chat and the lines)
-//   0–3.6      the DevOps floor, 9 AM: Rorit, Amazaurus, Eilon and Eter at their desk, together
-//   3.6–8.6    an email from Chuks lands on Rorit's monitor: Narnia compliance, a new domain name for everything
-//   8.6–10     "Narnia?!": her phone comes out. From here on, all four are stressed
-//   10–20.6    the DevOps group chat: 200 microservices, 200 certs; the domain's hardcoded everywhere; Eter leads
-//   20.6–28.6  Yashinozarus: upper management approves the name in 24 hours. The easy part. grep: 4,812
-//   28.6–33    Eter at her desk: the plan, the name ticked off, the certs and the hardcoded domains not
-//   33–45      the grind: all four typing flat out, Rorit's terminal, "Who hardcoded the domain 4,812 times?!", the
+// Beat sheet (video seconds; timeline.ts has the cues, the chat and the lines). Slow on purpose: every infra beat
+// gets time to land.
+//   0–5        the DevOps floor, 9 AM: Rorit, Amazaurus, Eilon and Eter at their desk, together
+//   5–12       an email from Chuks lands on Rorit's monitor: Narnia compliance, papopakoshapeworks.com → .na
+//   12–14      "Narnia?!": her phone comes out. From here on, all four are stressed
+//   14–28.8    the DevOps group chat: 200 microservices, 200 certs; the domain's hardcoded everywhere; Eter leads
+//   28.8–40    Yashinozarus: upper management approves papopakoshapeworks.na in 24 hours. The easy part. grep: 4,812
+//   40–46.2    Eter at her desk: the plan, the domain ticked off, the certs and the hardcoded domains not
+//   46.2–63    the grind: all four typing flat out, Rorit's terminal, "Who hardcoded the domain 4,812 times?!", the
 //              calendar flying through months
-//   45–56      Lulu walks over. "When will we be Narnia compliant?" "Year 20666. No worries." The calendar agrees
+//   63–78      Lulu walks over. "When will we be Narnia compliant?" "Year 20666. No worries." The calendar agrees
 //   then the channel's end card (outro.ts)
 
 /** The screen shows its last lines: as many as fit. */
@@ -83,25 +84,25 @@ const episode: Episode = {
       [CUE.mail, 'monitor'],
       [CUE.gasp, 'rorit'],
       [CUE.chat[0], 'pov'],
-      [landed(1) + 0.2, 'amazaurus'],
-      [landed(2) + 0.2, 'eilon'],
+      [landed(1) + 1.2, 'amazaurus'],
+      [landed(2) + 1.2, 'eilon'],
       [landed(3) - 0.4, 'pov'], // her "you lead it"
-      [landed(3) + 0.8, 'eter'],
+      [landed(3) + 1.2, 'eter'],
       [landed(4) + 0.2, 'pov'], // her answer
       [CUE.board[0], 'desk'],
       [LINES[2]!.from, 'eter'],
       [LINES[2]!.to, 'plan'], // what's left on it
       [CUE.grind[0], 'wide'], // all four of them, flat out
-      [CUE.grind[0] + 1.6, 'monitor'], // 4,812 hardcoded domains
+      [CUE.grind[0] + 2.4, 'monitor'], // 4,812 hardcoded domains
       [LINES[3]!.from, 'rorit'],
-      [LINES[3]!.to + 0.2, 'amazaurus'],
-      [LINES[3]!.to + 1.6, 'eilon'],
-      [LINES[3]!.to + 3.0, 'calendar'], // months go by
+      [LINES[3]!.to + 0.3, 'amazaurus'],
+      [LINES[3]!.to + 2.4, 'eilon'],
+      [LINES[3]!.to + 4.4, 'calendar'], // months go by
       [CUE.lulu[0], 'arrive'],
       [LINES[4]!.from, 'eter'],
       [LINES[5]!.from, 'lulu'],
       [CUE.year, 'calendar'],
-      [CUE.year + 1.0, 'two'],
+      [CUE.year + 1.4, 'two'],
     ]);
     const FLOOR_SHOTS: Record<FloorShot, (t: number) => Shot> = {
       wide: t => {
@@ -109,7 +110,7 @@ const episode: Episode = {
         const c = ease(seg(t, 0, CUE.mail));
         return { cam: [0, lerp(6.4, 5.6, c), lerp(19, 16.5, c)], look: [0, 3, 0] };
       },
-      monitor: () => overShoulder(at(floor.monitor), normalOf(floor.monitor), 2.0, -0.2, 0.55),
+      monitor: () => overShoulder(at(floor.monitor), normalOf(floor.monitor), 3.6, -0.2, 0.8), // the whole screen (the domain is on it), from the room side of her chair
       rorit: () => face(cast.rigs.Rorit, 0.5), // from her left: her monitor is on her right
       pov: () => phonePov(cast.phones.Rorit, stage.camera),
       amazaurus: () => inFrontOf(cast.rigs.Amazaurus.head, cast.rigs.Amazaurus.root, CLOSE.face, 0.1, 0.7), // over the desk: he's short

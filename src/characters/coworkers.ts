@@ -5,7 +5,7 @@ import { createCeratops } from './ceratops';
 import { createStegosaurus, STEGGY_COLORS, type StegosaurusRig } from './stegosaurus';
 import { createRory } from './rory';
 import { createLulu } from './lulu';
-import { addAfro } from '../props/afro';
+import { addAfroPuff } from '../props/afro';
 import { addFlannel } from '../props/flannel';
 import type { RigFit } from './types';
 import { ball } from './materials';
@@ -276,8 +276,8 @@ export function createEilon() {
   return rig;
 }
 
-/** Eter: DevOps, and she leads the Narnia effort. Lulu's build (a long-neck), lion gold (it's Narnia), a big curly
- * afro and a forest-green flannel. Very organised; very patient, for now. */
+/** Eter: DevOps, and she leads the Narnia effort. Lulu's build (a long-neck), lion gold (it's Narnia), her curly hair
+ * up in a high afro puff, and a forest-green flannel. Very organised; very patient, for now. */
 export function createEter() {
   const rig = createLulu({
     body: 0xe8b84a,
@@ -289,7 +289,7 @@ export function createEter() {
   });
   rig.flower.visible = false; // the flower is Lulu's
   for (const stick of rig.sticks) stick.visible = false; // and so are the drumsticks
-  addAfro(rig, { color: 0x3a2418, seed: 5 });
+  addAfroPuff(rig, { color: 0x3a2418, scrunchie: 0xffd23f, seed: 5 });
   addFlannel(rig, { base: '#2f6b45', band: '#16261c', accent: '#c9962e', line: '#e3d6b0' });
   return rig;
 }

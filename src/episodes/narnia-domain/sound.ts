@@ -1,14 +1,13 @@
 import { cueSheet, every, quieter, type Cue, type Player } from '../../audio/cue-sheet';
-import { chatPop, chatSent, ding } from '../../audio/sfx';
 import * as fx from '../../audio/foley';
 import { keystrokes } from '../../world/screen-script';
-import { CHAT, CUE, CUTS, DURATION, YASHI_SCRIPT, calendarAt } from './timeline';
+import { CUE, CUTS, DURATION, YASHI_SCRIPT, calendarAt } from './timeline';
 
-// No music: the office. Its hush; the mail landing and Rorit's click; the group chat (her messages whoosh out, the
-// others' pop in); Yashinozarus's keys; the grind (four keyboards going at once, the calendar's pages flying); Lulu's
-// steps; and a sparkle on the year 20666.
+// No music, and no alert sounds (no dings, buzzes or chat pops): the office. Its hush; Rorit's click on the email;
+// Yashinozarus's keys; the grind (four keyboards going at once, the calendar's pages flying); Lulu's steps; and a
+// sparkle on the year 20666.
 
-type Kind = 'mail' | 'click' | 'buzz' | 'pop' | 'sent' | 'key' | 'flip' | 'step' | 'sparkle';
+type Kind = 'click' | 'key' | 'flip' | 'step' | 'sparkle';
 
 /** Lulu's steps (seconds apart), the grind's keys (seconds apart: four of them typing), and the fastest the
  * calendar's pages are heard turning (seconds apart). */
@@ -36,10 +35,7 @@ function flips(): number[] {
 
 function cues(): Cue<Kind>[] {
   return [
-    { at: CUE.mail, kind: 'mail' },
     { at: CUE.open, kind: 'click' },
-    { at: CUE.phoneOut, kind: 'buzz' },
-    ...CHAT.map(m => ({ at: m.at, kind: m.from === 'Rorit' ? ('sent' as const) : ('pop' as const) })),
     ...keystrokes(YASHI_SCRIPT)
       .filter(t => shownAt(t, 'yashi'))
       .map(at => ({ at, kind: 'key' as const })),
@@ -51,11 +47,7 @@ function cues(): Cue<Kind>[] {
 }
 
 const PLAYERS: Record<Kind, Player> = {
-  mail: (b, w) => ding(b, w, 1046.5),
   click: fx.tick,
-  buzz: fx.vibrate,
-  pop: chatPop,
-  sent: chatSent,
   key: (b, w) => fx.keyTap(quieter(b, 0.5), w),
   flip: (b, w) => fx.page(quieter(b, 0.6), w),
   step: (b, w) => fx.footstep(quieter(b, 0.6), w),

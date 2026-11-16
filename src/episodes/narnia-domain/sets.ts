@@ -77,11 +77,11 @@ function chair(at: THREE.Vector3): THREE.Group {
 export type MailState = 'inbox' | 'new' | 'open' | 'grind';
 /** Her terminal in the grind. */
 const GRIND = [
-  ['$ grep -rl papopako.io | wc -l', '#7fe0b0'],
+  ['$ grep -rl papopakoshapeworks.com | wc -l', '#7fe0b0'],
   ['4812', '#ff6b5a'],
   ['$ certs reissue --all', '#7fe0b0'],
   ['✓ 61/200 · ✗ 3 failed (cert-manager)', '#ffd36b'],
-  ['$ sed -i s/papopako.io/papopako.narnia/', '#7fe0b0'],
+  ['$ sed -i s/papopakoshapeworks.com/…/', '#7fe0b0'],
   ['✗ helm: chart pinned to old domain', '#ff6b5a'],
 ] as const;
 
@@ -134,12 +134,13 @@ function paintMail(ctx: CanvasRenderingContext2D, w: number, h: number, state: M
     const body = [
       'Hi team,',
       'To be Narnia compliant, every service must',
-      'move to a new, Narnia-approved domain name.',
+      'move to a new, Narnia-approved domain:',
+      'papopakoshapeworks.com → papopakoshapeworks.na',
       'That’s all 200 microservices. New certs too.',
       'Deadline: yesterday.',
       'Thanks! 🦁 Chuks',
     ];
-    body.forEach((l, i) => ctx.fillText(l, x, h * (0.32 + i * 0.12)));
+    body.forEach((l, i) => ctx.fillText(l, x, h * (0.27 + i * 0.105)));
     return;
   }
   const rows = state === 'new' ? [['Chuks', '⚠️ Narnia compliance: new domain name'] as const, ...INBOX] : INBOX;
@@ -171,7 +172,7 @@ function paintPlan(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.font = font(h * 0.072, 600);
   [
     '✅ Kickoff',
-    '✅ Domain: papopako.narnia (24 h ⚡)',
+    '✅ papopakoshapeworks.na (approved, 24 h ⚡)',
     '⬜ Reissue 200 TLS certs 🔐',
     '⬜ Replace 4,812 hardcoded domains 😱',
     '⬜ Update DNS, Helm, configs, README',
